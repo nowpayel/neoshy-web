@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEOSHY - Money Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #070a12;
+      --panel: rgba(17, 23, 38, 0.7);
+      --border-cyan: rgba(0, 217, 255, 0.35);
+      --cyan: #00d9ff;
+      --blue: #0077ff;
+    }
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(0, 217, 255, 0.15) 0%, transparent 65%),
+        radial-gradient(circle at 80% 50%, rgba(0, 119, 255, 0.08) 0%, transparent 50%);
+    }
+    .neo-card {
+      background: var(--panel);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-cyan);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    }
+    .neo-input {
+      background: rgba(3, 7, 18, 0.85);
+      border: 1px solid rgba(0, 217, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+    .neo-input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 217, 255, 0.4);
+    }
+    .neo-btn {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--cyan) 100%);
+      box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+      transition: all 0.3s ease;
+    }
+    .neo-btn:hover {
+      box-shadow: 0 0 25px rgba(0, 217, 255, 0.7);
+      transform: translateY(-1px);
+    }
+    .bar-track {
+      background: rgba(3, 7, 18, 0.85);
+      border: 1px solid rgba(0, 217, 255, 0.15);
+    }
+    .bar-fill {
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .docs-scroll::-webkit-scrollbar { width: 6px; }
+    .docs-scroll::-webkit-scrollbar-track { background: rgba(3, 7, 18, 0.5); border-radius: 8px; }
+    .docs-scroll::-webkit-scrollbar-thumb { background: rgba(0, 217, 255, 0.3); border-radius: 8px; }
+    .docs-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0, 217, 255, 0.6); }
+  </style>
+</head>
+<body class="text-slate-100 min-h-screen p-3 md:p-8 font-sans">
+
+  <div class="w-full max-w-5xl mx-auto space-y-5 md:space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center border-b border-cyan-500/20 pb-4 gap-3">
+      <div>
+        <a href="index.html" class="inline-flex items-center gap-1 text-xs font-mono text-cyan-400/70 hover:text-cyan-300 transition mb-1">&larr; Back to Dashboard</a> &nbsp; <a href="../index.html" class="inline-flex items-center gap-1 text-xs font-mono text-cyan-400/70 hover:text-cyan-300 transition">Home</a>
+        <h1 class="text-xl md:text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-sky-200">
+          Money Dashboard
+        </h1>
+        <p class="text-[10px] md:text-xs text-cyan-400/60 font-mono tracking-wider">INCOME • EXPENSES • CURRENT BALANCE</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <select id="money-range-filter" onchange="fetchAndRenderMoneyReport()" class="neo-input rounded-lg p-2 text-xs text-white focus:outline-none font-mono">
+          <option value="all" selected>All Time</option>
+          <option value="today">Today</option>
+          <option value="7days">Last 7 Days</option>
+          <option value="14days">Last 14 Days</option>
+          <option value="40days">Last 40 Days</option>
+          <option value="custom">Custom Date</option>
+        </select>
+        <input type="date" id="money-date-filter" onchange="fetchAndRenderMoneyReport()" class="hidden neo-input rounded-lg p-2 text-xs text-white focus:outline-none font-mono">
+      </div>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+      <div class="neo-card p-4 rounded-2xl">
+        <span class="text-[10px] uppercase text-cyan-400/70 font-mono block mb-1">Grand Total (Income)</span>
+        <span id="stat-grand-total" class="text-xl md:text-2xl font-bold text-cyan-300 font-mono">Rp0,00</span>
+        <span class="block text-[10px] text-slate-500 font-mono mt-1">Total money received</span>
+      </div>
+      <div class="neo-card p-4 rounded-2xl">
+        <span class="text-[10px] uppercase text-rose-400/70 font-mono block mb-1">Expenses</span>
+        <span id="stat-expense-total" class="text-xl md:text-2xl font-bold text-rose-300 font-mono">Rp0,00</span>
+        <span class="block text-[10px] text-slate-500 font-mono mt-1">Total spent / outgoing</span>
+      </div>
+      <div class="neo-card p-4 rounded-2xl border-emerald-500/30">
+        <span class="text-[10px] uppercase text-emerald-400/70 font-mono block mb-1">Current Balance</span>
+        <span id="stat-net-balance" class="text-xl md:text-2xl font-bold text-emerald-300 font-mono">Rp0,00</span>
+        <span class="block text-[10px] text-slate-500 font-mono mt-1">Income − Expenses</span>
+      </div>
+      <div class="neo-card p-4 rounded-2xl">
+        <span class="text-[10px] uppercase text-amber-400/70 font-mono block mb-1">Transactions / Avg</span>
+        <span id="stat-tx-count" class="text-lg md:text-xl font-bold text-amber-300 font-mono">0</span>
+        <span class="block text-[10px] text-slate-400 font-mono mt-0.5">Avg: <span id="stat-average">Rp0,00</span></span>
+      </div>
+    </div>
+
+    <!-- Add Expense Form -->
+    <div class="neo-card p-4 md:p-5 rounded-2xl">
+      <h3 class="text-rose-300 font-mono font-bold text-xs mb-3 uppercase tracking-wider border-b border-rose-500/20 pb-2">
+        + Add Expense
+      </h3>
+      <form id="form-expense" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end" autocomplete="off">
+        <div>
+          <label class="block text-[10px] font-mono text-slate-400 mb-1">Date</label>
+          <input type="date" id="exp-tanggal" required class="neo-input w-full rounded-lg p-2 text-xs text-white focus:outline-none font-mono">
+        </div>
+        <div>
+          <label class="block text-[10px] font-mono text-slate-400 mb-1">What for? (Description)</label>
+          <input type="text" id="exp-keterangan" required placeholder="e.g. Buy sparepart, Tools..." class="neo-input w-full rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none font-mono">
+        </div>
+        <div>
+          <label class="block text-[10px] font-mono text-slate-400 mb-1">Amount</label>
+          <input type="text" id="exp-jumlah" required placeholder="e.g. 50000" class="neo-input w-full rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none font-mono">
+        </div>
+        <div>
+          <label class="block text-[10px] font-mono text-slate-400 mb-1">From (Wallet / Method)</label>
+          <select id="exp-metode" class="neo-input w-full rounded-lg p-2 text-xs text-white focus:outline-none font-mono">
+            <option value="Cash">Cash</option>
+            <option value="Dana">Dana</option>
+            <option value="GoPay">GoPay</option>
+            <option value="Qris Bank Jago">Qris Bank Jago</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <button type="submit" id="btn-add-expense" class="w-full neo-btn text-slate-950 font-bold py-2 rounded-lg text-xs">
+            Save Expense
+          </button>
+        </div>
+      </form>
+      <p id="exp-form-msg" class="text-[10px] font-mono mt-2 hidden"></p>
+    </div>
+
+    <!-- Income + Expenses panels -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+      <div class="neo-card p-4 md:p-5 rounded-2xl">
+        <h3 class="text-cyan-300 font-mono font-bold text-xs mb-3 uppercase tracking-wider border-b border-cyan-500/20 pb-2">
+          Income Sources
+        </h3>
+        <div id="income-source-summary" class="space-y-2 text-xs font-mono">
+          <div class="text-slate-500">Loading data...</div>
+        </div>
+      </div>
+      <div class="neo-card p-4 md:p-5 rounded-2xl">
+        <h3 class="text-rose-300 font-mono font-bold text-xs mb-3 uppercase tracking-wider border-b border-rose-500/20 pb-2">
+          Expenses (Reductions)
+        </h3>
+        <div id="expense-summary" class="space-y-2 text-xs font-mono max-h-64 overflow-y-auto docs-scroll">
+          <div class="text-slate-500">Loading expenses...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment method breakdown -->
+    <div class="neo-card p-4 md:p-6 rounded-2xl">
+      <h3 class="text-cyan-300 font-mono font-bold text-sm mb-1 uppercase tracking-wider border-b border-cyan-500/20 pb-2">
+        Balance by Payment Method
+      </h3>
+      <p class="text-[10px] text-slate-400 font-mono mb-4">
+        Income breakdown by payment method (Dana, GoPay, Cash, etc).
+        A down payment (DP) is counted as money already received; the remaining balance is not counted.
+      </p>
+      <div id="money-report-loading" class="text-center p-6 font-mono text-cyan-300 animate-pulse text-xs">Loading money data...</div>
+      <div id="money-report-list" class="space-y-3 hidden"></div>
+    </div>
+
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://vsednhqbszdiwpazcoii.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzZWRuaHFic3pkaXdwYXpjb2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMjEyMDYsImV4cCI6MjEwMjY5NzIwNn0.SO5nMDZOqsT_Cwp9x4_9CFHPsVPpyNgndb2k_qVn89o";
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Proteksi: harus login dulu
+    (async function guardAuth() {
+      const { data: { session } } = await db.auth.getSession();
+      if (!session) {
+        window.location.href = 'index.html';
+        return;
+      }
+    })();
+
+    const MONEY_METHOD_COLORS = {
+      'Dana': { text: 'text-sky-300', border: 'border-sky-500/40', bg: 'bg-sky-950/40', bar: 'bg-sky-400' },
+      'GoPay': { text: 'text-teal-300', border: 'border-teal-500/40', bg: 'bg-teal-950/40', bar: 'bg-teal-400' },
+      'Qris Bank Jago': { text: 'text-orange-300', border: 'border-orange-500/40', bg: 'bg-orange-950/40', bar: 'bg-orange-400' },
+      'Cash': { text: 'text-emerald-300', border: 'border-emerald-500/40', bg: 'bg-emerald-950/40', bar: 'bg-emerald-400' },
+      'Bank Transfer': { text: 'text-violet-300', border: 'border-violet-500/40', bg: 'bg-violet-950/40', bar: 'bg-violet-400' }
+    };
+    function getMoneyMethodStyle(method) {
+      return MONEY_METHOD_COLORS[method] || { text: 'text-slate-300', border: 'border-slate-500/40', bg: 'bg-slate-900/40', bar: 'bg-slate-400' };
+    }
+
+    function parseRawPrice(value) {
+      if (!value) return 0;
+      const cleaned = value.toString().replace(/[^0-9,.-]/g, '').replace(/\./g, '').replace(',', '.');
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : num;
+    }
+
+    function formatRupiahWithDecimals(num) {
+      return 'Rp' + num.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function moneyRowMatchesFilter(row, rangeVal, datePickerVal) {
+      if (rangeVal === 'all') return true;
+      if (!row.tanggal) return false;
+      if (rangeVal === 'custom') return row.tanggal === datePickerVal;
+      if (rangeVal === 'today') {
+        const todayStr = new Date().toISOString().split('T')[0];
+        return row.tanggal === todayStr;
+      }
+      let daysBack = 7;
+      if (rangeVal === '14days') daysBack = 14;
+      if (rangeVal === '40days') daysBack = 40;
+      const now = new Date();
+      now.setHours(23, 59, 59, 999);
+      const rowDate = new Date(row.tanggal);
+      rowDate.setHours(0, 0, 0, 0);
+      const diffTime = Math.abs(now - rowDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays <= daysBack;
+    }
+
+    function handleMoneyFilterModeChange() {
+      const rangeVal = document.getElementById('money-range-filter').value;
+      document.getElementById('money-date-filter').classList.toggle('hidden', rangeVal !== 'custom');
+    }
+
+    document.getElementById('exp-tanggal').value = new Date().toISOString().split('T')[0];
+
+    document.getElementById('form-expense').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-add-expense');
+      const msg = document.getElementById('exp-form-msg');
+      btn.disabled = true;
+      btn.innerText = 'Saving...';
+      msg.classList.add('hidden');
+
+      const jumlahNum = parseRawPrice(document.getElementById('exp-jumlah').value);
+      if (jumlahNum <= 0) {
+        msg.innerText = 'Amount must be greater than 0';
+        msg.className = 'text-[10px] font-mono mt-2 text-rose-400';
+        msg.classList.remove('hidden');
+        btn.disabled = false;
+        btn.innerText = 'Save Expense';
+        return;
+      }
+
+      const payload = {
+        tanggal: document.getElementById('exp-tanggal').value,
+        keterangan: document.getElementById('exp-keterangan').value.trim(),
+        jumlah: formatRupiahWithDecimals(jumlahNum),
+        metode: document.getElementById('exp-metode').value
+      };
+
+      try {
+        const { error } = await db.from('pengeluaran').insert([payload]);
+        if (error) throw error;
+        document.getElementById('exp-keterangan').value = '';
+        document.getElementById('exp-jumlah').value = '';
+        document.getElementById('exp-tanggal').value = new Date().toISOString().split('T')[0];
+        msg.innerText = 'Expense saved!';
+        msg.className = 'text-[10px] font-mono mt-2 text-emerald-400';
+        msg.classList.remove('hidden');
+        fetchAndRenderMoneyReport();
+      } catch (err) {
+        msg.innerText = 'Failed: ' + err.message;
+        msg.className = 'text-[10px] font-mono mt-2 text-rose-400';
+        msg.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Save Expense';
+      }
+    });
+
+    async function deleteExpense(id) {
+      if (!confirm('Delete this expense?')) return;
+      try {
+        const { error } = await db.from('pengeluaran').delete().eq('id', id);
+        if (error) throw error;
+        fetchAndRenderMoneyReport();
+      } catch (err) {
+        alert('Failed to delete: ' + err.message);
+      }
+    }
+
+    async function fetchAndRenderMoneyReport() {
+      handleMoneyFilterModeChange();
+      const loadingEl = document.getElementById('money-report-loading');
+      const listEl = document.getElementById('money-report-list');
+      loadingEl.classList.remove('hidden', 'text-rose-400');
+      loadingEl.classList.add('animate-pulse', 'text-cyan-300');
+      loadingEl.innerText = "Loading money data...";
+      listEl.classList.add('hidden');
+
+      try {
+        const { data: incomeData, error: incomeErr } = await db
+          .from('rekap_jasa')
+          .select('tanggal, harga, dp_harga, status_bayar, metode_pembayaran')
+          .order('id', { ascending: false })
+          .limit(100000);
+        if (incomeErr) throw incomeErr;
+
+        const { data: expenseData, error: expenseErr } = await db
+          .from('pengeluaran')
+          .select('id, tanggal, keterangan, jumlah, metode')
+          .order('id', { ascending: false })
+          .limit(100000);
+        if (expenseErr) throw expenseErr;
+
+        const rangeVal = document.getElementById('money-range-filter').value;
+        const datePickerVal = document.getElementById('money-date-filter').value;
+
+        const totalsByMethod = {};
+        const countByMethod = {};
+        let grandTotal = 0, txCount = 0, fullPayCount = 0, dpCount = 0, fullPayTotal = 0, dpTotal = 0;
+
+        incomeData.forEach(row => {
+          if (!moneyRowMatchesFilter(row, rangeVal, datePickerVal)) return;
+          const totalHargaNum = parseRawPrice(row.harga);
+          const dpHargaNum = parseRawPrice(row.dp_harga);
+          const isDP = row.status_bayar === 'DP';
+          const effectiveIncome = isDP ? dpHargaNum : totalHargaNum;
+          const method = row.metode_pembayaran || 'Unknown';
+          totalsByMethod[method] = (totalsByMethod[method] || 0) + effectiveIncome;
+          countByMethod[method] = (countByMethod[method] || 0) + 1;
+          grandTotal += effectiveIncome;
+          txCount += 1;
+          if (isDP) { dpCount++; dpTotal += effectiveIncome; }
+          else { fullPayCount++; fullPayTotal += effectiveIncome; }
+        });
+
+        let expenseTotal = 0;
+        const filteredExpenses = [];
+        (expenseData || []).forEach(row => {
+          if (!moneyRowMatchesFilter(row, rangeVal, datePickerVal)) return;
+          const amt = parseRawPrice(row.jumlah);
+          expenseTotal += amt;
+          filteredExpenses.push({ ...row, amountNum: amt });
+        });
+
+        renderMoneyReport(totalsByMethod, countByMethod, grandTotal, txCount, expenseTotal, grandTotal - expenseTotal, {
+          fullPayCount, dpCount, fullPayTotal, dpTotal
+        }, filteredExpenses);
+      } catch (err) {
+        loadingEl.innerText = "Failed to load data: " + err.message;
+        loadingEl.classList.remove('animate-pulse', 'text-cyan-300');
+        loadingEl.classList.add('text-rose-400');
+      }
+    }
+
+    function renderMoneyReport(totalsByMethod, countByMethod, grandTotal, txCount, expenseTotal, netBalance, extra, expenses) {
+      const loadingEl = document.getElementById('money-report-loading');
+      const listEl = document.getElementById('money-report-list');
+
+      document.getElementById('stat-grand-total').innerText = formatRupiahWithDecimals(grandTotal);
+      document.getElementById('stat-expense-total').innerText = formatRupiahWithDecimals(expenseTotal);
+      document.getElementById('stat-net-balance').innerText = formatRupiahWithDecimals(netBalance);
+      document.getElementById('stat-tx-count').innerText = txCount.toLocaleString('id-ID');
+      document.getElementById('stat-average').innerText = formatRupiahWithDecimals(txCount > 0 ? grandTotal / txCount : 0);
+
+      const sourceEl = document.getElementById('income-source-summary');
+      const methods = Object.keys(totalsByMethod);
+      if (methods.length === 0) {
+        sourceEl.innerHTML = `<div class="text-slate-500">No income for this period.</div>`;
+      } else {
+        methods.sort((a, b) => totalsByMethod[b] - totalsByMethod[a]);
+        sourceEl.innerHTML = methods.map(m => {
+          const amt = totalsByMethod[m];
+          const pct = grandTotal > 0 ? ((amt / grandTotal) * 100).toFixed(1) : 0;
+          const cnt = countByMethod[m] || 0;
+          return `<div class="flex justify-between items-center py-1 border-b border-white/5 last:border-0">
+              <span class="text-slate-300">${m} <span class="text-slate-500">(${cnt}x)</span></span>
+              <span class="text-cyan-300">${formatRupiahWithDecimals(amt)} <span class="text-slate-500 text-[10px]">${pct}%</span></span>
+            </div>`;
+        }).join('') + `
+          <div class="pt-2 mt-1 border-t border-cyan-500/20 space-y-1 text-[10px] text-slate-400">
+            <div class="flex justify-between"><span>Fully paid</span><span>${extra.fullPayCount} tx · ${formatRupiahWithDecimals(extra.fullPayTotal)}</span></div>
+            <div class="flex justify-between"><span>Down payment (DP)</span><span>${extra.dpCount} tx · ${formatRupiahWithDecimals(extra.dpTotal)}</span></div>
+          </div>`;
+      }
+
+      const expenseEl = document.getElementById('expense-summary');
+      if (!expenses || expenses.length === 0) {
+        expenseEl.innerHTML = `<div class="text-slate-500">No expenses recorded yet.</div>
+          <div class="text-[10px] text-slate-600 mt-2">Balance = Grand Total − Rp0</div>`;
+      } else {
+        expenseEl.innerHTML = expenses.map(exp => `
+          <div class="flex justify-between items-start py-1.5 border-b border-white/5 last:border-0 gap-2">
+            <div class="min-w-0 flex-1">
+              <div class="text-slate-200 truncate">${exp.keterangan || '-'}</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">${exp.tanggal || '-'} · ${exp.metode || '-'}</div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="text-rose-300 font-bold">${formatRupiahWithDecimals(exp.amountNum)}</div>
+              <button onclick="deleteExpense(${exp.id})" class="text-[9px] text-rose-400/70 hover:text-rose-300 mt-0.5">Delete</button>
+            </div>
+          </div>
+        `).join('') + `
+          <div class="pt-2 mt-1 border-t border-rose-500/20 text-[10px] text-slate-400 flex justify-between">
+            <span>Total expenses</span>
+            <span class="text-rose-300 font-bold">${formatRupiahWithDecimals(expenseTotal)}</span>
+          </div>`;
+      }
+
+      loadingEl.classList.add('hidden');
+      if (methods.length === 0) {
+        listEl.classList.remove('hidden');
+        listEl.innerHTML = `<div class="text-center p-4 text-xs font-mono text-slate-500">No data for this period.</div>`;
+        return;
+      }
+
+      methods.sort((a, b) => totalsByMethod[b] - totalsByMethod[a]);
+      const maxAmount = Math.max(...methods.map(m => totalsByMethod[m]));
+      listEl.innerHTML = methods.map(method => {
+        const style = getMoneyMethodStyle(method);
+        const amount = totalsByMethod[method];
+        const percent = grandTotal > 0 ? ((amount / grandTotal) * 100).toFixed(1) : 0;
+        const barWidth = maxAmount > 0 ? ((amount / maxAmount) * 100).toFixed(1) : 0;
+        const cnt = countByMethod[method] || 0;
+        return `
+          <div class="neo-card ${style.bg} ${style.border} p-3.5 rounded-xl">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <span class="text-xs font-mono font-bold ${style.text} uppercase tracking-wide">${method}</span>
+                <span class="block text-[10px] text-slate-400 font-mono mt-0.5">${percent}% of total · ${cnt} transactions</span>
+              </div>
+              <span class="text-lg font-bold font-mono ${style.text}">${formatRupiahWithDecimals(amount)}</span>
+            </div>
+            <div class="bar-track h-2 rounded-full overflow-hidden">
+              <div class="bar-fill h-full rounded-full ${style.bar}" style="width: ${barWidth}%"></div>
+            </div>
+          </div>`;
+      }).join('');
+      listEl.classList.remove('hidden');
+    }
+
+    fetchAndRenderMoneyReport();
+  </script>
+</body>
+</html>

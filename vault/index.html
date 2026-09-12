@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEOSHY — Vault & File Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #070a12;
+      --panel: rgba(17, 23, 38, 0.7);
+      --card-bg: rgba(22, 30, 49, 0.6);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-cyan: rgba(0, 217, 255, 0.35);
+      --cyan: #00d9ff;
+      --blue: #0077ff;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --font-main: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *::-webkit-scrollbar { display: none; }
+    * { -ms-overflow-style: none; scrollbar-width: none !important; }
+
+    body {
+      background-color: var(--bg); color: var(--text); font-family: var(--font-main);
+      min-height: 100vh; padding-bottom: 120px; overflow-x: hidden; position: relative;
+    }
+    #particleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+    .hero {
+      position: relative; text-align: center; padding: 50px 0 30px;
+      background: radial-gradient(circle at 50% 25%, rgba(0, 217, 255, 0.15) 0%, transparent 65%);
+      border-bottom: 1px solid var(--border); z-index: 1;
+    }
+    .hero-logo-wrapper {
+      position: relative; display: inline-flex; align-items: center; justify-content: center;
+      margin-bottom: 25px; cursor: pointer;
+    }
+    .hero-logo-wrapper::before {
+      content: ''; position: absolute; width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(0, 217, 255, 0.45) 0%, rgba(0, 119, 255, 0.15) 50%, transparent 70%);
+      filter: blur(40px); z-index: -1; animation: pulseGlow 3.5s ease-in-out infinite alternate;
+    }
+    .logo-card {
+      background: rgba(13, 19, 33, 0.7); border: 1px solid var(--border-cyan);
+      backdrop-filter: blur(16px); padding: 18px; border-radius: 28px;
+      display: inline-flex; align-items: center; justify-content: center;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      position: relative; overflow: hidden; animation: floatLogo 4s ease-in-out infinite;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .logo-card:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 0 30px rgba(0, 217, 255, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.3);
+      transform: translateY(-6px) scale(1.05);
+    }
+    .logo-card::after {
+      content: ''; position: absolute; top: -50%; left: -150%; width: 60%; height: 200%;
+      background: linear-gradient(60deg, transparent, rgba(0, 217, 255, 0.35), rgba(255, 255, 255, 0.7), transparent);
+      transform: rotate(25deg); transition: all 0.75s ease; pointer-events: none;
+    }
+    .logo-card:hover::after { left: 150%; }
+    .logo-img {
+      width: 140px; height: 140px; object-fit: contain; border-radius: 16px; display: block;
+      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 12px rgba(0, 217, 255, 0.6));
+      mix-blend-mode: screen; transition: filter 0.3s ease;
+    }
+    .logo-card:hover .logo-img {
+      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 25px rgba(0, 217, 255, 0.95)) brightness(1.2);
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(0, 217, 255, 0.08); border: 1px solid var(--border-cyan);
+      color: var(--cyan); padding: 6px 16px; border-radius: 30px;
+      font-size: 13px; font-family: var(--font-mono); margin-bottom: 18px; backdrop-filter: blur(8px);
+    }
+    .hero-title { font-size: 40px; font-weight: 800; line-height: 1.2; }
+    .hero-title span {
+      background: linear-gradient(135deg, #fff 30%, var(--cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    /* Bridge to Remote Tool */
+    .tool-bridge {
+      display: flex; justify-content: center; margin: 22px 0 0;
+    }
+    .tool-bridge a {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, rgba(0, 119, 255, 0.2), rgba(0, 217, 255, 0.15));
+      border: 1px solid var(--border-cyan); color: var(--cyan);
+      padding: 12px 22px; border-radius: 14px; text-decoration: none;
+      font-weight: 600; font-size: 14px; transition: all 0.25s;
+      box-shadow: 0 0 20px rgba(0, 217, 255, 0.12);
+    }
+    .tool-bridge a:hover {
+      background: linear-gradient(135deg, rgba(0, 119, 255, 0.35), rgba(0, 217, 255, 0.25));
+      box-shadow: 0 0 28px rgba(0, 217, 255, 0.25);
+      transform: translateY(-2px);
+    }
+    .tool-bridge a i.fa-arrow-right { font-size: 12px; transition: transform 0.2s; }
+    .tool-bridge a:hover i.fa-arrow-right { transform: translateX(4px); }
+
+    .filter-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin: 35px 0 25px; gap: 20px; flex-wrap: wrap;
+    }
+    .tabs {
+      display: flex; gap: 8px; background: var(--panel); padding: 5px;
+      border-radius: 12px; border: 1px solid var(--border); backdrop-filter: blur(12px);
+    }
+    .tab-btn {
+      background: transparent; border: none; color: var(--text-muted);
+      padding: 8px 18px; border-radius: 8px; font-size: 13.5px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; font-family: var(--font-main);
+    }
+    .tab-btn.active, .tab-btn:hover { background: var(--card-bg); color: var(--cyan); }
+    .search-box { position: relative; width: 340px; max-width: 100%; }
+    .search-box input {
+      width: 100%; background: var(--panel); border: 1px solid var(--border);
+      backdrop-filter: blur(12px); border-radius: 12px; padding: 9px 14px 9px 38px;
+      color: #fff; font-size: 13.5px; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s; font-family: var(--font-main);
+    }
+    .search-box input:focus { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0, 217, 255, 0.2); }
+    .search-box i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+    .group-card {
+      background: var(--panel); border: 1px solid var(--border); backdrop-filter: blur(12px);
+      border-radius: 14px; margin-bottom: 20px; overflow: hidden;
+    }
+    .group-header {
+      padding: 14px 20px; background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .group-name { font-size: 14.5px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .group-name i { color: var(--cyan); }
+    .group-badge { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
+    .file-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 20px; border-bottom: 1px solid var(--border);
+      transition: background 0.2s; cursor: pointer; gap: 12px;
+    }
+    .file-item:last-child { border-bottom: none; }
+    .file-item:hover { background: rgba(0, 217, 255, 0.06); }
+    .file-item.selected { background: rgba(0, 217, 255, 0.12); }
+    .file-left { display: flex; align-items: center; gap: 16px; min-width: 0; flex: 1; }
+    .checkbox {
+      width: 19px; height: 19px; border: 2px solid var(--text-muted); border-radius: 5px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .file-item.selected .checkbox { background: var(--cyan); border-color: var(--cyan); }
+    .checkbox i { color: #000; font-size: 10px; display: none; }
+    .file-item.selected .checkbox i { display: block; }
+    .file-title { font-size: 14px; font-weight: 600; color: var(--text); word-break: break-word; }
+    .dl-btn {
+      background: rgba(0, 217, 255, 0.1); border: 1px solid var(--border-cyan); color: var(--cyan);
+      padding: 6px 15px; border-radius: 8px; font-size: 12.5px; font-weight: 600;
+      text-decoration: none; display: flex; align-items: center; gap: 6px; transition: all 0.2s; flex-shrink: 0;
+    }
+    .dl-btn:hover { background: var(--cyan); color: #000; box-shadow: 0 0 12px rgba(0, 217, 255, 0.4); }
+    @keyframes floatLogo { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-7px); } }
+    @keyframes pulseGlow { 0% { opacity: 0.35; transform: scale(0.88); } 100% { opacity: 0.85; transform: scale(1.12); } }
+    .batch-bar {
+      position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%) translateY(120px);
+      background: rgba(17, 23, 38, 0.95); border: 1px solid var(--cyan); backdrop-filter: blur(16px);
+      padding: 12px 28px; border-radius: 40px; display: flex; align-items: center; gap: 24px;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000;
+    }
+    .batch-bar.active { transform: translateX(-50%) translateY(0); }
+    .batch-btn {
+      background: linear-gradient(135deg, var(--blue), var(--cyan)); border: none; color: #000;
+      font-weight: 700; padding: 10px 22px; border-radius: 25px; font-size: 13.5px;
+      cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: var(--font-main);
+    }
+    .batch-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .admin-btn {
+      position: fixed; bottom: 25px; right: 25px; background: var(--panel);
+      border: 1px solid var(--border); color: var(--text-muted); padding: 11px 16px;
+      border-radius: 12px; font-size: 13px; font-weight: 600; text-decoration: none;
+      display: flex; align-items: center; gap: 7px; backdrop-filter: blur(12px);
+      transition: all 0.2s; z-index: 100; font-family: var(--font-main); cursor: pointer;
+    }
+    .admin-btn:hover { border-color: var(--border-cyan); color: var(--cyan); }
+    .admin-btn.logged-in {
+      border-color: var(--border-cyan); color: var(--cyan); background: rgba(0, 217, 255, 0.08);
+    }
+    .loading, .empty { text-align: center; padding: 50px 20px; color: var(--text-muted); }
+    .loading i { font-size: 26px; margin-bottom: 10px; color: var(--cyan); display: block; }
+    .back-home {
+      position: fixed; top: 18px; left: 18px; background: var(--panel); border: 1px solid var(--border);
+      color: var(--text-muted); padding: 8px 14px; border-radius: 10px; font-size: 12.5px;
+      text-decoration: none; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(12px);
+      z-index: 50; transition: all 0.2s; font-family: var(--font-main);
+    }
+    .back-home:hover { border-color: var(--border-cyan); color: var(--cyan); }
+    @media (max-width: 640px) {
+      .hero-title { font-size: 28px; }
+      .logo-img { width: 110px; height: 110px; }
+      .filter-bar { flex-direction: column; align-items: stretch; }
+      .search-box { width: 100%; }
+      .tabs { justify-content: center; }
+      .file-item { flex-wrap: wrap; }
+      .dl-btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="particleCanvas"></canvas>
+  <a href="../index.html" class="back-home" style="gap:8px">
+    <div style="width:28px;height:28px;background:rgba(13,19,33,0.7);border:1px solid rgba(0,217,255,0.35);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+      <img src="logo.png" alt="" style="width:20px;height:20px;object-fit:contain;filter:invert(1) hue-rotate(180deg);mix-blend-mode:screen" onerror="this.style.display='none'">
+    </div>
+    <span>NEOSHY</span>
+  </a>
+
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-logo-wrapper" onclick="location.href='../index.html'" style="cursor:pointer">
+        <div class="logo-card">
+          <img src="logo.png" alt="NEOSHY Logo" class="logo-img" onerror="this.style.display='none'">
+        </div>
+      </div>
+      <br>
+      <div class="hero-badge"><i class="fa-solid fa-shield-halved"></i> 100% CLEAN & TESTED REPOSITORY</div>
+      <h1 class="hero-title">Download Tools & Modules<br><span>NeoShy.</span></h1>
+      <div class="tool-bridge">
+        <a href="../tools/index.html">
+          <i class="fa-solid fa-mobile-screen-button"></i>
+          Open NeoShy Remote Tool
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <div class="filter-bar">
+      <div class="tabs">
+        <button class="tab-btn active" data-cat="all" onclick="filterTab('all', this)">All Files</button>
+        <button class="tab-btn" data-cat="module" onclick="filterTab('module', this)">Modules</button>
+        <button class="tab-btn" data-cat="tool" onclick="filterTab('tool', this)">Tools</button>
+      </div>
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchInput" placeholder="Search modules, tools..." oninput="filterAndSearch()">
+      </div>
+    </div>
+    <div id="fileContainer">
+      <div class="loading"><i class="fa-solid fa-spinner fa-spin"></i>Loading files...</div>
+    </div>
+  </main>
+
+  <div class="batch-bar" id="batchBar">
+    <div class="batch-info">Selected: <b id="selectedCount" style="color:var(--cyan)">0</b> Files</div>
+    <button class="batch-btn" id="batchBtn" onclick="startBatchDownload()">
+      <i class="fa-solid fa-cloud-arrow-down"></i> <span id="batchBtnText">Download Selected</span>
+    </button>
+  </div>
+
+  <a href="admin.html" class="admin-btn" id="adminBtn">
+    <i class="fa-solid fa-lock"></i> <span id="adminBtnText">Admin</span>
+  </a>
+
+  <script>
+    const SUPABASE_URL = "https://vsednhqbszdiwpazcoii.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzZWRuaHFic3pkaXdwYXpjb2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMjEyMDYsImV4cCI6MjEwMjY5NzIwNn0.SO5nMDZOqsT_Cwp9x4_9CFHPsVPpyNgndb2k_qVn89o";
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let globalData = [];
+    let currentCategory = "all";
+
+    const placeholders = {
+      all: "Search modules, tools...",
+      module: "Search modules, tweaks, or apps...",
+      tool: "Search flash tools, drivers, or ADB tools..."
+    };
+
+    async function checkSession() {
+      const { data: { session } } = await db.auth.getSession();
+      if (session) {
+        const btn = document.getElementById("adminBtn");
+        btn.classList.add("logged-in");
+        document.getElementById("adminBtnText").textContent = "Manage Vault";
+        btn.querySelector("i").className = "fa-solid fa-pen-to-square";
+      }
+    }
+
+    async function loadFiles() {
+      const { data, error } = await db.from("vault_files").select("*").order("sort_order", { ascending: true });
+      if (error) {
+        document.getElementById("fileContainer").innerHTML =
+          '<p style="color:#ff4d4d;text-align:center;padding:40px">Failed to load files.<br><small>' + error.message + '</small></p>';
+        return;
+      }
+      // Hide NeoShy Remote Tool entries
+      globalData = (data || []).filter(f => {
+        const t = (f.title || "").toLowerCase();
+        return !t.includes("neoshy remote") && !t.includes("remote tool");
+      });
+      renderData(globalData);
+    }
+
+    function esc(str) {
+      if (!str) return "";
+      return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    function renderData(data) {
+      const container = document.getElementById("fileContainer");
+      container.innerHTML = "";
+      if (!data.length) {
+        container.innerHTML = '<div class="empty"><i class="fa-solid fa-folder-open" style="font-size:28px;display:block;margin-bottom:10px"></i>No files found</div>';
+        return;
+      }
+
+      const moduleItems = data.filter(i => i.category === "module");
+      const toolItems = data.filter(i => i.category === "tool");
+
+      if (moduleItems.length > 0) {
+        let itemsHTML = moduleItems.map(item => fileItemHTML(item)).join("");
+        container.innerHTML +=
+          '<div class="group-card cat-group" data-cat="module">' +
+          '<div class="group-header"><div class="group-name"><i class="fa-solid fa-puzzle-piece"></i> Modules</div>' +
+          '<span class="group-badge">' + moduleItems.length + ' File' + (moduleItems.length > 1 ? 's' : '') + '</span></div>' +
+          '<div class="file-list">' + itemsHTML + '</div></div>';
+      }
+
+      const groups = {};
+      toolItems.forEach(item => {
+        const g = item.group_name || "Tools";
+        if (!groups[g]) groups[g] = [];
+        groups[g].push(item);
+      });
+
+      for (const groupName in groups) {
+        const groupItems = groups[groupName];
+        let itemsHTML = groupItems.map(item => fileItemHTML(item)).join("");
+        container.innerHTML +=
+          '<div class="group-card cat-group" data-cat="tool">' +
+          '<div class="group-header"><div class="group-name"><i class="fa-solid fa-screwdriver-wrench"></i> ' + esc(groupName) + '</div>' +
+          '<span class="group-badge">' + groupItems.length + ' File' + (groupItems.length > 1 ? 's' : '') + '</span></div>' +
+          '<div class="file-list">' + itemsHTML + '</div></div>';
+      }
+    }
+
+    function fileItemHTML(item) {
+      return '<div class="file-item" data-title="' + esc(item.title) + '" data-cat="' + item.category + '" data-url="' + esc(item.url) + '" onclick="toggleSelect(this)">' +
+        '<div class="file-left"><div class="checkbox"><i class="fa-solid fa-check"></i></div><div>' +
+        '<div class="file-title">' + esc(item.title) + '</div></div></div>' +
+        '<a href="' + esc(item.url) + '" target="_blank" rel="noopener" class="dl-btn" onclick="event.stopPropagation()"><i class="fa-solid fa-download"></i> Download</a></div>';
+    }
+
+    function toggleSelect(item) {
+      item.classList.toggle("selected");
+      updateBatchBar();
+    }
+
+    function updateBatchBar() {
+      const selected = document.querySelectorAll(".file-item.selected");
+      const bar = document.getElementById("batchBar");
+      document.getElementById("selectedCount").innerText = selected.length;
+      selected.length > 0 ? bar.classList.add("active") : bar.classList.remove("active");
+    }
+
+    function filterTab(category, btn) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentCategory = category;
+      document.getElementById("searchInput").placeholder = placeholders[category] || placeholders.all;
+      filterAndSearch();
+    }
+
+    function filterAndSearch() {
+      const query = document.getElementById("searchInput").value.toLowerCase();
+      document.querySelectorAll(".cat-group").forEach(group => {
+        const groupCat = group.getAttribute("data-cat");
+        const matchCategory = (currentCategory === "all" || groupCat === currentCategory);
+        if (!matchCategory) { group.style.display = "none"; return; }
+        let visible = 0;
+        group.querySelectorAll(".file-item").forEach(item => {
+          const title = (item.getAttribute("data-title") || "").toLowerCase();
+          const match = title.includes(query);
+          item.style.display = match ? "flex" : "none";
+          if (match) visible++;
+        });
+        group.style.display = visible > 0 ? "block" : "none";
+      });
+    }
+
+    function startBatchDownload() {
+      const selected = document.querySelectorAll(".file-item.selected");
+      if (!selected.length) return;
+      const btn = document.getElementById("batchBtn");
+      const btnText = document.getElementById("batchBtnText");
+      btn.disabled = true;
+      selected.forEach((item, index) => {
+        const url = item.getAttribute("data-url");
+        if (!url) return;
+        setTimeout(() => {
+          btnText.innerText = "Downloading (" + (index + 1) + "/" + selected.length + ")...";
+          const iframe = document.createElement("iframe");
+          iframe.style.display = "none";
+          iframe.src = url;
+          document.body.appendChild(iframe);
+          setTimeout(() => { if (document.body.contains(iframe)) document.body.removeChild(iframe); }, 30000);
+          if (index === selected.length - 1) {
+            setTimeout(() => { btn.disabled = false; btnText.innerText = "Download Selected"; }, 1200);
+          }
+        }, index * 1200);
+      });
+    }
+
+    const canvas = document.getElementById("particleCanvas");
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener("resize", resizeCanvas); resizeCanvas();
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.8; this.speedY = (Math.random() - 0.5) * 0.8;
+      }
+      update() {
+        this.x += this.speedX; this.y += this.speedY;
+        if (this.x > canvas.width) this.x = 0; if (this.x < 0) this.x = canvas.width;
+        if (this.y > canvas.height) this.y = 0; if (this.y < 0) this.y = canvas.height;
+      }
+      draw() {
+        ctx.fillStyle = "rgba(0, 217, 255, 0.6)";
+        ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    function initParticles() {
+      particles = [];
+      const count = Math.floor((canvas.width * canvas.height) / 18000);
+      for (let i = 0; i < count; i++) particles.push(new Particle());
+    }
+    initParticles();
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update(); particles[i].draw();
+        for (let j = i; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < 90) {
+            ctx.beginPath();
+            ctx.strokeStyle = "rgba(0, 217, 255, " + (1 - distance / 90 - 0.2) + ")";
+            ctx.lineWidth = 0.5;
+            ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    checkSession();
+    loadFiles();
+  </script>
+</body>
+</html>

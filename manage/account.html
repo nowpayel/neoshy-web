@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEOSHY - Account</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+
+    /* hide all scrollbars */
+    *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+    * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+
+    :root {
+      --bg: #070a12;
+      --panel: rgba(17, 23, 38, 0.7);
+      --border-cyan: rgba(0, 217, 255, 0.35);
+      --cyan: #00d9ff;
+      --blue: #0077ff;
+    }
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(0, 217, 255, 0.15) 0%, transparent 65%),
+        radial-gradient(circle at 80% 50%, rgba(0, 119, 255, 0.08) 0%, transparent 50%);
+    }
+    .neo-card {
+      background: var(--panel);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-cyan);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    }
+    .neo-input {
+      background: rgba(3, 7, 18, 0.85);
+      border: 1px solid rgba(0, 217, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+    .neo-input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 217, 255, 0.4);
+    }
+    .neo-btn {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--cyan) 100%);
+      box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+      transition: all 0.3s ease;
+    }
+    .neo-btn:hover {
+      box-shadow: 0 0 25px rgba(0, 217, 255, 0.7);
+      transform: translateY(-1px);
+    }
+    .neo-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+  </style>
+</head>
+<body class="text-slate-100 min-h-screen p-3 md:p-8 font-sans">
+  <div class="w-full max-w-2xl mx-auto space-y-5">
+
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-cyan-500/20 pb-4 gap-3">
+      <div>
+        <a href="index.html" class="inline-flex items-center gap-1 text-xs font-mono text-cyan-400/70 hover:text-cyan-300 transition mb-1">&larr; Back to Service Manager</a> &nbsp; <a href="../index.html" class="inline-flex items-center gap-1 text-xs font-mono text-cyan-400/70 hover:text-cyan-300 transition">Home</a>
+        <h1 class="text-xl md:text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-sky-200">
+          Account Settings
+        </h1>
+        <p class="text-[10px] md:text-xs text-cyan-400/60 font-mono tracking-wider">PASSWORD • USERNAMES • USERS</p>
+      </div>
+      <button onclick="logout()" class="text-xs font-mono text-rose-400 hover:text-rose-300 bg-rose-950/40 border border-rose-500/30 px-3 py-2 rounded-xl transition">
+        Logout
+      </button>
+    </div>
+
+    <div class="neo-card p-4 md:p-5 rounded-2xl space-y-2">
+      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">Current Account</h2>
+      <p class="text-sm text-slate-300 font-mono">Email: <span id="current-email" class="text-cyan-300">-</span></p>
+    </div>
+
+    <div class="neo-card p-4 md:p-5 rounded-2xl space-y-4">
+      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">Change Password</h2>
+      <form id="form-password" class="space-y-3" autocomplete="off">
+        <div>
+          <label class="block text-xs font-mono text-cyan-300/70 mb-1">Current Password</label>
+          <div class="relative">
+            <input type="password" id="current-password" required class="neo-input w-full rounded-lg p-2.5 pr-10 text-sm text-white focus:outline-none font-mono">
+            <button type="button" onclick="togglePass('current-password','eye0','eye0off')" class="absolute right-2 top-1/2 -translate-y-1/2 text-cyan-400/70 hover:text-cyan-300 p-0.5">
+              <svg id="eye0" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              <svg id="eye0off" class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-mono text-cyan-300/70 mb-1">New Password</label>
+          <div class="relative">
+            <input type="password" id="new-password" required minlength="6" class="neo-input w-full rounded-lg p-2.5 pr-10 text-sm text-white focus:outline-none font-mono">
+            <button type="button" onclick="togglePass('new-password','eye1','eye1off')" class="absolute right-2 top-1/2 -translate-y-1/2 text-cyan-400/70 hover:text-cyan-300 p-0.5">
+              <svg id="eye1" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              <svg id="eye1off" class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-mono text-cyan-300/70 mb-1">Confirm New Password</label>
+          <input type="password" id="confirm-password" required minlength="6" class="neo-input w-full rounded-lg p-2.5 text-sm text-white focus:outline-none font-mono">
+        </div>
+        <p id="pass-msg" class="text-xs font-mono hidden"></p>
+        <button type="submit" id="btn-pass" class="neo-btn text-slate-950 font-bold py-2.5 px-5 rounded-lg text-sm">Update Password</button>
+      </form>
+    </div>
+
+    <div class="neo-card p-4 md:p-5 rounded-2xl space-y-4">
+      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">Login Usernames</h2>
+      <p class="text-[11px] text-slate-400 font-mono">Short usernames for login instead of the full email.</p>
+      <div id="alias-list" class="space-y-2 text-sm font-mono">
+        <div class="text-slate-500 text-xs">Loading...</div>
+      </div>
+      <form id="form-alias" class="flex flex-col sm:flex-row gap-2 pt-2 border-t border-cyan-500/10">
+        <input type="text" id="alias-username" required placeholder="new username" class="neo-input flex-1 rounded-lg p-2.5 text-sm text-white placeholder-slate-600 focus:outline-none font-mono" autocomplete="off">
+        <input type="email" id="alias-email" required placeholder="target email" class="neo-input flex-1 rounded-lg p-2.5 text-sm text-white placeholder-slate-600 focus:outline-none font-mono" autocomplete="off">
+        <button type="submit" class="neo-btn text-slate-950 font-bold py-2.5 px-4 rounded-lg text-sm whitespace-nowrap">Add</button>
+      </form>
+      <p id="alias-msg" class="text-xs font-mono hidden"></p>
+    </div>
+
+    <div class="neo-card p-4 md:p-5 rounded-2xl space-y-4">
+      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">Create New Login Account</h2>
+      <p class="text-[11px] text-slate-400 font-mono"></p>
+      <form id="form-new-user" class="space-y-3" autocomplete="off">
+        <div>
+          <label class="block text-xs font-mono text-cyan-300/70 mb-1">Email</label>
+          <input type="email" id="new-user-email" required class="neo-input w-full rounded-lg p-2.5 text-sm text-white focus:outline-none font-mono">
+        </div>
+        <div>
+          <label class="block text-xs font-mono text-cyan-300/70 mb-1">Password</label>
+          <input type="password" id="new-user-pass" required minlength="6" class="neo-input w-full rounded-lg p-2.5 text-sm text-white focus:outline-none font-mono">
+        </div>
+        <div>
+          <label class="block text-xs font-mono text-cyan-300/70 mb-1">Short username (optional)</label>
+          <input type="text" id="new-user-alias" placeholder="e.g. staff1" class="neo-input w-full rounded-lg p-2.5 text-sm text-white placeholder-slate-600 focus:outline-none font-mono">
+        </div>
+        <p id="newuser-msg" class="text-xs font-mono hidden"></p>
+        <button type="submit" id="btn-newuser" class="neo-btn text-slate-950 font-bold py-2.5 px-5 rounded-lg text-sm">Create Account</button>
+      </form>
+    </div>
+
+  </div>
+
+  <script>
+    // PASTE your real anon key from Supabase → Project Settings → API → anon public
+    const SUPABASE_URL = "https://vsednhqbszdiwpazcoii.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzZWRuaHFic3pkaXdwYXpjb2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMjEyMDYsImV4cCI6MjEwMjY5NzIwNn0.SO5nMDZOqsT_Cwp9x4_9CFHPsVPpyNgndb2k_qVn89o";
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUserEmail = "";
+
+    (async function guardAuth() {
+      const { data: { session } } = await db.auth.getSession();
+      if (!session) {
+        window.location.href = 'index.html';
+        return;
+      }
+      currentUserEmail = session.user.email || "";
+      document.getElementById('current-email').innerText = currentUserEmail || '-';
+      document.getElementById('alias-email').value = currentUserEmail || '';
+      loadAliases();
+    })();
+
+    function togglePass(inputId, eyeId, eyeOffId) {
+      const input = document.getElementById(inputId);
+      const eye = document.getElementById(eyeId);
+      const eyeOff = document.getElementById(eyeOffId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        eye.classList.add('hidden');
+        eyeOff.classList.remove('hidden');
+      } else {
+        input.type = 'password';
+        eye.classList.remove('hidden');
+        eyeOff.classList.add('hidden');
+      }
+    }
+
+    function showMsg(id, text, ok) {
+      const el = document.getElementById(id);
+      el.innerText = text;
+      el.classList.remove('hidden', 'text-emerald-400', 'text-rose-400');
+      el.classList.add(ok ? 'text-emerald-400' : 'text-rose-400');
+    }
+
+    async function logout() {
+      await db.auth.signOut();
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('form-password').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const currentPass = document.getElementById('current-password').value;
+      const p1 = document.getElementById('new-password').value;
+      const p2 = document.getElementById('confirm-password').value;
+
+      if (p1 !== p2) {
+        showMsg('pass-msg', 'New passwords do not match.', false);
+        return;
+      }
+      if (p1.length < 6) {
+        showMsg('pass-msg', 'New password must be at least 6 characters.', false);
+        return;
+      }
+      if (p1 === currentPass) {
+        showMsg('pass-msg', 'New password must be different from current password.', false);
+        return;
+      }
+
+      const btn = document.getElementById('btn-pass');
+      btn.disabled = true;
+      btn.innerText = 'Updating...';
+
+      const { error: verifyErr } = await db.auth.signInWithPassword({
+        email: currentUserEmail,
+        password: currentPass
+      });
+
+      if (verifyErr) {
+        showMsg('pass-msg', 'Current password is incorrect.', false);
+        btn.disabled = false;
+        btn.innerText = 'Update Password';
+        return;
+      }
+
+      const { error } = await db.auth.updateUser({ password: p1 });
+      btn.disabled = false;
+      btn.innerText = 'Update Password';
+
+      if (error) {
+        showMsg('pass-msg', error.message, false);
+      } else {
+        showMsg('pass-msg', 'Password updated successfully.', true);
+        document.getElementById('form-password').reset();
+      }
+    });
+
+    async function loadAliases() {
+      const box = document.getElementById('alias-list');
+      try {
+        const { data, error } = await db
+          .from('login_aliases')
+          .select('id, username, email')
+          .order('username');
+        if (error) throw error;
+        if (!data || data.length === 0) {
+          box.innerHTML = '<div class="text-slate-500 text-xs">No usernames yet. Add one below.</div>';
+          return;
+        }
+        box.innerHTML = data.map(row => `
+          <div class="flex items-center justify-between gap-2 bg-slate-950/50 border border-cyan-500/15 rounded-lg px-3 py-2">
+            <div class="min-w-0">
+              <span class="text-cyan-300 font-bold">${escapeHtml(row.username)}</span>
+              <span class="text-slate-500 text-xs block truncate">${escapeHtml(row.email)}</span>
+            </div>
+            <button type="button" onclick="deleteAlias(${row.id})" class="text-[10px] text-rose-400 hover:text-rose-300 border border-rose-500/30 px-2 py-1 rounded">Delete</button>
+          </div>
+        `).join('');
+      } catch (err) {
+        box.innerHTML = '<div class="text-rose-400 text-xs">Failed to load: ' + escapeHtml(err.message) + '. Check API key and login_aliases table.</div>';
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    document.getElementById('form-alias').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('alias-username').value.trim().toLowerCase();
+      const email = document.getElementById('alias-email').value.trim().toLowerCase();
+      if (!username || username.includes('@')) {
+        showMsg('alias-msg', 'Username cannot be empty or an email address.', false);
+        return;
+      }
+      const { error } = await db.from('login_aliases').insert([{ username, email }]);
+      if (error) {
+        showMsg('alias-msg', error.message, false);
+        return;
+      }
+      showMsg('alias-msg', 'Username added.', true);
+      document.getElementById('alias-username').value = '';
+      loadAliases();
+    });
+
+    async function deleteAlias(id) {
+      if (!confirm('Delete this username?')) return;
+      const { error } = await db.from('login_aliases').delete().eq('id', id);
+      if (error) {
+        alert(error.message);
+        return;
+      }
+      loadAliases();
+    }
+
+    document.getElementById('form-new-user').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('new-user-email').value.trim();
+      const password = document.getElementById('new-user-pass').value;
+      const alias = document.getElementById('new-user-alias').value.trim().toLowerCase();
+      const btn = document.getElementById('btn-newuser');
+      btn.disabled = true;
+      btn.innerText = 'Creating...';
+
+      const { error } = await db.auth.signUp({ email, password });
+      if (error) {
+        showMsg('newuser-msg', error.message, false);
+        btn.disabled = false;
+        btn.innerText = 'Create Account';
+        return;
+      }
+
+      if (alias && !alias.includes('@')) {
+        await db.from('login_aliases').insert([{ username: alias, email: email.toLowerCase() }]);
+      }
+
+      await db.auth.signOut();
+      showMsg('newuser-msg', 'Account created. Please log in again.', true);
+      btn.disabled = false;
+      btn.innerText = 'Create Account';
+      setTimeout(function() { window.location.href = 'index.html'; }, 1500);
+    });
+  </script>
+</body>
+</html>
