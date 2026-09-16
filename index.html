@@ -787,6 +787,20 @@
 
     /* ORDER UI FINAL */
 
+    .hero-cta .btn-order-hero {
+      width: 100%;
+      max-width: 320px;
+      font-weight: 700;
+      box-shadow: 0 0 24px rgba(34, 211, 238, 0.35);
+    }
+    @media (min-width: 640px) {
+      .hero-cta .btn-order-hero { width: auto; min-width: 200px; }
+    }
+    .hero-cta {
+      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;
+    }
+
+
     .svc-item .svc-prices .svc-price-row {
       display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end;
     }
@@ -1101,8 +1115,11 @@
       </div>
 
       <div class="hero-cta">
-        <a href="#contact" class="btn btn-primary">
-          <i class="fa-brands fa-whatsapp"></i> Contact Service
+        <button type="button" class="btn btn-primary btn-order-hero" onclick="openOrder()">
+          <i class="fa-solid fa-clipboard-list"></i> Order Service
+        </button>
+        <a href="#contact" class="btn btn-ghost">
+          <i class="fa-brands fa-whatsapp"></i> Contact
         </a>
         <a href="https://neoshytool.vercel.app" class="btn btn-ghost" target="_blank" rel="noopener">
           <i class="fa-solid fa-mobile-screen-button"></i> Remote Tool
@@ -1124,29 +1141,25 @@
         <p class="section-sub">Pilih layanan yang tersedia, lalu isi formulir order</p>
       </div>
       <div class="services-grid">
-        <div class="service-card">
+        <div class="service-card" role="button" tabindex="0" onclick="openOrder()" style="cursor:pointer">
           <div class="service-icon"><i class="fa-solid fa-compact-disc"></i></div>
           <h3>Custom ROM / Flash</h3>
           <p>Install official atau custom ROM. Support Xiaomi, Samsung, dan brand lain.</p>
-          <span class="svc-price-tag">dari Rp40.000</span>
         </div>
-        <div class="service-card">
+        <div class="service-card" role="button" tabindex="0" onclick="openOrder()" style="cursor:pointer">
           <div class="service-icon"><i class="fa-solid fa-unlock-keyhole"></i></div>
           <h3>Unlock Bootloader</h3>
           <p>UBL service untuk Xiaomi & lainnya. Tersedia juga UBL Instan.</p>
-          <span class="svc-price-tag">Rp40.000 – 50.000</span>
         </div>
-        <div class="service-card">
+        <div class="service-card" role="button" tabindex="0" onclick="openOrder()" style="cursor:pointer">
           <div class="service-icon"><i class="fa-solid fa-shield-halved"></i></div>
           <h3>Root Access</h3>
           <p>Magisk / KernelSU + opsi Fix Integrity / Hide Root.</p>
-          <span class="svc-price-tag">Rp30.000 – 60.000</span>
         </div>
-        <div class="service-card">
+        <div class="service-card" role="button" tabindex="0" onclick="openOrder()" style="cursor:pointer">
           <div class="service-icon"><i class="fa-solid fa-rotate"></i></div>
           <h3>Fix Bootloop / Unbrick</h3>
           <p>Recover device bootloop atau soft-brick karena salah flash.</p>
-          <span class="svc-price-tag">Rp70.000</span>
         </div>
       </div>
       <div class="services-cta">
@@ -1355,7 +1368,7 @@
       }
     });
 
-    function setLoggedIn(label) {
+    async function setLoggedIn(label) {
       isLoggedIn = true;
       document.getElementById("loginBtn").style.display = "none";
       const accBtn = document.getElementById("accountBtn");
@@ -1363,18 +1376,42 @@
       const name = label.includes("@") ? label.split("@")[0] : label;
       document.getElementById("userLabel").textContent = name;
 
-      // Load saved avatar from localStorage
+      // Load profile from Supabase (sync antar perangkat) + cache lokal
       try {
-        const profile = JSON.parse(localStorage.getItem("neoshy_profile") || "{}");
-        if (profile.avatar) {
-          const img = document.getElementById("navAvatarImg");
-          const ph = document.getElementById("navAvatarPh");
-          img.src = profile.avatar;
-          img.style.display = "block";
-          ph.style.display = "none";
-        }
-        if (profile.displayName) {
-          document.getElementById("userLabel").textContent = profile.displayName;
+        const { data: { session: sess } } = await db.auth.getSession();
+        if (sess && sess.user) {
+          const { data: prof } = await db.from("profiles").select("display_name, avatar_url").eq("id", sess.user.id).maybeSingle();
+          if (prof) {
+            if (prof.display_name) {
+              const ul = document.getElementById("userLabel");
+              if (ul) ul.textContent = prof.display_name;
+            }
+            if (prof.avatar_url) {
+              const img = document.getElementById("navAvatarImg");
+              const ph = document.getElementById("navAvatarPh");
+              if (img) { img.src = prof.avatar_url; img.style.display = "block"; }
+              if (ph) ph.style.display = "none";
+            }
+            try {
+              const cur = JSON.parse(localStorage.getItem("neoshy_profile") || "{}");
+              localStorage.setItem("neoshy_profile", JSON.stringify(Object.assign(cur, {
+                displayName: prof.display_name || cur.displayName,
+                avatar: prof.avatar_url || cur.avatar
+              })));
+            } catch (e2) {}
+          }
+        } else {
+          const profile = JSON.parse(localStorage.getItem("neoshy_profile") || "{}");
+          if (profile.avatar) {
+            const img = document.getElementById("navAvatarImg");
+            const ph = document.getElementById("navAvatarPh");
+            if (img) { img.src = profile.avatar; img.style.display = "block"; }
+            if (ph) ph.style.display = "none";
+          }
+          if (profile.displayName) {
+            const ul = document.getElementById("userLabel");
+            if (ul) ul.textContent = profile.displayName;
+          }
         }
       } catch (e) {}
     }

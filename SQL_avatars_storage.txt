@@ -1,0 +1,40 @@
+-- STORAGE AVATARS — jalankan di SQL Editor
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do update set public = true;
+
+-- Policy storage (hapus lama dulu)
+drop policy if exists "avatar public read" on storage.objects;
+drop policy if exists "avatar own upload" on storage.objects;
+drop policy if exists "avatar own update" on storage.objects;
+drop policy if exists "avatar own delete" on storage.objects;
+drop policy if exists "Allow authenticated uploads avatars" on storage.objects;
+drop policy if exists "Allow public read avatars" on storage.objects;
+
+create policy "avatar public read"
+  on storage.objects for select
+  using (bucket_id = 'avatars');
+
+create policy "avatar own upload"
+  on storage.objects for insert to authenticated
+  with check (
+    bucket_id = 'avatars'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+create policy "avatar own update"
+  on storage.objects for update to authenticated
+  using (
+    bucket_id = 'avatars'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+create policy "avatar own delete"
+  on storage.objects for delete to authenticated
+  using (
+    bucket_id = 'avatars'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Cek bucket
+select id, name, public from storage.buckets where id = 'avatars';

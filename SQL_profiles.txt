@@ -1,0 +1,45 @@
+-- Profil (username + foto) sinkron antar perangkat
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  display_name text,
+  avatar_url text,
+  updated_at timestamptz default now()
+);
+
+alter table public.profiles enable row level security;
+
+drop policy if exists "profiles select own" on public.profiles;
+create policy "profiles select own" on public.profiles
+  for select using (auth.uid() = id);
+
+drop policy if exists "profiles write own" on public.profiles;
+create policy "profiles write own" on public.profiles
+  for all using (auth.uid() = id) with check (auth.uid() = id);
+
+drop policy if exists "profiles select authenticated" on public.profiles;
+create policy "profiles select authenticated" on public.profiles
+  for select to authenticated using (true);
+
+-- Bucket foto profil
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do update set public = true;
+
+drop policy if exists "avatar public read" on storage.objects;
+create policy "avatar public read" on storage.objects
+  for select using (bucket_id = 'avatars');
+
+drop policy if exists "avatar own upload" on storage.objects;
+create policy "avatar own upload" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "avatar own update" on storage.objects;
+create policy "avatar own update" on storage.objects
+  for update to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "avatar own delete" on storage.objects;
+create policy "avatar own delete" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);

@@ -89,7 +89,7 @@
   <div id="loginGate" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
     <div class="neo-card max-w-sm w-full p-6 rounded-2xl space-y-4">
       <h2 class="text-lg font-bold text-cyan-300 text-center">Login Required</h2>
-      <p class="text-xs text-slate-400 text-center font-mono">Open Account from the main site after login, or sign in here.</p>
+      <p class="text-xs text-slate-400 text-center font-mono">Login dulu untuk membuka Account Center.</p>
       <a href="../main/index.html" class="neo-btn block text-center text-slate-950 font-bold py-2.5 rounded-xl text-sm">Go to Main Site</a>
     </div>
   </div>
@@ -99,12 +99,12 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-cyan-500/20 pb-4 gap-3">
       <div>
         <a href="../main/index.html" class="inline-flex items-center gap-1.5 text-xs font-mono text-cyan-400/70 hover:text-cyan-300 transition mb-1">
-          <i class="fa-solid fa-arrow-left"></i> Back to Home
+          <i class="fa-solid fa-arrow-left"></i> Kembali
         </a>
         <h1 class="text-xl md:text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-sky-200">
           Account Center
         </h1>
-        <p class="text-[10px] md:text-xs text-cyan-400/60 font-mono tracking-wider">PROFILE • ADMIN PORTALS • USERS</p>
+        <p class="text-[10px] md:text-xs text-cyan-400/60 font-mono tracking-wider">Profil · Admin · User</p>
       </div>
       <button onclick="logout()" class="text-xs font-mono text-rose-400 hover:text-rose-300 bg-rose-950/40 border border-rose-500/30 px-3 py-2 rounded-xl transition">
         <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
@@ -128,10 +128,10 @@
         </div>
         <div class="flex-1 text-center sm:text-left space-y-2 w-full">
           <div>
-            <label class="block text-[10px] font-mono uppercase tracking-wider text-cyan-400/70 mb-1">Username (juga untuk login)</label>
+            <label class="block text-[10px] font-mono uppercase tracking-wider text-cyan-400/70 mb-1">Username</label>
             <div class="flex gap-2">
               <input type="text" id="displayName" placeholder="username" class="neo-input flex-1 rounded-lg px-3 py-2 text-sm text-white font-mono" maxlength="40">
-              <button id="btnSaveName" class="neo-btn text-slate-950 font-bold px-4 rounded-lg text-xs whitespace-nowrap">Save</button>
+              <button id="btnSaveName" class="neo-btn text-slate-950 font-bold px-4 rounded-lg text-xs whitespace-nowrap">Simpan</button>
             </div>
           </div>
           <p class="text-sm text-slate-300 font-mono">
@@ -154,7 +154,7 @@
           </div>
           <div>
             <h3 class="font-bold text-slate-100 text-sm mb-0.5">Service Manager</h3>
-            <p class="text-[11px] text-slate-400 font-mono leading-relaxed">Service notes, income tracking, customer history & UBL timer.</p>
+            <p class="text-[11px] text-slate-400 font-mono leading-relaxed">Kelola jasa & catatan service.</p>
             <span class="inline-flex items-center gap-1 text-[10px] text-cyan-400 font-mono mt-2">Open <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
           </div>
         </a>
@@ -164,7 +164,7 @@
           </div>
           <div>
             <h3 class="font-bold text-slate-100 text-sm mb-0.5">Vault Manager</h3>
-            <p class="text-[11px] text-slate-400 font-mono leading-relaxed">Add, edit & delete files, tools, modules & drivers in the Vault.</p>
+            <p class="text-[11px] text-slate-400 font-mono leading-relaxed">Kelola file di Vault.</p>
             <span class="inline-flex items-center gap-1 text-[10px] text-purple-300 font-mono mt-2">Open <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
           </div>
         </a>
@@ -178,15 +178,15 @@
       </h2>
       <form id="form-pass" class="space-y-3" autocomplete="off">
         <div>
-          <label class="block text-xs font-mono text-cyan-300/70 mb-1">New Password</label>
+          <label class="block text-xs font-mono text-cyan-300/70 mb-1">Password baru</label>
           <input type="password" id="new-pass" required minlength="6" class="neo-input w-full rounded-lg p-2.5 text-sm text-white font-mono">
         </div>
         <div>
-          <label class="block text-xs font-mono text-cyan-300/70 mb-1">Confirm Password</label>
+          <label class="block text-xs font-mono text-cyan-300/70 mb-1">Ulangi password</label>
           <input type="password" id="confirm-pass" required minlength="6" class="neo-input w-full rounded-lg p-2.5 text-sm text-white font-mono">
         </div>
         <p id="pass-msg" class="text-xs font-mono hidden"></p>
-        <button type="submit" id="btn-pass" class="neo-btn text-slate-950 font-bold py-2.5 px-5 rounded-lg text-sm">Update Password</button>
+        <button type="submit" id="btn-pass" class="neo-btn text-slate-950 font-bold py-2.5 px-5 rounded-lg text-sm">Ubah Password</button>
       </form>
     </div>
 
@@ -195,7 +195,7 @@
       <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Login Usernames
       </h2>
-      <p class="text-[11px] text-slate-400 font-mono">Username di profil otomatis jadi username login. Kamu juga bisa tambah alias lain di sini.</p>
+      <p class="text-[11px] text-slate-400 font-mono">Username login. Bisa tambah alias lain.</p>
       <div id="alias-list" class="space-y-2 text-sm font-mono"></div>
       <form id="form-alias" class="flex flex-col sm:flex-row gap-2" autocomplete="off">
         <input type="text" id="alias-username" required placeholder="new username" class="neo-input flex-1 rounded-lg p-2.5 text-sm text-white placeholder-slate-600 font-mono" autocomplete="off">
@@ -236,10 +236,10 @@
           <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Harga Layanan & Diskon
           </h2>
-          <p class="text-[11px] text-slate-400 font-mono mt-1">Ubah harga, diskon, atau tambah jasa baru. Form order ikut update otomatis.</p>
+          <p class="text-[11px] text-slate-400 font-mono mt-1">Atur harga & diskon layanan.</p>
         </div>
         <div class="flex gap-2">
-          <button type="button" id="btnResetPrices" class="text-[11px] font-mono text-slate-400 hover:text-cyan-300 border border-slate-600/40 px-3 py-1.5 rounded-lg transition">Reset default</button>
+          <button type="button" id="btnResetPrices" class="text-[11px] font-mono text-slate-400 hover:text-cyan-300 border border-slate-600/40 px-3 py-1.5 rounded-lg transition">Reset</button>
         </div>
       </div>
 
@@ -286,6 +286,7 @@
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUserEmail = "";
+    let currentUserId = "";
     const PROFILE_KEY = "neoshy_profile";
 
     function showMsg(id, text, ok) {
@@ -318,6 +319,54 @@
       }
     }
 
+
+    async function loadProfileFromDb() {
+      if (!currentUserId) return null;
+      const { data, error } = await db.from("profiles")
+        .select("display_name, avatar_url")
+        .eq("id", currentUserId)
+        .maybeSingle();
+      if (error) {
+        console.warn("profiles:", error.message);
+        return null;
+      }
+      return data;
+    }
+
+    async function upsertProfile(fields) {
+      if (!currentUserId) return { error: { message: "Not logged in" } };
+      const payload = Object.assign({ id: currentUserId, updated_at: new Date().toISOString() }, fields);
+      return await db.from("profiles").upsert(payload, { onConflict: "id" });
+    }
+
+    async function uploadAvatarDataUrl(dataUrl) {
+      // Pastikan session masih valid sebelum upload storage
+      const { data: { session } } = await db.auth.getSession();
+      if (!session) throw new Error("Sesi login habis, login ulang");
+      currentUserId = session.user.id;
+
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      if (!blob || blob.size < 100) throw new Error("Gambar kosong");
+      if (blob.size > 2 * 1024 * 1024) throw new Error("Foto terlalu besar (max 2MB setelah crop)");
+
+      const path = currentUserId + "/avatar.jpg";
+
+      // Hapus lama dulu (abaikan error jika belum ada)
+      try { await db.storage.from("avatars").remove([path]); } catch (e) {}
+
+      const { error: upErr } = await db.storage.from("avatars").upload(path, blob, {
+        upsert: true,
+        contentType: "image/jpeg",
+        cacheControl: "3600"
+      });
+      if (upErr) throw new Error("Storage: " + upErr.message);
+
+      const { data } = db.storage.from("avatars").getPublicUrl(path);
+      if (!data || !data.publicUrl) throw new Error("Gagal ambil public URL");
+      return data.publicUrl + "?t=" + Date.now();
+    }
+
     async function checkSession() {
       const { data: { session } } = await db.auth.getSession();
       if (!session) {
@@ -325,13 +374,26 @@
         return;
       }
       currentUserEmail = session.user.email || "";
+      currentUserId = session.user.id || "";
       document.getElementById("current-email").textContent = currentUserEmail || "-";
       document.getElementById("alias-email").value = currentUserEmail || "";
       document.getElementById("app").classList.remove("hidden");
 
-      const profile = loadLocalProfile();
-      if (profile.displayName) document.getElementById("displayName").value = profile.displayName;
-      if (profile.avatar) applyAvatar(profile.avatar);
+      const remote = await loadProfileFromDb();
+      if (remote) {
+        if (remote.display_name) {
+          document.getElementById("displayName").value = remote.display_name;
+          saveLocalProfile({ displayName: remote.display_name });
+        }
+        if (remote.avatar_url) {
+          applyAvatar(remote.avatar_url);
+          saveLocalProfile({ avatar: remote.avatar_url });
+        }
+      } else {
+        const profile = loadLocalProfile();
+        if (profile.displayName) document.getElementById("displayName").value = profile.displayName;
+        if (profile.avatar) applyAvatar(profile.avatar);
+      }
 
       loadAliases();
       try { renderPriceEditor(); } catch (e) { console.error(e); }
@@ -369,7 +431,7 @@
         });
       };
       img.onerror = () => {
-        showMsg("profileMsg", "Failed to load image.", false);
+        showMsg("profileMsg", "Gagal muat gambar.", false);
       };
       img.src = dataUrl;
     }
@@ -403,13 +465,12 @@
       ctx.stroke();
     }
 
-    function applyCrop() {
+    async function applyCrop() {
       if (!cropImg) return;
       const canvas = document.getElementById("cropCanvas");
       const w = canvas.width, h = canvas.height;
       const cx = w / 2, cy = h / 2;
       const r = Math.min(w, h) * 0.38;
-      // Source rect in image space under the circle
       const sx = (cx - r - cropX) / cropScale;
       const sy = (cy - r - cropY) / cropScale;
       const sw = (r * 2) / cropScale;
@@ -422,13 +483,26 @@
       octx.closePath();
       octx.clip();
       octx.drawImage(cropImg, sx, sy, sw, sw, 0, 0, 256, 256);
-      const dataUrl = out.toDataURL("image/jpeg", 0.9);
+      const dataUrl = out.toDataURL("image/jpeg", 0.85);
       applyAvatar(dataUrl);
       saveLocalProfile({ avatar: dataUrl });
-      showMsg("profileMsg", "Photo updated.", true);
       document.getElementById("cropModal").classList.add("hidden");
       cropImg = null;
       document.getElementById("avatarInput").value = "";
+      showMsg("profileMsg", "Mengunggah foto...", true);
+      try {
+        if (!currentUserId) throw new Error("Login dulu");
+        // WAJIB lewat Storage — jangan simpan dataURL di DB (tidak sinkron antar perangkat)
+        const avatarUrl = await uploadAvatarDataUrl(dataUrl);
+        const { error } = await upsertProfile({ avatar_url: avatarUrl });
+        if (error) throw new Error("profiles: " + error.message);
+        applyAvatar(avatarUrl);
+        saveLocalProfile({ avatar: avatarUrl });
+        showMsg("profileMsg", "Foto berhasil diubah.", true);
+      } catch (err) {
+        console.error(err);
+        showMsg("profileMsg", "Gagal simpan foto: " + (err.message || err), false);
+      }
     }
 
     (function initCropUI() {
@@ -469,7 +543,7 @@
       const file = e.target.files && e.target.files[0];
       if (!file || !file.type.startsWith("image/")) return;
       if (file.size > 3 * 1024 * 1024) {
-        showMsg("profileMsg", "Image max 3MB.", false);
+        showMsg("profileMsg", "Foto max 3MB.", false);
         e.target.value = "";
         return;
       }
@@ -484,35 +558,43 @@
       if (raw && name !== raw.toLowerCase().replace(/\s+/g, "")) {
         document.getElementById("displayName").value = name;
       }
-      saveLocalProfile({ displayName: name || raw });
+      const display = name || raw;
+      saveLocalProfile({ displayName: display });
+
+      if (!currentUserId) {
+        showMsg("profileMsg", "Login dulu.", false);
+        return;
+      }
+
+      const { error: pErr } = await upsertProfile({ display_name: display || null });
+      if (pErr) {
+        showMsg("profileMsg", "Gagal simpan: " + pErr.message, false);
+        return;
+      }
+
       if (!name || name.includes("@")) {
-        showMsg("profileMsg", name ? "Username saved (local only)." : "Username cleared.", true);
+        showMsg("profileMsg", display ? "Username berhasil diubah." : "Username dikosongkan.", true);
         return;
       }
-      if (!currentUserEmail) {
-        showMsg("profileMsg", "Username saved locally. Login required to sync as login username.", true);
-        return;
-      }
+
       try {
-        // Upsert: this username becomes a login username for current email
         const { data: existing } = await db.from("login_aliases").select("id, email").eq("username", name).maybeSingle();
         if (existing) {
           if (existing.email !== currentUserEmail.toLowerCase()) {
-            showMsg("profileMsg", "Username \"" + name + "\" already used by another account.", false);
+            showMsg("profileMsg", "Username sudah dipakai.", false);
             return;
           }
-          showMsg("profileMsg", "Username saved. You can login with \"" + name + "\".", true);
         } else {
           const { error } = await db.from("login_aliases").insert([{ username: name, email: currentUserEmail.toLowerCase() }]);
           if (error) {
-            showMsg("profileMsg", "Saved locally, but alias failed: " + error.message, false);
+            showMsg("profileMsg", "Gagal: " + error.message, false);
             return;
           }
-          showMsg("profileMsg", "Username saved. You can login with \"" + name + "\".", true);
         }
         loadAliases();
+        showMsg("profileMsg", "Username berhasil diubah.", true);
       } catch (err) {
-        showMsg("profileMsg", "Saved locally. Alias sync error: " + (err.message || err), false);
+        showMsg("profileMsg", "Gagal: " + (err.message || err), false);
       }
     });
 
@@ -521,7 +603,7 @@
       const p1 = document.getElementById("new-pass").value;
       const p2 = document.getElementById("confirm-pass").value;
       if (p1 !== p2) {
-        showMsg("pass-msg", "Passwords do not match.", false);
+        showMsg("pass-msg", "Password tidak sama.", false);
         return;
       }
       const btn = document.getElementById("btn-pass");
@@ -530,11 +612,11 @@
       const { error } = await db.auth.updateUser({ password: p1 });
       if (error) showMsg("pass-msg", error.message, false);
       else {
-        showMsg("pass-msg", "Password updated.", true);
+        showMsg("pass-msg", "Password berhasil diubah.", true);
         document.getElementById("form-pass").reset();
       }
       btn.disabled = false;
-      btn.textContent = "Update Password";
+      btn.textContent = "Ubah Password";
     });
 
     async function loadAliases() {
@@ -543,17 +625,17 @@
         const { data, error } = await db.from("login_aliases").select("id, username, email").order("username");
         if (error) throw error;
         if (!data || !data.length) {
-          box.innerHTML = '<div class="text-slate-500 text-xs">No usernames yet. Add one below.</div>';
+          box.innerHTML = '<div class="text-slate-500 text-xs">Belum ada username.</div>';
           return;
         }
         box.innerHTML = data.map(row =>
           '<div class="flex items-center justify-between gap-2 bg-slate-950/40 border border-cyan-500/15 rounded-lg px-3 py-2">' +
           '<div class="min-w-0"><span class="text-cyan-300 font-bold">' + escapeHtml(row.username) + '</span>' +
           '<span class="text-slate-500 text-xs block truncate">' + escapeHtml(row.email) + '</span></div>' +
-          '<button onclick="deleteAlias(' + row.id + ')" class="text-rose-400 hover:text-rose-300 text-xs px-2 py-1 rounded border border-rose-500/30 bg-rose-950/30">Delete</button></div>'
+          '<button onclick="deleteAlias(' + row.id + ')" class="text-rose-400 hover:text-rose-300 text-xs px-2 py-1 rounded border border-rose-500/30 bg-rose-950/30">Hapus</button></div>'
         ).join("");
       } catch (err) {
-        box.innerHTML = '<div class="text-rose-400 text-xs">Failed to load: ' + escapeHtml(err.message) + '</div>';
+        box.innerHTML = '<div class="text-rose-400 text-xs">Gagal: ' + escapeHtml(err.message) + '</div>';
       }
     }
 
@@ -566,12 +648,12 @@
       const username = document.getElementById("alias-username").value.trim().toLowerCase();
       const email = document.getElementById("alias-email").value.trim().toLowerCase();
       if (!username || username.includes("@")) {
-        showMsg("alias-msg", "Username cannot be empty or an email address.", false);
+        showMsg("alias-msg", "Username tidak valid.", false);
         return;
       }
       const { error } = await db.from("login_aliases").insert([{ username, email }]);
       if (error) { showMsg("alias-msg", error.message, false); return; }
-      showMsg("alias-msg", "Username added.", true);
+      showMsg("alias-msg", "Username ditambah.", true);
       document.getElementById("alias-username").value = "";
       loadAliases();
     });
@@ -706,7 +788,7 @@
       cacheLocal(list);
 
       if (catalogDbOk === false) {
-        showMsg("priceMsg", "Tersimpan di browser saja. Tabel service_catalog belum ada di Supabase — lihat SQL di console.", true);
+        showMsg("priceMsg", "Disimpan lokal saja.", true);
         console.info(`SQL buat tabel:
 
 create table if not exists service_catalog (
@@ -743,7 +825,7 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
       const { error } = await db.from("service_catalog").upsert(rows, { onConflict: "id" });
       if (error) {
         catalogDbOk = false;
-        showMsg("priceMsg", "Gagal simpan ke database: " + error.message + " (disimpan lokal dulu)", false);
+        showMsg("priceMsg", "Gagal simpan: " + error.message, false);
         return false;
       }
       catalogDbOk = true;
@@ -772,7 +854,7 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
       if (catalogDbOk === false) {
         html += '<p class="text-[11px] font-mono text-amber-300/90 bg-amber-950/30 border border-amber-500/30 rounded-lg px-3 py-2">Belum terhubung database' + (lastCatalogError ? (': ' + escapeHtml(lastCatalogError)) : '') + '. Jalankan SQL lengkap di Supabase, lalu hard refresh.</p>';
       } else if (catalogDbOk === true) {
-        html += '<p class="text-[11px] font-mono text-emerald-400/80">Terhubung database — perubahan tersimpan permanen.</p>';
+        html += '<p class="text-[11px] font-mono text-emerald-400/80">Terhubung database.</p>';
       }
       groups.forEach(function(g) {
         var items = catalog.filter(function(i) { return i.type === g.key; });
@@ -879,13 +961,13 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
       await deleteServiceFromDb(id);
       var ok = await persistCatalog(list);
       renderPriceEditorFromList(list);
-      showMsg("priceMsg", ok ? "Layanan dihapus dari database." : "Layanan dihapus (lokal).", true);
+      showMsg("priceMsg", ok ? "Layanan dihapus." : "Layanan dihapus.", true);
     }
 
     document.getElementById("btnSavePrices").addEventListener("click", async function() {
       var list = collectPricesFromEditor();
       var ok = await persistCatalog(list);
-      showMsg("priceMsg", ok ? "Harga & diskon disimpan ke database." : "Disimpan lokal (database belum siap).", ok);
+      showMsg("priceMsg", ok ? "Harga berhasil disimpan." : "Disimpan lokal saja.", ok);
     });
 
     document.getElementById("btnResetPrices").addEventListener("click", async function() {
@@ -898,14 +980,14 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
       catalogCache = null;
       catalogDbOk = null;
       await renderPriceEditor();
-      showMsg("priceMsg", "Harga direset ke default.", true);
+      showMsg("priceMsg", "Harga direset.", true);
     });
 
     document.getElementById("btnAddSvc").addEventListener("click", async function() {
       var label = (document.getElementById("newSvcLabel").value || "").trim();
       var type = document.getElementById("newSvcType").value || "satuan";
       var price = parseInt(document.getElementById("newSvcPrice").value || "0", 10) || 0;
-      if (!label) { showMsg("priceMsg", "Isi nama layanan dulu.", false); return; }
+      if (!label) { showMsg("priceMsg", "Isi nama layanan.", false); return; }
       var list = collectPricesFromEditor();
       var id = "svc_" + Date.now().toString(36);
       list.push({ id: id, type: type, label: label, price: price, discount_price: null, discount_label: "", sort_order: list.length + 1 });
@@ -913,7 +995,7 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
       document.getElementById("newSvcLabel").value = "";
       document.getElementById("newSvcPrice").value = "";
       renderPriceEditorFromList(list);
-      showMsg("priceMsg", ok ? "Layanan ditambah & disimpan ke database." : "Layanan ditambah (lokal).", ok);
+      showMsg("priceMsg", ok ? "Layanan ditambah." : "Layanan ditambah.", ok);
     });
 
     checkSession();
