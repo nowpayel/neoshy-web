@@ -1,0 +1,19 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/index.html", "destination": "/", "permanent": true },
+    { "source": "/main", "destination": "/", "permanent": true },
+    { "source": "/main/:path*", "destination": "/:path*", "permanent": true },
+    { "source": "/manage/account", "destination": "/account", "permanent": true },
+    { "source": "/manage/account.html", "destination": "/account", "permanent": true },
+    { "source": "/manage/dashboard", "destination": "/dashboard", "permanent": true },
+    { "source": "/manage/dashboard.html", "destination": "/dashboard", "permanent": true },
+    { "source": "/vault/index.html", "destination": "/vault", "permanent": true },
+    { "source": "/vault/admin.html", "destination": "/vault/admin", "permanent": true },
+    { "source": "/account/index.html", "destination": "/account", "permanent": true },
+    { "source": "/dashboard/index.html", "destination": "/dashboard", "permanent": true },
+    { "source": "/tools/index.html", "destination": "/tools", "permanent": true },
+    { "source": "/manage/index.html", "destination": "/manage", "permanent": true }
+  ]
+}

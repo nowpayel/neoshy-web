@@ -65,7 +65,7 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center border-b border-cyan-500/20 pb-4 gap-3">
       <div>
-        <a href="../manage/index.html" class="inline-flex items-center gap-1 text-xs font-mono text-cyan-400/70 hover:text-cyan-300 transition mb-1">&larr; Back to Dashboard</a>
+        <a href="/manage" class="inline-flex items-center gap-1 text-xs font-mono text-cyan-400/70 hover:text-cyan-300 transition mb-1">&larr; Back to Dashboard</a>
         <h1 class="text-xl md:text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-sky-200">
           Money Dashboard
         </h1>
@@ -190,7 +190,7 @@
     (async function guardAuth() {
       const { data: { session } } = await db.auth.getSession();
       if (!session) {
-        window.location.href = '../manage/index.html';
+        window.location.href = '/manage';
         return;
       }
     })();

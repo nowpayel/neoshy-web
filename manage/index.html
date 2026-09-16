@@ -222,7 +222,7 @@
         </div>
 
         <div class="flex items-center gap-2 sm:hidden">
-          <a href="account.html" class="text-xs font-mono text-cyan-400 hover:text-cyan-300 bg-cyan-950/40 border border-cyan-500/30 px-3 py-1.5 rounded-xl transition">&larr; Account</a>
+          <a href="/account" class="text-xs font-mono text-cyan-400 hover:text-cyan-300 bg-cyan-950/40 border border-cyan-500/30 px-3 py-1.5 rounded-xl transition">&larr; Account</a>
           <button onclick="logout()" class="text-xs font-mono text-rose-400 hover:text-rose-300 bg-rose-950/40 border border-rose-500/30 px-3 py-1.5 rounded-xl transition">Logout</button>
         </div>
       </div>
@@ -247,7 +247,7 @@
           <span class="text-base md:text-lg font-bold text-cyan-300 font-mono" id="total-omset">Rp0,00</span>
         </div>
 
-        <a href="account.html" class="hidden sm:inline-flex text-xs font-mono text-cyan-400 hover:text-cyan-300 bg-cyan-950/40 border border-cyan-500/30 px-3 py-2 rounded-xl transition">&larr; Account</a>
+        <a href="/account" class="hidden sm:inline-flex text-xs font-mono text-cyan-400 hover:text-cyan-300 bg-cyan-950/40 border border-cyan-500/30 px-3 py-2 rounded-xl transition">&larr; Account</a>
         <button onclick="logout()" class="hidden sm:block text-xs font-mono text-rose-400 hover:text-rose-300 bg-rose-950/40 border border-rose-500/30 px-3 py-2 rounded-xl transition">Logout</button>
       </div>
     </div>
@@ -735,7 +735,7 @@
     }
 
     function goToMoneyDashboard() {
-      window.location.href = 'dashboard.html';
+      window.location.href = '/dashboard';
     }
 
     // Cek session Supabase saat halaman dibuka

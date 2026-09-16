@@ -1097,14 +1097,14 @@
   <!-- NAV -->
   <nav>
     <div class="wrap inner">
-      <a href="index.html" class="logo">
+      <a href="/" class="logo">
         <img src="logo.png" alt="NEOSHY" class="nav-logo" onerror="this.style.display='none'">
         <span class="brand-text">NEO<span>SHY</span></span>
       </a>
 
       <ul class="nav-links" id="navLinks">
         <li><a href="#services">Services</a></li>
-        <li><a href="vault/index.html">Vault</a></li>
+        <li><a href="/vault">Vault</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
 
@@ -1112,7 +1112,7 @@
         <button class="account-btn" id="loginBtn" onclick="openLogin()" type="button">
           <i class="fa-solid fa-lock"></i> <span>Login</span>
         </button>
-        <a href="manage/account.html" class="account-btn" id="accountBtn" style="display:none" title="Account Center">
+        <a href="/account" class="account-btn" id="accountBtn" style="display:none" title="Account Center">
           <span class="acc-avatar-ph" id="navAvatarPh"><i class="fa-solid fa-user"></i></span>
           <img class="acc-avatar" id="navAvatarImg" style="display:none" alt="">
           <span class="acc-name" id="userLabel">admin</span>
@@ -1153,10 +1153,10 @@
         <a href="#contact" class="btn btn-ghost">
           <i class="fa-brands fa-whatsapp"></i> Contact
         </a>
-        <a href="https://neoshytool.vercel.app" class="btn btn-ghost" target="_blank" rel="noopener">
+        <a href="/tools" class="btn btn-ghost">
           <i class="fa-solid fa-mobile-screen-button"></i> Remote Tool
         </a>
-        <a href="vault/index.html" class="btn btn-ghost">
+        <a href="/vault" class="btn btn-ghost">
           <i class="fa-solid fa-box-archive"></i> Vault
         </a>
       </div>
@@ -1390,7 +1390,7 @@
           return;
         }
         // After login → go to Account Center
-        window.location.href = "manage/account.html";
+        window.location.href = "/account";
       } catch (err) {
         errEl.textContent = err.message || "Login failed";
         errEl.style.display = "block";
