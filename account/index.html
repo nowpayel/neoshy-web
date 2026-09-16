@@ -236,30 +236,60 @@
           <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Harga Layanan & Diskon
           </h2>
-          <p class="text-[11px] text-slate-400 font-mono mt-1">Atur harga & diskon layanan.</p>
+          <p class="text-[11px] text-slate-400 font-mono mt-1">Daftar layanan. Klik Edit untuk ubah nama, harga, atau diskon.</p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 flex-wrap">
+          <button type="button" id="btnAddSvcOpen" class="neo-btn text-slate-950 font-bold text-[11px] font-mono px-3 py-1.5 rounded-lg">+ Tambah</button>
           <button type="button" id="btnResetPrices" class="text-[11px] font-mono text-slate-400 hover:text-cyan-300 border border-slate-600/40 px-3 py-1.5 rounded-lg transition">Reset</button>
         </div>
       </div>
 
-      <div class="neo-card !bg-slate-950/50 p-3 rounded-xl space-y-2 border border-cyan-500/20">
-        <p class="text-[10px] font-mono text-cyan-400 uppercase tracking-wider">Tambah layanan baru</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-          <input type="text" id="newSvcLabel" placeholder="Nama layanan" class="neo-input rounded-lg px-3 py-2 text-sm text-white font-mono">
-          <select id="newSvcType" class="neo-input rounded-lg px-3 py-2 text-sm text-white font-mono">
-            <option value="satuan">Satuan</option>
-            <option value="paket">Paket / Bundling</option>
-            <option value="khusus">Khusus</option>
-          </select>
-          <input type="number" id="newSvcPrice" min="0" step="1000" placeholder="Harga Rp" class="neo-input rounded-lg px-3 py-2 text-sm text-white font-mono">
-          <button type="button" id="btnAddSvc" class="neo-btn text-slate-950 font-bold py-2 px-4 rounded-lg text-sm">+ Tambah</button>
+      <div id="priceEditor" class="space-y-2"></div>
+      <p id="priceMsg" class="text-xs font-mono hidden"></p>
+    </div>
+
+    <!-- Edit / Add Service Modal -->
+    <div id="svcEditModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onclick="if(event.target===this)closeSvcEditModal()">
+      <div class="neo-card max-w-md w-full p-5 rounded-2xl space-y-4 max-h-[92vh] overflow-y-auto" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between">
+          <h3 id="svcEditTitle" class="text-sm font-bold text-cyan-300 font-mono">Edit Layanan</h3>
+          <button type="button" onclick="closeSvcEditModal()" class="text-slate-400 hover:text-white text-lg leading-none px-1">&times;</button>
+        </div>
+        <input type="hidden" id="svcEditId">
+        <div class="space-y-3">
+          <div>
+            <label class="block text-[10px] font-mono text-cyan-300/70 mb-1">Nama layanan</label>
+            <input type="text" id="svcEditLabel" placeholder="e.g. Root + Fix Integrity" class="neo-input w-full rounded-lg px-3 py-2.5 text-sm text-white font-mono">
+          </div>
+          <div>
+            <label class="block text-[10px] font-mono text-cyan-300/70 mb-1">Tipe</label>
+            <select id="svcEditType" class="neo-input w-full rounded-lg px-3 py-2.5 text-sm text-white font-mono">
+              <option value="satuan">Satuan</option>
+              <option value="paket">Paket / Bundling</option>
+              <option value="khusus">Khusus</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] font-mono text-cyan-300/70 mb-1">Harga awal (Rp)</label>
+              <input type="number" id="svcEditPrice" min="0" step="1000" placeholder="80000" class="neo-input w-full rounded-lg px-3 py-2.5 text-sm text-white font-mono">
+            </div>
+            <div>
+              <label class="block text-[10px] font-mono text-cyan-300/70 mb-1">Harga diskon (Rp)</label>
+              <input type="number" id="svcEditDisc" min="0" step="1000" placeholder="kosong = tanpa promo" class="neo-input w-full rounded-lg px-3 py-2.5 text-sm text-white font-mono">
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-mono text-cyan-300/70 mb-1">Label promo <span class="text-slate-500">(opsional)</span></label>
+            <input type="text" id="svcEditDiscLabel" placeholder="e.g. HEMAT / Flash Sale" maxlength="24" class="neo-input w-full rounded-lg px-3 py-2.5 text-sm text-white font-mono">
+          </div>
+          <p id="svcEditPreview" class="text-[10px] font-mono text-slate-500"></p>
+        </div>
+        <div class="flex gap-2 pt-1">
+          <button type="button" onclick="closeSvcEditModal()" class="flex-1 py-2.5 rounded-xl text-xs font-mono text-slate-300 bg-slate-800/60 border border-slate-600/40 hover:bg-slate-700/60 transition">Batal</button>
+          <button type="button" id="btnSvcEditSave" class="flex-1 neo-btn text-slate-950 font-bold py-2.5 rounded-xl text-xs">Simpan</button>
         </div>
       </div>
-
-      <div id="priceEditor" class="space-y-3"></div>
-      <p id="priceMsg" class="text-xs font-mono hidden"></p>
-      <button type="button" id="btnSavePrices" class="neo-btn text-slate-950 font-bold py-2.5 px-5 rounded-lg text-sm">Simpan Harga</button>
     </div>
 
     <p class="text-center text-[10px] text-slate-500 font-mono pb-4">NEOSHY Control Center • 2026</p>
@@ -842,9 +872,18 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
       return true;
     }
 
+    function fmtRp(n) {
+      return "Rp" + Number(n || 0).toLocaleString("id-ID");
+    }
+
+    function getCatalogList() {
+      return (catalogCache || []).slice();
+    }
+
     function renderPriceEditorFromList(catalog) {
       var box = document.getElementById("priceEditor");
       if (!box) return;
+      catalogCache = catalog.slice();
       var groups = [
         { key: "satuan", title: "Layanan Satuan" },
         { key: "paket", title: "Paket Hemat & Komplit" },
@@ -852,70 +891,41 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
       ];
       var html = "";
       if (catalogDbOk === false) {
-        html += '<p class="text-[11px] font-mono text-amber-300/90 bg-amber-950/30 border border-amber-500/30 rounded-lg px-3 py-2">Belum terhubung database' + (lastCatalogError ? (': ' + escapeHtml(lastCatalogError)) : '') + '. Jalankan SQL lengkap di Supabase, lalu hard refresh.</p>';
+        html += '<p class="text-[11px] font-mono text-amber-300/90 bg-amber-950/30 border border-amber-500/30 rounded-lg px-3 py-2 mb-2">Belum terhubung database' + (lastCatalogError ? (': ' + escapeHtml(lastCatalogError)) : '') + '. Jalankan SQL di Supabase, lalu hard refresh.</p>';
       } else if (catalogDbOk === true) {
-        html += '<p class="text-[11px] font-mono text-emerald-400/80">Terhubung database.</p>';
+        html += '<p class="text-[11px] font-mono text-emerald-400/80 mb-2">Terhubung database · ' + catalog.length + ' layanan</p>';
       }
       groups.forEach(function(g) {
         var items = catalog.filter(function(i) { return i.type === g.key; });
         if (!items.length) return;
-        html += '<div class="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400/80 mt-3 mb-1.5">' + g.title + ' (' + items.length + ')</div>';
+        html += '<div class="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400/80 mt-2 mb-1.5">' + g.title + ' (' + items.length + ')</div>';
         items.forEach(function(item) {
-          var discVal = (item.discount_price != null && item.discount_price !== "") ? item.discount_price : "";
-          var pctAuto = "";
-          if (discVal !== "" && Number(item.price) > 0 && Number(discVal) < Number(item.price)) {
-            pctAuto = Math.round((1 - Number(discVal) / Number(item.price)) * 100);
-          } else if (item.discount_percent != null && Number(item.discount_percent) > 0) {
-            pctAuto = Number(item.discount_percent);
-          }
-          var preview = "";
-          if (pctAuto !== "" && discVal !== "") {
-            preview = '<p class="text-[10px] font-mono text-amber-300/90 mt-1 disc-preview">Diskon otomatis: <b>−' + pctAuto + '%</b> &nbsp;|&nbsp; <span class="line-through text-slate-500">Rp' + Number(item.price).toLocaleString("id-ID") + '</span> → <b class="text-cyan-300">Rp' + Number(discVal).toLocaleString("id-ID") + '</b></p>';
-          } else {
-            preview = '<p class="text-[10px] font-mono text-slate-500 mt-1 disc-preview">Isi harga diskon lebih kecil dari harga awal untuk aktifkan promo.</p>';
-          }
-          html += '<div class="bg-slate-950/40 border border-cyan-500/15 rounded-xl p-3 space-y-2" data-price-id="' + item.id + '">' +
-            '<div class="flex items-center justify-between gap-2">' +
-            '<span class="text-sm text-slate-100 font-medium">' + escapeHtml(item.label) + '</span>' +
-            '<button type="button" class="text-rose-400 hover:text-rose-300 text-[10px] font-mono border border-rose-500/30 px-2 py-0.5 rounded" data-del-id="' + item.id + '">Hapus</button>' +
+          var price = Number(item.price) || 0;
+          var disc = item.discount_price != null && item.discount_price !== "" ? Number(item.discount_price) : null;
+          var hasDisc = disc != null && disc > 0 && disc < price;
+          var pct = hasDisc ? Math.round((1 - disc / price) * 100) : (item.discount_percent || null);
+          var priceHtml = hasDisc
+            ? '<span class="line-through text-slate-500 text-[11px] mr-1.5">' + fmtRp(price) + '</span><span class="text-cyan-300 font-bold font-mono text-sm">' + fmtRp(disc) + '</span>' +
+              (pct ? '<span class="ml-1.5 text-[10px] font-mono text-amber-300 bg-amber-950/40 border border-amber-500/30 px-1.5 py-0.5 rounded">−' + pct + '%</span>' : '')
+            : '<span class="text-cyan-300 font-bold font-mono text-sm">' + fmtRp(price) + '</span>';
+          html += '<div class="flex items-center gap-3 bg-slate-950/40 border border-cyan-500/15 rounded-xl px-3 py-2.5 hover:border-cyan-500/30 transition" data-price-id="' + item.id + '">' +
+            '<div class="flex-1 min-w-0">' +
+            '<div class="text-sm text-slate-100 font-medium truncate">' + escapeHtml(item.label) + '</div>' +
+            '<div class="flex items-center flex-wrap gap-1 mt-0.5">' + priceHtml + '</div>' +
             '</div>' +
-            '<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">' +
-            '<div><label class="block text-[10px] font-mono text-cyan-300/70 mb-1">Harga awal (Rp)</label>' +
-            '<input type="number" min="0" step="1000" class="neo-input w-full rounded-lg px-3 py-2 text-sm text-white font-mono price-normal" value="' + (item.price || 0) + '"></div>' +
-            '<div><label class="block text-[10px] font-mono text-cyan-300/70 mb-1">Harga diskon (Rp)</label>' +
-            '<input type="number" min="0" step="1000" class="neo-input w-full rounded-lg px-3 py-2 text-sm text-white font-mono price-disc" placeholder="kosong = tanpa promo" value="' + discVal + '"></div>' +
-            '<div><label class="block text-[10px] font-mono text-cyan-300/70 mb-1">Label promo</label>' +
-            '<input type="text" class="neo-input w-full rounded-lg px-3 py-2 text-sm text-white font-mono price-label" placeholder="opsional, mis. Flash Sale" maxlength="20" value="' + escapeHtml(item.discount_label || "") + '"></div>' +
-            '</div>' + preview + '</div>';
+            '<div class="flex items-center gap-1.5 flex-shrink-0">' +
+            '<button type="button" class="text-[11px] font-mono text-sky-400 hover:text-sky-300 bg-sky-950/40 border border-sky-500/30 px-2.5 py-1 rounded-lg transition" data-edit-id="' + item.id + '">Edit</button>' +
+            '<button type="button" class="text-[11px] font-mono text-rose-400 hover:text-rose-300 bg-rose-950/30 border border-rose-500/30 px-2.5 py-1 rounded-lg transition" data-del-id="' + item.id + '">Hapus</button>' +
+            '</div></div>';
         });
       });
-      if (!catalog.length) html += '<p class="text-slate-500 text-xs font-mono">Belum ada layanan. Tambah di atas.</p>';
+      if (!catalog.length) html += '<p class="text-slate-500 text-xs font-mono py-4 text-center">Belum ada layanan. Klik + Tambah.</p>';
       box.innerHTML = html;
       box.querySelectorAll("[data-del-id]").forEach(function(btn) {
-        btn.addEventListener("click", function() {
-          deleteService(btn.getAttribute("data-del-id"));
-        });
+        btn.addEventListener("click", function() { deleteService(btn.getAttribute("data-del-id")); });
       });
-      box.querySelectorAll("[data-price-id]").forEach(function(row) {
-        function updatePreview() {
-          var n = parseInt((row.querySelector(".price-normal") || {}).value || "0", 10) || 0;
-          var dRaw = (row.querySelector(".price-disc") || {}).value;
-          var prev = row.querySelector(".disc-preview");
-          if (!prev) return;
-          if (dRaw === "" || dRaw == null || Number(dRaw) <= 0 || Number(dRaw) >= n) {
-            prev.className = "text-[10px] font-mono text-slate-500 mt-1 disc-preview";
-            prev.innerHTML = "Isi harga diskon lebih kecil dari harga awal untuk aktifkan promo.";
-            return;
-          }
-          var d = parseInt(dRaw, 10) || 0;
-          var pct = n > 0 ? Math.round((1 - d / n) * 100) : 0;
-          prev.className = "text-[10px] font-mono text-amber-300/90 mt-1 disc-preview";
-          prev.innerHTML = "Diskon otomatis: <b>−" + pct + "%</b> &nbsp;|&nbsp; <span class=\"line-through text-slate-500\">Rp" + n.toLocaleString("id-ID") + "</span> → <b class=\"text-cyan-300\">Rp" + d.toLocaleString("id-ID") + "</b>";
-        }
-        var nEl = row.querySelector(".price-normal");
-        var dEl = row.querySelector(".price-disc");
-        if (nEl) nEl.addEventListener("input", updatePreview);
-        if (dEl) dEl.addEventListener("input", updatePreview);
+      box.querySelectorAll("[data-edit-id]").forEach(function(btn) {
+        btn.addEventListener("click", function() { openSvcEditModal(btn.getAttribute("data-edit-id")); });
       });
     }
 
@@ -926,53 +936,109 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
       renderPriceEditorFromList(catalog);
     }
 
-    function collectPricesFromEditor() {
-      var catalog = (catalogCache || []).slice();
-      var byId = {};
-      catalog.forEach(function(i) { byId[i.id] = Object.assign({}, i); });
-      document.querySelectorAll("#priceEditor [data-price-id]").forEach(function(row) {
-        var id = row.getAttribute("data-price-id");
-        if (!byId[id]) return;
-        var normalEl = row.querySelector(".price-normal");
-        var discEl = row.querySelector(".price-disc");
-        var labelEl = row.querySelector(".price-label");
-        var normal = Math.max(0, parseInt(normalEl ? normalEl.value : "0", 10) || 0);
-        var discRaw = discEl ? discEl.value : "";
-        var label = labelEl && labelEl.value ? labelEl.value.trim() : "";
-        byId[id].price = normal;
-        if (discRaw === "" || discRaw == null || Number(discRaw) <= 0 || Number(discRaw) >= normal) {
-          byId[id].discount_price = null;
-          byId[id].discount_percent = null;
-        } else {
-          var disc = Math.max(0, parseInt(discRaw, 10) || 0);
-          byId[id].discount_price = disc;
-          var pct = normal > 0 ? Math.round((1 - disc / normal) * 100) : 0;
-          byId[id].discount_percent = pct;
-          if (!label) label = "-" + pct + "%";
+    function updateSvcEditPreview() {
+      var n = parseInt(document.getElementById("svcEditPrice").value || "0", 10) || 0;
+      var dRaw = document.getElementById("svcEditDisc").value;
+      var prev = document.getElementById("svcEditPreview");
+      if (!prev) return;
+      if (dRaw === "" || dRaw == null || Number(dRaw) <= 0 || Number(dRaw) >= n) {
+        prev.className = "text-[10px] font-mono text-slate-500";
+        prev.textContent = n > 0 ? ("Harga: " + fmtRp(n) + " · tanpa diskon") : "Isi harga awal.";
+        return;
+      }
+      var d = parseInt(dRaw, 10) || 0;
+      var pct = n > 0 ? Math.round((1 - d / n) * 100) : 0;
+      prev.className = "text-[10px] font-mono text-amber-300/90";
+      prev.innerHTML = "Diskon <b>−" + pct + "%</b> · <span class=\"line-through text-slate-500\">" + fmtRp(n) + "</span> → <b class=\"text-cyan-300\">" + fmtRp(d) + "</b>";
+    }
+
+    function openSvcEditModal(id) {
+      var isNew = !id;
+      document.getElementById("svcEditTitle").textContent = isNew ? "Tambah Layanan" : "Edit Layanan";
+      document.getElementById("svcEditId").value = id || "";
+      var item = null;
+      if (id) {
+        item = getCatalogList().find(function(i) { return i.id === id; });
+      }
+      document.getElementById("svcEditLabel").value = item ? (item.label || "") : "";
+      document.getElementById("svcEditType").value = item ? (item.type || "satuan") : "satuan";
+      document.getElementById("svcEditPrice").value = item ? (item.price || 0) : "";
+      document.getElementById("svcEditDisc").value = (item && item.discount_price != null && item.discount_price !== "") ? item.discount_price : "";
+      document.getElementById("svcEditDiscLabel").value = item ? (item.discount_label || "") : "";
+      updateSvcEditPreview();
+      document.getElementById("svcEditModal").classList.remove("hidden");
+      setTimeout(function() { document.getElementById("svcEditLabel").focus(); }, 50);
+    }
+
+    function closeSvcEditModal() {
+      document.getElementById("svcEditModal").classList.add("hidden");
+    }
+
+    async function saveSvcEdit() {
+      var id = (document.getElementById("svcEditId").value || "").trim();
+      var label = (document.getElementById("svcEditLabel").value || "").trim();
+      var type = document.getElementById("svcEditType").value || "satuan";
+      var price = Math.max(0, parseInt(document.getElementById("svcEditPrice").value || "0", 10) || 0);
+      var discRaw = document.getElementById("svcEditDisc").value;
+      var discLabel = (document.getElementById("svcEditDiscLabel").value || "").trim();
+      if (!label) { showMsg("priceMsg", "Isi nama layanan.", false); return; }
+
+      var discount_price = null;
+      var discount_percent = null;
+      if (discRaw !== "" && discRaw != null && Number(discRaw) > 0 && Number(discRaw) < price) {
+        discount_price = Math.max(0, parseInt(discRaw, 10) || 0);
+        discount_percent = price > 0 ? Math.round((1 - discount_price / price) * 100) : 0;
+        if (!discLabel) discLabel = "−" + discount_percent + "%";
+      } else {
+        discLabel = discLabel || "";
+      }
+
+      var list = getCatalogList();
+      if (id) {
+        var found = false;
+        list = list.map(function(i) {
+          if (i.id !== id) return i;
+          found = true;
+          return Object.assign({}, i, {
+            label: label,
+            type: type,
+            price: price,
+            discount_price: discount_price,
+            discount_percent: discount_percent,
+            discount_label: discLabel
+          });
+        });
+        if (!found) {
+          list.push({ id: id, type: type, label: label, price: price, discount_price: discount_price, discount_percent: discount_percent, discount_label: discLabel, sort_order: list.length + 1 });
         }
-        byId[id].discount_label = label;
-      });
-      return catalog.map(function(i) { return byId[i.id] || i; });
+      } else {
+        id = "svc_" + Date.now().toString(36);
+        list.push({ id: id, type: type, label: label, price: price, discount_price: discount_price, discount_percent: discount_percent, discount_label: discLabel, sort_order: list.length + 1 });
+      }
+      var ok = await persistCatalog(list);
+      renderPriceEditorFromList(list);
+      closeSvcEditModal();
+      showMsg("priceMsg", ok ? "Layanan disimpan." : "Disimpan lokal saja.", ok);
     }
 
     async function deleteService(id) {
       if (!confirm("Hapus layanan ini?")) return;
-      var list = collectPricesFromEditor().filter(function(i) { return i.id !== id; });
+      var list = getCatalogList().filter(function(i) { return i.id !== id; });
       await deleteServiceFromDb(id);
       var ok = await persistCatalog(list);
       renderPriceEditorFromList(list);
-      showMsg("priceMsg", ok ? "Layanan dihapus." : "Layanan dihapus.", true);
+      showMsg("priceMsg", "Layanan dihapus.", true);
     }
 
-    document.getElementById("btnSavePrices").addEventListener("click", async function() {
-      var list = collectPricesFromEditor();
-      var ok = await persistCatalog(list);
-      showMsg("priceMsg", ok ? "Harga berhasil disimpan." : "Disimpan lokal saja.", ok);
-    });
+    document.getElementById("btnSvcEditSave").addEventListener("click", saveSvcEdit);
+    window.closeSvcEditModal = closeSvcEditModal;
+    window.openSvcEditModal = openSvcEditModal;
+    document.getElementById("svcEditPrice").addEventListener("input", updateSvcEditPreview);
+    document.getElementById("svcEditDisc").addEventListener("input", updateSvcEditPreview);
+    document.getElementById("btnAddSvcOpen").addEventListener("click", function() { openSvcEditModal(null); });
 
     document.getElementById("btnResetPrices").addEventListener("click", async function() {
       if (!confirm("Reset semua harga ke default?")) return;
-      // wipe db rows then seed
       if (catalogDbOk !== false) {
         await db.from("service_catalog").delete().neq("id", "");
       }
@@ -981,21 +1047,6 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
       catalogDbOk = null;
       await renderPriceEditor();
       showMsg("priceMsg", "Harga direset.", true);
-    });
-
-    document.getElementById("btnAddSvc").addEventListener("click", async function() {
-      var label = (document.getElementById("newSvcLabel").value || "").trim();
-      var type = document.getElementById("newSvcType").value || "satuan";
-      var price = parseInt(document.getElementById("newSvcPrice").value || "0", 10) || 0;
-      if (!label) { showMsg("priceMsg", "Isi nama layanan.", false); return; }
-      var list = collectPricesFromEditor();
-      var id = "svc_" + Date.now().toString(36);
-      list.push({ id: id, type: type, label: label, price: price, discount_price: null, discount_label: "", sort_order: list.length + 1 });
-      var ok = await persistCatalog(list);
-      document.getElementById("newSvcLabel").value = "";
-      document.getElementById("newSvcPrice").value = "";
-      renderPriceEditorFromList(list);
-      showMsg("priceMsg", ok ? "Layanan ditambah." : "Layanan ditambah.", ok);
     });
 
     checkSession();
