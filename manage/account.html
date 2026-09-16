@@ -9,17 +9,17 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     :root {
-      --bg: #070a12;
-      --panel: rgba(17, 23, 38, 0.72);
-      --border-cyan: rgba(0, 217, 255, 0.35);
-      --cyan: #00d9ff;
-      --blue: #0077ff;
+      --bg: #0a0e17;
+      --panel: rgba(16, 22, 36, 0.55);
+      --border-cyan: rgba(59, 158, 255, 0.28);
+      --cyan: #3b9eff;
+      --blue: #0078e0;
     }
     body {
       background-color: var(--bg);
       background-image:
-        radial-gradient(circle at 50% 0%, rgba(0, 217, 255, 0.14) 0%, transparent 65%),
-        radial-gradient(circle at 80% 50%, rgba(0, 119, 255, 0.07) 0%, transparent 50%);
+        radial-gradient(circle at 50% 0%, rgba(59, 158, 255, 0.14) 0%, transparent 65%),
+        radial-gradient(circle at 80% 50%, rgba(0, 120, 224, 0.07) 0%, transparent 50%);
     }
     .neo-card {
       background: var(--panel);
@@ -30,21 +30,21 @@
     }
     .neo-input {
       background: rgba(3, 7, 18, 0.85);
-      border: 1px solid rgba(0, 217, 255, 0.2);
+      border: 1px solid rgba(59, 158, 255, 0.2);
       transition: all 0.3s ease;
     }
     .neo-input:focus {
       border-color: var(--cyan);
-      box-shadow: 0 0 12px rgba(0, 217, 255, 0.4);
+      box-shadow: 0 0 12px rgba(59, 158, 255, 0.4);
       outline: none;
     }
     .neo-btn {
       background: linear-gradient(135deg, var(--blue) 0%, var(--cyan) 100%);
-      box-shadow: 0 0 15px rgba(0, 217, 255, 0.35);
+      box-shadow: 0 0 15px rgba(59, 158, 255, 0.35);
       transition: all 0.3s ease;
     }
     .neo-btn:hover {
-      box-shadow: 0 0 25px rgba(0, 217, 255, 0.6);
+      box-shadow: 0 0 25px rgba(59, 158, 255, 0.6);
       transform: translateY(-1px);
     }
     .neo-btn:disabled {
@@ -57,25 +57,25 @@
       cursor: pointer;
     }
     .portal-card:hover {
-      border-color: rgba(0, 217, 255, 0.55);
+      border-color: rgba(59, 158, 255, 0.55);
       transform: translateY(-3px);
-      box-shadow: 0 12px 28px rgba(0, 217, 255, 0.15);
+      box-shadow: 0 12px 28px rgba(59, 158, 255, 0.15);
     }
     .avatar-ring {
-      box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.35), 0 0 24px rgba(0, 217, 255, 0.25);
+      box-shadow: 0 0 0 3px rgba(59, 158, 255, 0.35), 0 0 24px rgba(59, 158, 255, 0.25);
     }
     .avatar-img {
       width: 96px;
       height: 96px;
       border-radius: 50%;
       object-fit: cover;
-      background: rgba(0, 217, 255, 0.08);
+      background: rgba(59, 158, 255, 0.08);
     }
     .avatar-placeholder {
       width: 96px;
       height: 96px;
       border-radius: 50%;
-      background: linear-gradient(135deg, rgba(0, 119, 255, 0.25), rgba(0, 217, 255, 0.15));
+      background: linear-gradient(135deg, rgba(0, 120, 224, 0.25), rgba(59, 158, 255, 0.15));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -460,7 +460,7 @@
       // Circle border
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(0,217,255,0.75)";
+      ctx.strokeStyle = "rgba(59,158,255,0.75)";
       ctx.lineWidth = 2.5;
       ctx.stroke();
     }

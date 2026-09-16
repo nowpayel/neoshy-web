@@ -9,13 +9,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg: #070a12;
-      --panel: rgba(17, 23, 38, 0.7);
-      --border-cyan: rgba(0, 217, 255, 0.35);
-      --cyan: #00d9ff;
-      --blue: #0077ff;
-      --red: #ef4444;
-      --text: #f1f5f9;
+      --bg: #0a0e17;
+      --panel: rgba(16, 22, 36, 0.55);
+      --border-cyan: rgba(59, 158, 255, 0.28);
+      --cyan: #3b9eff;
+      --blue: #0078e0;
+      --red: #f87171;
+      --text: #e2e8f0;
       --text-muted: #94a3b8;
       --font-main: 'Plus Jakarta Sans', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
@@ -27,38 +27,39 @@
     body {
       background-color: var(--bg);
       background-image:
-        radial-gradient(circle at 50% 0%, rgba(0, 217, 255, 0.15) 0%, transparent 65%),
-        radial-gradient(circle at 80% 50%, rgba(0, 119, 255, 0.08) 0%, transparent 50%);
+        radial-gradient(circle at 50% 0%, rgba(59, 158, 255, 0.15) 0%, transparent 65%),
+        radial-gradient(circle at 80% 50%, rgba(0, 120, 224, 0.08) 0%, transparent 50%);
       color: var(--text); font-family: var(--font-main); min-height: 100vh;
     }
 
     .neo-card {
-      background: var(--panel);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--border-cyan);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.15);
     }
     .neo-input {
-      background: rgba(3, 7, 18, 0.85);
-      border: 1px solid rgba(0, 217, 255, 0.2);
+      background: rgba(10, 14, 23, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       transition: all 0.3s ease;
-      color: #fff; border-radius: 10px; padding: 11px 14px; width: 100%;
+      color: #fff; border-radius: 12px; padding: 11px 14px; width: 100%;
       font-size: 14px; outline: none; font-family: var(--font-main);
+      backdrop-filter: blur(8px);
     }
     .neo-input:focus {
-      border-color: var(--cyan);
-      box-shadow: 0 0 12px rgba(0, 217, 255, 0.4);
+      border-color: rgba(59, 158, 255, 0.45);
+      box-shadow: 0 0 12px rgba(59, 158, 255, 0.2);
     }
     .neo-input:disabled { opacity: 0.5; cursor: not-allowed; }
     .neo-btn {
-      background: linear-gradient(135deg, var(--blue) 0%, var(--cyan) 100%);
-      box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+      background: linear-gradient(135deg, rgba(59, 158, 255, 0.85), rgba(0, 120, 224, 0.75));
+      box-shadow: 0 4px 20px rgba(0, 120, 224, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
       transition: all 0.3s ease;
-      border: none; color: #041018; font-weight: 700; padding: 11px 18px;
-      border-radius: 10px; font-size: 14px; cursor: pointer; font-family: var(--font-main);
+      border: 1px solid rgba(255, 255, 255, 0.2); color: #0a0e17; font-weight: 700; padding: 11px 18px;
+      border-radius: 12px; font-size: 14px; cursor: pointer; font-family: var(--font-main);
     }
-    .neo-btn:hover { box-shadow: 0 0 25px rgba(0, 217, 255, 0.7); transform: translateY(-1px); }
+    .neo-btn:hover { box-shadow: 0 6px 28px rgba(0, 120, 224, 0.35); transform: translateY(-1px); }
     .neo-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
     /* LOGIN */
@@ -71,19 +72,21 @@
     }
     .hero-logo-wrapper::before {
       content: ''; position: absolute; width: 120px; height: 120px;
-      background: radial-gradient(circle, rgba(0, 217, 255, 0.45) 0%, rgba(0, 119, 255, 0.15) 50%, transparent 70%);
+      background: radial-gradient(circle, rgba(59, 158, 255, 0.3) 0%, rgba(0, 120, 224, 0.1) 50%, transparent 70%);
       filter: blur(28px); z-index: 0; animation: pulseGlow 3.5s ease-in-out infinite alternate;
     }
     .logo-card {
-      background: rgba(13, 19, 33, 0.7); border: 1px solid var(--border-cyan);
-      backdrop-filter: blur(16px); border-radius: 20px; padding: 12px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(20px) saturate(1.5); -webkit-backdrop-filter: blur(20px) saturate(1.5);
+      border-radius: 20px; padding: 12px;
       display: inline-flex; position: relative; z-index: 1;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.18);
       animation: floatLogo 4s ease-in-out infinite;
     }
     .logo-img {
       width: 64px; height: 64px; object-fit: contain; border-radius: 10px;
-      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 10px rgba(0, 217, 255, 0.6));
+      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 10px rgba(59, 158, 255, 0.45));
       mix-blend-mode: screen;
     }
     @keyframes floatLogo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
@@ -112,7 +115,7 @@
     /* ADMIN */
     #adminScreen { display: none; }
     .topbar {
-      background: rgba(7, 10, 18, 0.9); border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+      background: rgba(7, 10, 18, 0.9); border-bottom: 1px solid rgba(59, 158, 255, 0.2);
       padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;
       position: sticky; top: 0; z-index: 20; backdrop-filter: blur(16px);
     }
@@ -123,13 +126,13 @@
     }
     .topbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
     .btn-sm {
-      background: rgba(8, 47, 73, 0.5); border: 1px solid rgba(56, 189, 248, 0.3);
+      background: rgba(8, 47, 73, 0.5); border: 1px solid rgba(0, 120, 224, 0.3);
       color: #7dd3fc; padding: 7px 12px; border-radius: 10px; font-size: 12px;
       font-weight: 600; cursor: pointer; text-decoration: none;
       display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s;
       font-family: var(--font-mono);
     }
-    .btn-sm:hover { background: rgba(14, 116, 144, 0.5); border-color: #38bdf8; }
+    .btn-sm:hover { background: rgba(14, 116, 144, 0.5); border-color: #0078e0; }
     .btn-danger {
       background: rgba(136, 19, 55, 0.4); border-color: rgba(244, 63, 94, 0.35); color: #fda4af;
     }
@@ -160,15 +163,15 @@
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th {
       text-align: left; padding: 12px 14px; background: rgba(0, 0, 0, 0.25);
-      border-bottom: 1px solid rgba(0, 217, 255, 0.15); color: rgba(103, 232, 249, 0.7);
+      border-bottom: 1px solid rgba(59, 158, 255, 0.15); color: rgba(103, 232, 249, 0.7);
       font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
       font-family: var(--font-mono); white-space: nowrap;
     }
     td {
-      padding: 11px 14px; border-bottom: 1px solid rgba(0, 217, 255, 0.08); vertical-align: middle;
+      padding: 11px 14px; border-bottom: 1px solid rgba(59, 158, 255, 0.08); vertical-align: middle;
     }
     tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(0, 217, 255, 0.04); }
+    tr:hover td { background: rgba(59, 158, 255, 0.04); }
     .url-cell {
       max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
       font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);
@@ -178,15 +181,15 @@
       font-size: 10px; font-weight: 600; font-family: var(--font-mono);
     }
     .cat-module { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
-    .cat-tool { background: rgba(0, 217, 255, 0.1); color: var(--cyan); border: 1px solid rgba(0, 217, 255, 0.25); }
+    .cat-tool { background: rgba(59, 158, 255, 0.1); color: var(--cyan); border: 1px solid rgba(59, 158, 255, 0.25); }
     .action-btns { display: flex; gap: 6px; }
     .btn-icon {
-      background: rgba(8, 47, 73, 0.4); border: 1px solid rgba(56, 189, 248, 0.25);
+      background: rgba(8, 47, 73, 0.4); border: 1px solid rgba(0, 120, 224, 0.25);
       color: #7dd3fc; width: 30px; height: 30px; border-radius: 8px;
       cursor: pointer; display: flex; align-items: center; justify-content: center;
       font-size: 12px; transition: all 0.15s;
     }
-    .btn-icon:hover { background: rgba(14, 116, 144, 0.5); border-color: #38bdf8; }
+    .btn-icon:hover { background: rgba(14, 116, 144, 0.5); border-color: #0078e0; }
     .btn-icon.delete {
       background: rgba(136, 19, 55, 0.3); border-color: rgba(244, 63, 94, 0.3); color: #fda4af;
     }
@@ -227,7 +230,7 @@
     .modal h3 { margin-bottom: 16px; font-size: 1.05rem; color: var(--cyan); }
     .modal-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
     .btn-secondary {
-      background: transparent; border: 1px solid rgba(0, 217, 255, 0.25); color: var(--text-muted);
+      background: transparent; border: 1px solid rgba(59, 158, 255, 0.25); color: var(--text-muted);
       padding: 9px 16px; border-radius: 10px; font-size: 13px; cursor: pointer; font-family: var(--font-main);
     }
     .btn-secondary:hover { border-color: var(--cyan); color: #fff; }

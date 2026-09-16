@@ -12,20 +12,20 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     :root {
-      --bg: #070a12;
-      --bg-card: rgba(17, 23, 38, 0.75);
-      --bg-elevated: rgba(22, 30, 49, 0.7);
-      --border: rgba(255, 255, 255, 0.08);
-      --border-cyan: rgba(0, 217, 255, 0.35);
-      --text: #f1f5f9;
+      --bg: #0a0e17;
+      --bg-card: rgba(16, 22, 36, 0.55);
+      --bg-elevated: rgba(20, 28, 45, 0.45);
+      --border: rgba(255, 255, 255, 0.10);
+      --border-cyan: rgba(59, 158, 255, 0.28);
+      --text: #e2e8f0;
       --text-muted: #94a3b8;
-      --accent: #00d9ff;
-      --accent-dim: #00a8cc;
+      --accent: #3b9eff;
+      --accent-dim: #2a8eef;
       --green: #22c55e;
-      --red: #ef4444;
+      --red: #f87171;
       --purple: #a855f7;
       --orange: #f97316;
-      --blue: #0077ff;
+      --blue: #0078e0;
       --radius: 14px;
       --shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
       --font-main: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -37,6 +37,10 @@
     html { scroll-behavior: smooth; }
 
     body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 120, 224, 0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 60%, rgba(59, 158, 255, 0.06), transparent);
       font-family: var(--font-main);
       background: var(--bg);
       color: var(--text);
@@ -99,7 +103,7 @@
       height: 36px;
       object-fit: contain;
       border-radius: 8px;
-      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 8px rgba(0, 217, 255, 0.55));
+      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 8px rgba(59, 158, 255, 0.55));
       mix-blend-mode: screen;
     }
     .logo .brand-text {
@@ -142,10 +146,10 @@
     .btn:hover { transform: translateY(-1px); }
     .btn-primary {
       background: linear-gradient(135deg, var(--accent), var(--blue));
-      color: #041018;
-      box-shadow: 0 4px 20px rgba(0, 217, 255, 0.35);
+      color: #0a0e17;
+      box-shadow: 0 4px 20px rgba(59, 158, 255, 0.35);
     }
-    .btn-primary:hover { box-shadow: 0 6px 28px rgba(0, 217, 255, 0.5); }
+    .btn-primary:hover { box-shadow: 0 6px 28px rgba(59, 158, 255, 0.5); }
     .btn-ghost {
       background: transparent;
       color: var(--text);
@@ -169,7 +173,7 @@
       padding: 36px 0 48px;
       text-align: center;
       position: relative;
-      background: radial-gradient(circle at 50% 15%, rgba(0, 217, 255, 0.12) 0%, transparent 55%);
+      background: radial-gradient(circle at 50% 15%, rgba(59, 158, 255, 0.12) 0%, transparent 55%);
     }
 
     /* Logo glass card — standalone at top */
@@ -186,7 +190,7 @@
       position: absolute;
       width: 170px;
       height: 170px;
-      background: radial-gradient(circle, rgba(0, 217, 255, 0.4) 0%, rgba(0, 119, 255, 0.12) 50%, transparent 70%);
+      background: radial-gradient(circle, rgba(59, 158, 255, 0.4) 0%, rgba(0, 120, 224, 0.12) 50%, transparent 70%);
       filter: blur(32px);
       z-index: -1;
       animation: pulseGlow 3.5s ease-in-out infinite alternate;
@@ -209,7 +213,7 @@
     }
     .logo-card:hover {
       border-color: var(--accent);
-      box-shadow: 0 0 28px rgba(0, 217, 255, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.25);
+      box-shadow: 0 0 28px rgba(59, 158, 255, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.25);
       transform: translateY(-5px) scale(1.04);
     }
     .logo-card::after {
@@ -219,7 +223,7 @@
       left: -150%;
       width: 60%;
       height: 200%;
-      background: linear-gradient(60deg, transparent, rgba(0, 217, 255, 0.3), rgba(255, 255, 255, 0.6), transparent);
+      background: linear-gradient(60deg, transparent, rgba(59, 158, 255, 0.3), rgba(255, 255, 255, 0.6), transparent);
       transform: rotate(25deg);
       transition: all 0.7s ease;
       pointer-events: none;
@@ -232,12 +236,12 @@
       object-fit: contain;
       border-radius: 16px;
       display: block;
-      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 12px rgba(0, 217, 255, 0.6));
+      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 12px rgba(59, 158, 255, 0.6));
       mix-blend-mode: screen;
       transition: filter 0.3s ease;
     }
     .logo-card:hover .logo-img {
-      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 25px rgba(0, 217, 255, 0.95)) brightness(1.15);
+      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 25px rgba(59, 158, 255, 0.95)) brightness(1.15);
     }
 
     .badge {
@@ -246,7 +250,7 @@
       gap: 8px;
       padding: 6px 14px;
       border-radius: 999px;
-      background: rgba(0, 217, 255, 0.08);
+      background: rgba(59, 158, 255, 0.08);
       border: 1px solid var(--border-cyan);
       color: var(--accent);
       font-size: 0.78rem;
@@ -317,9 +321,9 @@
       transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
     }
     .feature-card:hover {
-      border-color: rgba(0, 217, 255, 0.4);
+      border-color: rgba(59, 158, 255, 0.4);
       transform: translateY(-3px);
-      box-shadow: 0 8px 24px rgba(0, 217, 255, 0.08);
+      box-shadow: 0 8px 24px rgba(59, 158, 255, 0.08);
     }
     .feature-icon {
       width: 40px;
@@ -342,7 +346,7 @@
       line-height: 1.55;
     }
     .icon-adb { background: rgba(34, 197, 94, 0.15); color: var(--green); }
-    .icon-fb { background: rgba(0, 217, 255, 0.15); color: var(--accent); }
+    .icon-fb { background: rgba(59, 158, 255, 0.15); color: var(--accent); }
     .icon-mi { background: rgba(249, 115, 22, 0.15); color: var(--orange); }
     .icon-sam { background: rgba(96, 165, 250, 0.15); color: #60a5fa; }
     .icon-dump { background: rgba(168, 85, 247, 0.15); color: var(--purple); }
@@ -392,7 +396,7 @@
       backdrop-filter: blur(12px);
     }
     .shot-card:hover {
-      border-color: rgba(0, 217, 255, 0.4);
+      border-color: rgba(59, 158, 255, 0.4);
       transform: translateY(-2px);
     }
     .shot-card .img-wrap {
@@ -452,7 +456,7 @@
     .hero-shot {
       border-radius: var(--radius);
       border: 1px solid var(--border);
-      box-shadow: var(--shadow), 0 0 50px rgba(0, 217, 255, 0.08);
+      box-shadow: var(--shadow), 0 0 50px rgba(59, 158, 255, 0.08);
       max-width: min(780px, 100%);
       max-height: 380px;
       width: auto;
@@ -501,7 +505,7 @@
       padding: 22px;
       text-align: center;
       backdrop-filter: blur(14px);
-      box-shadow: 0 0 30px rgba(0, 217, 255, 0.1);
+      box-shadow: 0 0 30px rgba(59, 158, 255, 0.1);
     }
     .qr-card img {
       width: min(200px, 70vw);
@@ -554,7 +558,7 @@
     .social-link:hover {
       border-color: var(--border-cyan);
       transform: translateX(4px);
-      background: rgba(0, 217, 255, 0.06);
+      background: rgba(59, 158, 255, 0.06);
     }
     .social-link .icon {
       width: 42px;
@@ -575,11 +579,11 @@
     /* ─── CTA ─── */
     .cta-box {
       background: linear-gradient(135deg, rgba(13, 26, 42, 0.9) 0%, rgba(10, 21, 32, 0.95) 100%);
-      border: 1px solid rgba(0, 217, 255, 0.28);
+      border: 1px solid rgba(59, 158, 255, 0.28);
       border-radius: 18px;
       padding: 40px 24px;
       text-align: center;
-      box-shadow: 0 0 60px rgba(0, 217, 255, 0.07);
+      box-shadow: 0 0 60px rgba(59, 158, 255, 0.07);
       backdrop-filter: blur(12px);
     }
     .cta-box h2 {
@@ -750,7 +754,7 @@
       </div>
       <div class="features" style="max-width: 900px; margin: 0 auto;">
         <div class="feature-card">
-          <div class="feature-icon" style="background: rgba(0, 217, 255, 0.15); color: var(--accent);"><i class="fa-solid fa-table-columns"></i></div>
+          <div class="feature-icon" style="background: rgba(59, 158, 255, 0.15); color: var(--accent);"><i class="fa-solid fa-table-columns"></i></div>
           <h3>New Sidebar Layout</h3>
           <p>Device Status, Command Tools tabs (ADB / Fastboot / Xiaomi / Samsung), and quick actions are now organized in a clean left sidebar.</p>
         </div>
@@ -1029,7 +1033,7 @@
         if (this.y < 0) this.y = canvas.height;
       }
       draw() {
-        ctx.fillStyle = 'rgba(0, 217, 255, 0.5)';
+        ctx.fillStyle = 'rgba(59, 158, 255, 0.5)';
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
@@ -1058,7 +1062,7 @@
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 70) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(0, 217, 255, ${0.55 - dist / 70})`;
+            ctx.strokeStyle = `rgba(59, 158, 255, ${0.55 - dist / 70})`;
             ctx.lineWidth = 0.4;
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
