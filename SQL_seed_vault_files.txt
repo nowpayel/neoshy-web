@@ -1,0 +1,44 @@
+-- ============================================
+-- Seed SEMUA file Vault dari files.json
+-- Jalankan di Supabase → SQL Editor
+-- ============================================
+
+-- 1) Hapus data lama di vault (biar bersih, hanya dari DB)
+truncate table public.vault_files restart identity;
+
+-- 2) Masukkan 27 file
+insert into public.vault_files (category, group_name, title, url, sort_order)
+values
+  ('module', 'Magisk & Root Modules', 'Zygisk-Next-1.4.3-release.zip', 'https://github.com/Dr-TSNG/ZygiskNext/releases/download/v1.4.3/Zygisk-Next-1.4.3-817-e815170-release.zip', 1),
+  ('module', 'Magisk & Root Modules', 'Tricky-Store-v1.4.1.zip', 'https://github.com/5ec1cff/TrickyStore/releases/download/1.4.1/Tricky-Store-v1.4.1-245-72b2e84-release.zip', 2),
+  ('module', 'Magisk & Root Modules', 'TrickyAddonModule-v4.4.zip', 'https://github.com/KOWX712/Tricky-Addon-Update-Target-List/releases/download/v4.4/TrickyAddonModule-v4.4.zip', 3),
+  ('module', 'Magisk & Root Modules', 'PlayIntegrityFix_v4.7-1-inject-s.zip', 'https://github.com/KOWX712/PlayIntegrityFix/releases/download/v4.7-inject-s/PlayIntegrityFix_v4.7-1-inject-s.zip', 4),
+  ('module', 'Magisk & Root Modules', 'LSPosed-v1.9.2-zygisk-release.zip', 'https://github.com/LSPosed/LSPosed/releases/download/v1.9.2/LSPosed-v1.9.2-7024-zygisk-release.zip', 5),
+  ('module', 'Magisk & Root Modules', 'Vector-v2.0-3021-Release.zip', 'https://github.com/JingMatrix/Vector/releases/download/v2.0/Vector-v2.0-3021-Release.zip', 6),
+  ('module', 'Magisk & Root Modules', 'HMA-OSS-ZYGISK-oss-166-release.zip', 'https://github.com/frknkrc44/HMA-OSS/releases/download/oss-166/HMA-OSS-ZYGISK-oss-166-release.zip', 7),
+  ('module', 'Performance & System Tweaks', 'encore-5.2.1-main.zip', 'https://github.com/Rem01Gaming/encore/releases/download/5.2.1/encore-5.2.1-1533-361ab0e-main.zip', 8),
+  ('module', 'Performance & System Tweaks', 'ProjectRaco-6.0-LAB.zip', 'https://github.com/LoggingNewMemory/Project-Raco/releases/download/6.0/ProjectRaco-6.0-LAB.zip', 9),
+  ('module', 'Root Manager & Android Apps', 'Magisk-v30.7.apk', 'https://github.com/topjohnwu/Magisk/releases/download/v30.7/Magisk-v30.7.apk', 10),
+  ('module', 'Root Manager & Android Apps', 'Setting_HyperOs_A13.apk', 'https://github.com/nowpayel/bahan/releases/download/hyperos/Setting_HyperOs_A13.apk', 11),
+  ('module', 'Root Manager & Android Apps', 'Setting_HyperOs_A14.apk', 'https://github.com/nowpayel/bahan/releases/download/hyperos/Setting_HyperOs_A14.apk', 12),
+  ('module', 'Root Manager & Android Apps', 'KsuWebUI-1.0-11-release.apk', 'https://github.com/adivenxnataly/KsuWebUI/releases/download/1.0-11/KsuWebUI-1.0-11-release.apk', 13),
+  ('module', 'Root Manager & Android Apps', 'KernelSU_Next_v3.3.0-spoofed.apk', 'https://github.com/KernelSU-Next/KernelSU-Next/releases/download/v3.3.0/KernelSU_Next_v3.3.0-spoofed_33214-release.apk', 14),
+  ('module', 'Root Manager & Android Apps', 'NexAlloy-2.0.105.apk', 'https://github.com/NexAlloy/NexAlloy/releases/download/2.0.105/NexAlloy-2.0.105.apk', 15),
+  ('tool', 'Xiaomi Flashing & Unlock Tools', 'MTK GSM SULTENG', 'https://pixeldrain.com/u/59Na1k3S', 16),
+  ('tool', 'Xiaomi Flashing & Unlock Tools', 'miflash_unlock-en-6.5.224.28.zip', 'https://miuirom.xiaomi.com/rom/u1106245679/6.5.224.28/miflash_unlock-en-6.5.224.28.zip', 17),
+  ('tool', 'Xiaomi Flashing & Unlock Tools', 'MiFlash20220507.zip', 'https://cdn.xiaomiflashtool.com/wp-content/uploads/MiFlash20220507.zip', 18),
+  ('tool', 'Xiaomi Flashing & Unlock Tools', 'UBL HYPEROS PHP.rar', 'https://pixeldrain.com/u/9c1Dq7do', 19),
+  ('tool', 'Samsung & Universal Flashing Utilities', 'Odin3_v3.14.4.zip', 'https://odindownloader.com/wp-content/uploads/Odin3_v3.14.4.zip', 20),
+  ('tool', 'ADB & Developer Utilities', 'platform-tools-latest-windows.zip', 'https://dl.google.com/android/repository/platform-tools-latest-windows.zip?hl=id', 21),
+  ('tool', 'ADB & Developer Utilities', 'Minimal_ADB_Fastboot_v1.4.3.zip', 'https://androiddatahost.com/wp-content/uploads/Minimal_ADB_Fastboot_v1.4.3.zip', 22),
+  ('tool', 'ADB & Developer Utilities', 'python-3.14.6-amd64.exe', 'https://www.python.org/ftp/python/3.14.6/python-3.14.6-amd64.exe', 23),
+  ('tool', 'ADB & Developer Utilities', 'scrcpy-win64-v4.1.zip', 'https://release-assets.githubusercontent.com/github-production-release-asset/111583593/c8f2841a-acc9-463f-9dfc-ea35cba9d3c3', 24),
+  ('tool', 'Remote Tools', 'Neoshy Remote Tool', 'https://github.com/nowpayel/tool/releases/download/tool/Neoshy.Remote.Tool.zip', 25),
+  ('tool', 'USB Drivers & Interfaces', 'usb_driver_r13-windows.zip', 'https://dl.google.com/android/repository/usb_driver_r13-windows.zip?hl=id', 26),
+  ('tool', 'USB Drivers & Interfaces', 'SAMSUNG_USB_Driver_v1.9.5.0.exe', 'https://d13643hualop71.cloudfront.net/SDP/SAMSUNG_USB_Driver_for_Mobile_Phones_v1.9.5.0.exe?token=1785150057355.EOVRxWRyVVxkvlTfQEUDR62UnrWATY%2FDRIGdp02au1c%3D', 27);
+
+-- 3) Cek
+select count(*) as total from public.vault_files;
+select title, category, left(url, 60) as url_preview
+from public.vault_files
+order by sort_order;

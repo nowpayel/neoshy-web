@@ -12,51 +12,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: var(--text);
-    }
-    .nav-logo-card {
-      width: 38px; height: 38px;
-      background: rgba(13, 19, 33, 0.7);
-      border: 1px solid var(--border-cyan);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden;
-      box-shadow: 0 0 12px rgba(0, 217, 255, 0.15);
-      flex-shrink: 0;
-    }
-    .nav-logo-img {
-      width: 28px; height: 28px;
-      object-fit: contain;
-      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 6px rgba(0, 217, 255, 0.5));
-      mix-blend-mode: screen;
-    }
-    .nav-logo-title {
-      font-size: 15px; font-weight: 800; letter-spacing: 0.04em;
-      background: linear-gradient(to right, #22d3ee, #e0f2fe);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      line-height: 1.1;
-    }
-    .nav-logo-sub {
-      font-size: 9px; font-family: var(--font-mono);
-      color: rgba(0, 217, 255, 0.55); letter-spacing: 0.06em;
-      margin-top: 1px;
-    }
-
-
-    /* hide all scrollbars */
-    *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
-    * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
-
     :root {
       --bg: #070a12;
-      --panel: rgba(17, 23, 38, 0.7);
-      --card-bg: rgba(22, 30, 49, 0.6);
+      --panel: rgba(17, 23, 38, 0.72);
+      --card-bg: rgba(22, 30, 49, 0.65);
       --border: rgba(255, 255, 255, 0.08);
       --border-cyan: rgba(0, 217, 255, 0.35);
       --cyan: #00d9ff;
@@ -64,8 +23,11 @@
       --text: #f1f5f9;
       --text-muted: #94a3b8;
       --red: #ef4444;
-      --font-main: 'Plus Jakarta Sans', sans-serif;
+      --green: #25d366;
+      --font-main: 'Plus Jakarta Sans', system-ui, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
+      --radius: 14px;
+      --shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -97,14 +59,14 @@
       z-index: 1;
     }
 
-    /* NAV */
+    /* ─── NAV ─── */
     nav {
       position: sticky;
       top: 0;
       z-index: 100;
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
-      background: rgba(7, 10, 18, 0.88);
+      background: rgba(7, 10, 18, 0.9);
       border-bottom: 1px solid var(--border);
     }
 
@@ -112,21 +74,60 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 60px;
+      height: 72px;
+      gap: 16px;
     }
 
     .logo {
       font-weight: 800;
-      font-size: 1.1rem;
-      letter-spacing: -0.02em;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
       color: var(--cyan);
       text-decoration: none;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+      gap: 2px;
+      white-space: nowrap;
+      line-height: 1;
     }
 
-    .logo span { color: var(--text); font-weight: 600; }
+    .logo .nav-logo {
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
+      border-radius: 9px;
+      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 8px rgba(0, 217, 255, 0.55));
+      mix-blend-mode: screen;
+    }
+
+    .logo .brand-text {
+      color: var(--text);
+      font-weight: 700;
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .logo .brand-text span { color: var(--cyan); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--cyan); }
 
     .nav-actions {
       display: flex;
@@ -168,41 +169,83 @@
 
     .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
 
-    .user-bar {
-      display: none;
+    .account-btn {
+      display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       background: rgba(0, 217, 255, 0.08);
       border: 1px solid var(--border-cyan);
-      padding: 6px 12px 6px 14px;
+      color: var(--cyan);
+      padding: 6px 14px;
       border-radius: 10px;
       font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: var(--font-main);
+      transition: all 0.2s ease;
     }
-
-    .user-bar.show { display: flex; }
-
-    .user-bar span {
+    .account-btn:hover {
+      background: rgba(0, 217, 255, 0.16);
+      border-color: var(--cyan);
+    }
+    .account-btn .acc-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid rgba(0, 217, 255, 0.5);
+      flex-shrink: 0;
+    }
+    .account-btn .acc-avatar-ph {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(0, 217, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
       color: var(--cyan);
+      flex-shrink: 0;
+    }
+    .account-btn .acc-name {
       font-family: var(--font-mono);
       font-size: 12.5px;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    /* HERO — match Vault style */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.35rem;
+      cursor: pointer;
+      padding: 6px;
+    }
+
+    /* ─── HERO ─── */
     .hero {
       position: relative;
       text-align: center;
-      padding: 55px 0 40px;
-      background: radial-gradient(circle at 50% 25%, rgba(0, 217, 255, 0.15) 0%, transparent 65%);
+      padding: 56px 0 48px;
+      background: radial-gradient(ellipse at 50% 20%, rgba(0, 217, 255, 0.14) 0%, transparent 60%);
       border-bottom: 1px solid var(--border);
       z-index: 1;
     }
 
     .hero-logo-wrapper {
       position: relative;
-      display: inline-flex;
+      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      margin-bottom: 22px;
+      margin: 0 auto 18px;
+      width: 100%;
     }
 
     .hero-logo-wrapper::before {
@@ -210,14 +253,14 @@
       position: absolute;
       width: 200px;
       height: 200px;
-      background: radial-gradient(circle, rgba(0, 217, 255, 0.45) 0%, rgba(0, 119, 255, 0.15) 50%, transparent 70%);
+      background: radial-gradient(circle, rgba(0, 217, 255, 0.4) 0%, rgba(0, 119, 255, 0.12) 50%, transparent 70%);
       filter: blur(40px);
       z-index: -1;
       animation: pulseGlow 3.5s ease-in-out infinite alternate;
     }
 
     .logo-card {
-      background: rgba(13, 19, 33, 0.7);
+      background: rgba(13, 19, 33, 0.75);
       border: 1px solid var(--border-cyan);
       backdrop-filter: blur(16px);
       padding: 16px;
@@ -225,7 +268,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.12);
       position: relative;
       overflow: hidden;
       animation: floatLogo 4s ease-in-out infinite;
@@ -234,8 +277,8 @@
 
     .logo-card:hover {
       border-color: var(--cyan);
-      box-shadow: 0 0 30px rgba(0, 217, 255, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.3);
-      transform: translateY(-6px) scale(1.05);
+      box-shadow: 0 0 30px rgba(0, 217, 255, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.25);
+      transform: translateY(-6px) scale(1.04);
     }
 
     .logo-card::after {
@@ -245,7 +288,7 @@
       left: -150%;
       width: 60%;
       height: 200%;
-      background: linear-gradient(60deg, transparent, rgba(0, 217, 255, 0.35), rgba(255, 255, 255, 0.7), transparent);
+      background: linear-gradient(60deg, transparent, rgba(0, 217, 255, 0.3), rgba(255, 255, 255, 0.55), transparent);
       transform: rotate(25deg);
       transition: all 0.75s ease;
       pointer-events: none;
@@ -259,13 +302,13 @@
       object-fit: contain;
       border-radius: 14px;
       display: block;
-      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 12px rgba(0, 217, 255, 0.6));
+      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 12px rgba(0, 217, 255, 0.55));
       mix-blend-mode: screen;
       transition: filter 0.3s ease;
     }
 
     .logo-card:hover .logo-img {
-      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 25px rgba(0, 217, 255, 0.95)) brightness(1.2);
+      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 22px rgba(0, 217, 255, 0.9)) brightness(1.15);
     }
 
     .hero-badge {
@@ -279,7 +322,7 @@
       border-radius: 30px;
       font-size: 13px;
       font-family: var(--font-mono);
-      margin-bottom: 16px;
+      margin: 0 auto 16px;
       backdrop-filter: blur(8px);
     }
 
@@ -294,14 +337,15 @@
       background: linear-gradient(135deg, #fff 30%, var(--cyan));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .hero-desc {
       color: var(--text-muted);
       font-size: 1rem;
-      max-width: 540px;
-      margin: 0 auto 20px;
-      line-height: 1.6;
+      max-width: 520px;
+      margin: 0 auto 22px;
+      line-height: 1.65;
     }
 
     .hero-badges {
@@ -309,6 +353,7 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 8px;
+      margin-bottom: 28px;
     }
 
     .badge {
@@ -325,6 +370,24 @@
       font-weight: 500;
     }
 
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
     @keyframes floatLogo {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-7px); }
@@ -335,8 +398,16 @@
       100% { opacity: 0.85; transform: scale(1.12); }
     }
 
-    /* SECTIONS */
-    section { padding: 48px 0; }
+    /* ─── SECTIONS ─── */
+    section {
+      padding: 56px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-header {
+      margin-bottom: 28px;
+    }
 
     .section-title {
       font-size: 1.45rem;
@@ -348,10 +419,10 @@
     .section-sub {
       color: var(--text-muted);
       font-size: 0.92rem;
-      margin-bottom: 26px;
+      max-width: 480px;
     }
 
-    /* SERVICES */
+    /* ─── SERVICES ─── */
     .services-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
@@ -361,10 +432,11 @@
     .service-card {
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 22px 18px;
+      border-radius: var(--radius);
+      padding: 24px 20px;
       backdrop-filter: blur(12px);
       transition: all 0.25s ease;
+      height: 100%;
     }
 
     .service-card:hover {
@@ -374,8 +446,8 @@
     }
 
     .service-icon {
-      width: 44px;
-      height: 44px;
+      width: 46px;
+      height: 46px;
       border-radius: 12px;
       background: rgba(0, 217, 255, 0.1);
       border: 1px solid rgba(0, 217, 255, 0.25);
@@ -388,18 +460,132 @@
     }
 
     .service-card h3 {
-      font-size: 1.02rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      margin-bottom: 5px;
+      margin-bottom: 6px;
     }
 
     .service-card p {
       color: var(--text-muted);
       font-size: 0.86rem;
-      line-height: 1.5;
+      line-height: 1.55;
     }
 
-    /* PORTAL */
+    /* ─── PORTAL ─── */
+
+    .service-card { cursor: pointer; position: relative; }
+    .service-card .svc-price-tag {
+      display: inline-block; margin-top: 10px; font-size: 11px; font-family: var(--font-mono);
+      color: var(--cyan); background: rgba(0,217,255,0.1); border: 1px solid rgba(0,217,255,0.25);
+      padding: 3px 8px; border-radius: 6px;
+    }
+    .service-card .svc-cta {
+      margin-top: 12px; font-size: 12px; font-weight: 600; color: var(--cyan);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .order-modal { max-width: 440px; max-height: 90vh; overflow-y: auto; position: relative; }
+    .modal-close {
+      position: absolute; top: 12px; right: 14px; background: none; border: none;
+      color: var(--text-muted); font-size: 22px; cursor: pointer; line-height: 1;
+    }
+    .modal-close:hover { color: #fff; }
+    .svc-checklist { display: flex; flex-direction: column; gap: 8px; }
+    .svc-item {
+      display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px;
+      background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 10px;
+      cursor: pointer; font-size: 13px; color: var(--text); transition: border-color 0.15s;
+    }
+    .svc-item:hover { border-color: rgba(0,217,255,0.35); }
+    .svc-item input { margin-top: 3px; accent-color: var(--cyan); flex-shrink: 0; }
+    .svc-item span { flex: 1; line-height: 1.35; }
+    .svc-item b { color: var(--cyan); font-weight: 600; float: right; font-family: var(--font-mono); font-size: 12px; }
+    .form-group textarea {
+      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 14px; color: #fff; font-size: 14px;
+      outline: none; resize: vertical; min-height: 64px; font-family: var(--font-main);
+    }
+    .form-group textarea:focus { border-color: var(--cyan); }
+    .order-total {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 16px; margin: 8px 0 16px; border-radius: 12px;
+      background: rgba(0,217,255,0.08); border: 1px solid rgba(0,217,255,0.3);
+      font-size: 14px; color: var(--text-muted);
+    }
+    .order-total strong { font-size: 1.25rem; color: var(--cyan); font-family: var(--font-mono); }
+
+
+    .services-cta {
+      display: flex;
+      justify-content: center;
+      margin-top: 28px;
+    }
+    .services-cta .btn { padding: 12px 28px; font-size: 14px; }
+    .service-card { cursor: default; }
+    .order-modal {
+      max-width: 440px;
+      width: calc(100% - 24px);
+      max-height: min(90vh, 720px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .order-modal::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+    .modal-close {
+      position: absolute; top: 12px; right: 14px; background: none; border: none;
+      color: var(--text-muted); font-size: 22px; cursor: pointer; line-height: 1; z-index: 2;
+    }
+    .modal-close:hover { color: #fff; }
+    .svc-checklist { display: flex; flex-direction: column; gap: 8px; }
+    .svc-item {
+      display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px;
+      background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 10px;
+      cursor: pointer; font-size: 13px; color: var(--text); transition: border-color 0.15s;
+    }
+    .svc-item:hover { border-color: rgba(0,217,255,0.35); }
+    .svc-item input { margin-top: 3px; accent-color: var(--cyan); flex-shrink: 0; }
+    .svc-item span { flex: 1; line-height: 1.35; }
+    .svc-item b { color: var(--cyan); font-weight: 600; float: right; font-family: var(--font-mono); font-size: 12px; }
+    .form-group textarea {
+      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 14px; color: #fff; font-size: 14px;
+      outline: none; resize: vertical; min-height: 64px; font-family: var(--font-main);
+    }
+    .form-group textarea:focus { border-color: var(--cyan); }
+    .order-total {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 16px; margin: 8px 0 16px; border-radius: 12px;
+      background: rgba(0,217,255,0.08); border: 1px solid rgba(0,217,255,0.3);
+      font-size: 14px; color: var(--text-muted);
+    }
+    .order-total strong { font-size: 1.25rem; color: var(--cyan); font-family: var(--font-mono); }
+    .order-note {
+      font-size: 11px; color: var(--text-muted); line-height: 1.45;
+      margin: -4px 0 10px; font-family: var(--font-mono);
+    }
+    .device-chips {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
+    }
+    .chip-btn {
+      background: rgba(0,217,255,0.08); border: 1px solid rgba(0,217,255,0.28);
+      color: var(--cyan); font-size: 11px; font-family: var(--font-mono);
+      padding: 4px 10px; border-radius: 999px; cursor: pointer; transition: all 0.15s;
+    }
+    .chip-btn:hover { background: rgba(0,217,255,0.18); border-color: var(--cyan); }
+    .hero-cta {
+      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 22px;
+    }
+    .hero-cta .btn { min-width: 140px; justify-content: center; }
+    @media (max-width: 560px) {
+      .order-modal { max-height: 92vh; padding: 18px 14px 16px; }
+      .svc-item { font-size: 12px; padding: 9px 10px; }
+      .svc-item b { display: block; float: none; margin-top: 2px; }
+      .hero-cta { flex-direction: column; align-items: stretch; }
+      .hero-cta .btn { width: 100%; }
+    }
+
+
     .portal-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -413,11 +599,13 @@
       padding: 26px 22px;
       text-decoration: none;
       color: inherit;
-      display: block;
+      display: flex;
+      flex-direction: column;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
       backdrop-filter: blur(12px);
+      min-height: 200px;
     }
 
     .portal-card::before {
@@ -462,6 +650,7 @@
       font-size: 0.88rem;
       line-height: 1.5;
       margin-bottom: 16px;
+      flex: 1;
     }
 
     .portal-footer {
@@ -472,6 +661,7 @@
       font-family: var(--font-mono);
       color: var(--cyan);
       font-weight: 500;
+      margin-top: auto;
     }
 
     .portal-footer i {
@@ -484,7 +674,216 @@
     .portal-locked { opacity: 0.72; }
     .portal-locked .portal-footer { color: var(--text-muted); }
 
-    /* LOGIN MODAL */
+    /* ─── CONTACT ─── */
+    .contact-section {
+      border-top: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(0, 217, 255, 0.03) 0%, transparent 40%);
+    }
+
+    .social-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .qr-card {
+      background: var(--panel);
+      border: 1px solid var(--border-cyan);
+      border-radius: 18px;
+      padding: 24px 20px;
+      text-align: center;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 0 30px rgba(0, 217, 255, 0.08);
+    }
+
+    .qr-card img {
+      width: min(200px, 70vw);
+      height: auto;
+      border-radius: 12px;
+      display: block;
+      margin: 0 auto 14px;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .qr-card h3 {
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .qr-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .wa-number {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      color: var(--cyan);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .wa-number:hover { text-decoration: underline; }
+
+    .social-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .social-link {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.2s, transform 0.15s, background 0.2s;
+      backdrop-filter: blur(10px);
+    }
+
+    .social-link:hover {
+      border-color: var(--border-cyan);
+      transform: translateX(4px);
+      background: rgba(0, 217, 255, 0.06);
+    }
+
+    .social-link .icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .social-link.wa .icon { background: rgba(37, 211, 102, 0.15); color: #25d366; }
+    .social-link.fb .icon { background: rgba(24, 119, 242, 0.15); color: #1877f2; }
+    .social-link.tt .icon { background: rgba(255, 255, 255, 0.08); color: #fff; }
+
+    .social-link .info h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .social-link .info span {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    /* ─── LOGIN MODAL ─── */
+
+    /* ORDER UI FINAL */
+
+    .svc-item .svc-prices .svc-price-row {
+      display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end;
+    }
+    .svc-item .svc-prices .old {
+      display: inline; font-size: 12px; color: #64748b; text-decoration: line-through;
+      margin-bottom: 0; opacity: 0.9;
+    }
+    .svc-item .svc-prices .price-arrow {
+      color: #64748b; font-size: 12px;
+    }
+    .svc-item .svc-prices b { color: var(--cyan); font-weight: 700; font-size: 14px; }
+
+    .services-cta {
+      display: flex;
+      justify-content: center;
+      margin-top: 28px;
+    }
+    .services-cta .btn { padding: 12px 28px; font-size: 14px; }
+    .order-modal {
+      max-width: 640px !important;
+      width: calc(100% - 32px) !important;
+      max-height: min(92vh, 900px) !important;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+      padding: 32px 32px 24px !important;
+    }
+    .order-modal::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+    .modal-close {
+      position: absolute; top: 14px; right: 16px; background: none; border: none;
+      color: var(--text-muted); font-size: 24px; cursor: pointer; line-height: 1; z-index: 2;
+    }
+    .modal-close:hover { color: #fff; }
+    .svc-checklist { display: flex; flex-direction: column; gap: 8px; }
+    .svc-group-title {
+      font-size: 11px; font-family: var(--font-mono); font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase; color: var(--cyan);
+      margin: 10px 0 4px; padding-top: 6px; border-top: 1px solid rgba(0,217,255,0.12);
+    }
+    .svc-group-title:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+    .svc-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+      background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 12px;
+      cursor: pointer; font-size: 14px; color: var(--text); transition: border-color 0.15s;
+    }
+    .svc-item:hover { border-color: rgba(0,217,255,0.35); }
+    .svc-item input[type="checkbox"] {
+      width: 18px; height: 18px; margin: 0; flex-shrink: 0;
+      accent-color: var(--cyan); cursor: pointer;
+    }
+    .svc-item .svc-body {
+      flex: 1; line-height: 1.35;
+      display: flex; justify-content: space-between; gap: 16px; align-items: center;
+    }
+    .svc-item .svc-label { flex: 1; }
+    .svc-item .svc-prices { text-align: right; font-family: var(--font-mono); white-space: nowrap; }
+    .svc-item .svc-prices b { color: var(--cyan); font-weight: 700; font-size: 13px; }
+    .svc-item .svc-prices .old {
+      display: block; font-size: 11px; color: var(--text-muted); text-decoration: line-through; margin-bottom: 1px;
+    }
+    .svc-item .disc-badge {
+      display: inline-block; font-size: 10px; font-family: var(--font-mono); font-weight: 700;
+      color: #fbbf24; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.35);
+      padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle;
+    }
+    .form-group textarea {
+      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 14px; color: #fff; font-size: 14px;
+      outline: none; resize: vertical; min-height: 64px; font-family: var(--font-main);
+    }
+    .form-group textarea:focus { border-color: var(--cyan); }
+    .order-total {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 16px; margin: 8px 0 16px; border-radius: 12px;
+      background: rgba(0,217,255,0.08); border: 1px solid rgba(0,217,255,0.3);
+      font-size: 14px; color: var(--text-muted);
+    }
+    .order-total strong { font-size: 1.25rem; color: var(--cyan); font-family: var(--font-mono); }
+    .order-note {
+      font-size: 11px; color: var(--text-muted); line-height: 1.45;
+      margin: -4px 0 10px; font-family: var(--font-mono);
+    }
+    .hero-cta {
+      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 22px;
+    }
+    .hero-cta .btn { min-width: 140px; justify-content: center; }
+    @media (max-width: 560px) {
+      .order-modal { max-width: 100% !important; width: calc(100% - 16px) !important; max-height: 92vh !important; padding: 18px 14px 16px !important; }
+      .svc-item { font-size: 13px; padding: 10px 11px; }
+      .svc-item .svc-body { flex-direction: column; gap: 4px; align-items: flex-start; }
+      .svc-item .svc-prices { text-align: left; }
+      .hero-cta { flex-direction: column; align-items: stretch; }
+      .hero-cta .btn { width: 100%; }
+    }
+
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -516,6 +915,7 @@
       background: linear-gradient(135deg, #fff 30%, var(--cyan));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .modal > p {
@@ -588,49 +988,91 @@
       margin-top: 6px;
     }
 
+    /* ─── FOOTER ─── */
     footer {
       border-top: 1px solid var(--border);
-      padding: 26px 0;
+      padding: 28px 0 36px;
       text-align: center;
       color: var(--text-muted);
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       font-family: var(--font-mono);
-      margin-top: 30px;
       position: relative;
       z-index: 1;
     }
 
-    @media (max-width: 640px) {
-      .hero { padding: 40px 0 30px; }
+    footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 10, 18, 0.96);
+        border-bottom: 1px solid var(--border);
+        padding: 16px 20px 20px;
+        gap: 14px;
+        backdrop-filter: blur(16px);
+      }
+      .menu-toggle { display: block; }
+
+      .hero { padding: 40px 0 36px; }
       .logo-img { width: 100px; height: 100px; }
+      .hero-logo-wrapper::before { width: 150px; height: 150px; }
+
+      .social-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .qr-card { order: -1; }
+
+      section { padding: 44px 0; }
+    }
+
+    @media (max-width: 640px) {
       .nav-actions .btn span { display: none; }
+      .hero-cta .btn { width: 100%; justify-content: center; }
     }
   </style>
 </head>
 <body>
+
   <canvas id="particleCanvas"></canvas>
 
   <!-- NAV -->
   <nav>
     <div class="wrap inner">
-            <div class="logo" style="cursor:default;user-select:none">
-        <div class="nav-logo-card">
-          <img src="logo.png" alt="NEOSHY" class="nav-logo-img" onerror="this.style.display='none'">
-        </div>
-        <div class="nav-logo-text">
-          <div class="nav-logo-title">NEOSHY</div>
-          <div class="nav-logo-sub">ANDROID TOOLS & SERVICES</div>
-        </div>
-      </div>
+      <a href="index.html" class="logo">
+        <img src="logo.png" alt="NEOSHY" class="nav-logo" onerror="this.style.display='none'">
+        <span class="brand-text">NEO<span>SHY</span></span>
+      </a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#services">Services</a></li>
+        <li><a href="vault/index.html">Vault</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+
       <div class="nav-actions">
-        <div class="user-bar" id="userBar">
-          <span id="userLabel">admin</span>
-          <button class="btn btn-danger" style="padding:5px 10px;font-size:12px" onclick="logout()">
-            <i class="fa-solid fa-right-from-bracket"></i>
-          </button>
-        </div>
-        <button class="btn btn-primary" id="loginBtn" onclick="openLogin()">
+        <button class="account-btn" id="loginBtn" onclick="openLogin()" type="button">
           <i class="fa-solid fa-lock"></i> <span>Login</span>
+        </button>
+        <a href="manage/account.html" class="account-btn" id="accountBtn" style="display:none" title="Account Center">
+          <span class="acc-avatar-ph" id="navAvatarPh"><i class="fa-solid fa-user"></i></span>
+          <img class="acc-avatar" id="navAvatarImg" style="display:none" alt="">
+          <span class="acc-name" id="userLabel">admin</span>
+        </a>
+        <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+          <i class="fa-solid fa-bars"></i>
         </button>
       </div>
     </div>
@@ -639,97 +1081,177 @@
   <!-- HERO -->
   <section class="hero">
     <div class="wrap">
-      <div class="hero-logo-wrapper"  style="cursor:pointer">
+      <div class="hero-logo-wrapper">
         <div class="logo-card">
           <img src="logo.png" alt="NEOSHY" class="logo-img" onerror="this.style.display='none'">
         </div>
       </div>
-      <br>
+
       <div class="hero-badge"><i class="fa-solid fa-bolt"></i> Android Tools & Services</div>
       <h1 class="hero-title">Android Tools & <span>Services</span></h1>
       <p class="hero-desc">
         Custom ROM, Unlock Bootloader, Root, and Fix Bootloop — tools and remote help for your Android device.
       </p>
+
       <div class="hero-badges">
         <span class="badge"><i class="fa-solid fa-compact-disc"></i> Custom ROM</span>
         <span class="badge"><i class="fa-solid fa-unlock"></i> Unlock Bootloader</span>
         <span class="badge"><i class="fa-solid fa-key"></i> Root</span>
         <span class="badge"><i class="fa-solid fa-rotate"></i> Fix Bootloop</span>
       </div>
-    </div>
-  </section>
 
-  <!-- SERVICES -->
-  <section>
-    <div class="wrap">
-      <h2 class="section-title">Services</h2>
-      <p class="section-sub">What I offer for your Android device</p>
-      <div class="services-grid">
-        <div class="service-card">
-          <div class="service-icon"><i class="fa-solid fa-compact-disc"></i></div>
-          <h3>Custom ROM</h3>
-          <p>Install official or custom ROMs safely. Support for various Xiaomi, Samsung, and other brands.</p>
-        </div>
-        <div class="service-card">
-          <div class="service-icon"><i class="fa-solid fa-unlock-keyhole"></i></div>
-          <h3>Unlock Bootloader</h3>
-          <p>UBL service for Xiaomi and other devices. Remote assistance available.</p>
-        </div>
-        <div class="service-card">
-          <div class="service-icon"><i class="fa-solid fa-shield-halved"></i></div>
-          <h3>Root Access</h3>
-          <p>Magisk / KernelSU installation and module setup for advanced users.</p>
-        </div>
-        <div class="service-card">
-          <div class="service-icon"><i class="fa-solid fa-rotate"></i></div>
-          <h3>Fix Bootloop</h3>
-          <p>Recover devices stuck in bootloop or soft-brick via Fastboot / EDL / Odin.</p>
-        </div>
+      <div class="hero-cta">
+        <a href="#contact" class="btn btn-primary">
+          <i class="fa-brands fa-whatsapp"></i> Contact Service
+        </a>
+        <a href="https://neoshytool.vercel.app" class="btn btn-ghost" target="_blank" rel="noopener">
+          <i class="fa-solid fa-mobile-screen-button"></i> Remote Tool
+        </a>
+        <a href="vault/index.html" class="btn btn-ghost">
+          <i class="fa-solid fa-box-archive"></i> Vault
+        </a>
       </div>
     </div>
   </section>
 
-  <!-- PORTAL -->
-  <section>
+
+
+  <!-- SERVICES -->
+  <section id="services">
     <div class="wrap">
-      <h2 class="section-title">Tools Portal</h2>
-      <p class="section-sub">Access all NeoShy tools from one place</p>
-      <div class="portal-grid">
-        <a href="tools/index.html" class="portal-card">
-          <div class="portal-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
-          <h3>Remote Tool</h3>
-          <p>ADB • Fastboot • Scrcpy • Xiaomi Flash • Samsung Heimdall • Payload Dump</p>
-          <div class="portal-footer">Open Tool <i class="fa-solid fa-arrow-right"></i></div>
-        </a>
+      <div class="section-header">
+        <h2 class="section-title">Services</h2>
+        <p class="section-sub">Pilih layanan yang tersedia, lalu isi formulir order</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon"><i class="fa-solid fa-compact-disc"></i></div>
+          <h3>Custom ROM / Flash</h3>
+          <p>Install official atau custom ROM. Support Xiaomi, Samsung, dan brand lain.</p>
+          <span class="svc-price-tag">dari Rp40.000</span>
+        </div>
+        <div class="service-card">
+          <div class="service-icon"><i class="fa-solid fa-unlock-keyhole"></i></div>
+          <h3>Unlock Bootloader</h3>
+          <p>UBL service untuk Xiaomi & lainnya. Tersedia juga UBL Instan.</p>
+          <span class="svc-price-tag">Rp40.000 – 50.000</span>
+        </div>
+        <div class="service-card">
+          <div class="service-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <h3>Root Access</h3>
+          <p>Magisk / KernelSU + opsi Fix Integrity / Hide Root.</p>
+          <span class="svc-price-tag">Rp30.000 – 60.000</span>
+        </div>
+        <div class="service-card">
+          <div class="service-icon"><i class="fa-solid fa-rotate"></i></div>
+          <h3>Fix Bootloop / Unbrick</h3>
+          <p>Recover device bootloop atau soft-brick karena salah flash.</p>
+          <span class="svc-price-tag">Rp70.000</span>
+        </div>
+      </div>
+      <div class="services-cta">
+        <button type="button" class="btn btn-primary" onclick="openOrder()">
+          <i class="fa-solid fa-clipboard-list"></i> Order Service Sekarang
+        </button>
+      </div>
+    </div>
+  </section>
 
-        <a href="vault/index.html" class="portal-card" id="vaultCard">
-          <div class="portal-icon"><i class="fa-solid fa-box-archive"></i></div>
-          <h3>Vault</h3>
-          <p>Download tools, drivers, modules & official files. Clean and tested repository.</p>
-          <div class="portal-footer">Open Vault <i class="fa-solid fa-arrow-right"></i></div>
-        </a>
 
-        <a href="manage/index.html" class="portal-card portal-locked" id="manageCard" onclick="return handleManageClick(event)">
-          <div class="portal-icon"><i class="fa-solid fa-clipboard-list"></i></div>
-          <h3>Service Manager</h3>
-          <p>Service notes, income tracking, and customer history. Admin only.</p>
-          <div class="portal-footer" id="manageFooter">
-            <i class="fa-solid fa-lock"></i> Login required
-          </div>
-        </a>
+  <!-- CONTACT -->
+  <section id="contact" class="contact-section">
+    <div class="wrap">
+      <div class="section-header">
+        <h2 class="section-title">Contact & Services</h2>
+        <p class="section-sub">Need phone repair, flash, unlock, or custom ROM service? Reach out anytime.</p>
+      </div>
+      <div class="social-grid">
+        <div class="qr-card">
+          <img src="wa-qr.png" alt="WhatsApp QR Code NeoShy" width="200" height="200" />
+          <h3>Scan for WhatsApp</h3>
+          <p>Scan the QR code or tap the number below</p>
+          <a href="https://wa.me/6285755182796" class="wa-number" target="_blank" rel="noopener">
+            <i class="fa-brands fa-whatsapp"></i> 0857-5518-2796
+          </a>
+        </div>
+        <div class="social-links">
+          <a href="https://wa.me/6285755182796" class="social-link wa" target="_blank" rel="noopener">
+            <div class="icon"><i class="fa-brands fa-whatsapp"></i></div>
+            <div class="info">
+              <h4>WhatsApp</h4>
+              <span>0857-5518-2796 · Phone repair & flash service</span>
+            </div>
+          </a>
+          <a href="https://www.facebook.com/share/1CKzgzQYAt/" class="social-link fb" target="_blank" rel="noopener">
+            <div class="icon"><i class="fa-brands fa-facebook-f"></i></div>
+            <div class="info">
+              <h4>Facebook</h4>
+              <span>Follow & chat on Facebook</span>
+            </div>
+          </a>
+          <a href="https://www.tiktok.com/@dapitraa002?_r=1&_t=ZS-99LZvMTPHFa" class="social-link tt" target="_blank" rel="noopener">
+            <div class="icon"><i class="fa-brands fa-tiktok"></i></div>
+            <div class="info">
+              <h4>TikTok</h4>
+              <span>@dapitraa002 · Tips & content</span>
+            </div>
+          </a>
+        </div>
       </div>
     </div>
   </section>
 
   <footer>
-    <div class="wrap">NEOSHY Control Center • 2026</div>
+    <div class="wrap">
+      NEOSHY Control Center • 2026
+    </div>
   </footer>
 
   <!-- LOGIN MODAL -->
+
+
+
+  <!-- ORDER SERVICE MODAL -->
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal order-modal">
+      <button type="button" class="modal-close" onclick="closeOrder()" aria-label="Close">&times;</button>
+      <h2>Order Service</h2>
+      <p>Pilih layanan, isi data, lihat total harga, lalu kirim chat order via WhatsApp.</p>
+      <form id="orderForm" autocomplete="off">
+        <div class="form-group">
+          <label>Nama</label>
+          <input type="text" id="orderName" required placeholder="Nama kamu">
+        </div>
+        <div class="form-group">
+          <label>Tipe HP / Model</label>
+          <input type="text" id="orderDevice" required placeholder="Contoh: Redmi Note 12 / Poco F3">
+        </div>
+        <div class="form-group">
+          <label>Pilih Layanan</label>
+          <div id="svcChecklist" class="svc-checklist">
+            <!-- filled by JS from price catalog -->
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notes (opsional)</label>
+          <textarea id="orderNotes" rows="2" placeholder="Catatan tambahan, masalah HP, dll."></textarea>
+        </div>
+        <p class="order-note">Ketersediaan &amp; detail layanan akan dikonfirmasi oleh admin NeoShy setelah chat order dikirim.</p>
+        <div class="order-total">
+          <span>Total Estimasi</span>
+          <strong id="orderTotal">Rp0</strong>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="orderSubmit">
+          <i class="fa-brands fa-whatsapp"></i> Kirim Chat Order via WhatsApp
+        </button>
+      </form>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="loginModal">
     <div class="modal">
-      <h2>Admin Login</h2>
-      <p>Access Service Manager & Vault Admin</p>
+      <h2>Login</h2>
+      <p>Login to open Account Center</p>
       <div class="error-msg" id="loginError"></div>
       <form id="loginForm">
         <div class="form-group">
@@ -756,6 +1278,25 @@
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let isLoggedIn = false;
+
+    // Mobile menu
+    const menuToggle = document.getElementById("menuToggle");
+    const navLinks = document.getElementById("navLinks");
+    if (menuToggle) {
+      menuToggle.addEventListener("click", () => {
+        navLinks.classList.toggle("open");
+        const icon = menuToggle.querySelector("i");
+        icon.className = navLinks.classList.contains("open")
+          ? "fa-solid fa-xmark"
+          : "fa-solid fa-bars";
+      });
+      navLinks.querySelectorAll("a").forEach(a => {
+        a.addEventListener("click", () => {
+          navLinks.classList.remove("open");
+          menuToggle.querySelector("i").className = "fa-solid fa-bars";
+        });
+      });
+    }
 
     async function checkSession() {
       const { data: { session } } = await db.auth.getSession();
@@ -803,8 +1344,8 @@
           errEl.style.display = "block";
           return;
         }
-        setLoggedIn(email);
-        closeLogin();
+        // After login → go to Account Center
+        window.location.href = "manage/account.html";
       } catch (err) {
         errEl.textContent = err.message || "Login failed";
         errEl.style.display = "block";
@@ -817,33 +1358,32 @@
     function setLoggedIn(label) {
       isLoggedIn = true;
       document.getElementById("loginBtn").style.display = "none";
-      document.getElementById("userBar").classList.add("show");
-      document.getElementById("userLabel").textContent = label.includes("@") ? label.split("@")[0] : label;
+      const accBtn = document.getElementById("accountBtn");
+      accBtn.style.display = "inline-flex";
+      const name = label.includes("@") ? label.split("@")[0] : label;
+      document.getElementById("userLabel").textContent = name;
 
-      const manageCard = document.getElementById("manageCard");
-      manageCard.classList.remove("portal-locked");
-      manageCard.href = "manage/index.html";
-      document.getElementById("manageFooter").innerHTML = `Open Manager <i class="fa-solid fa-arrow-right"></i>`;
+      // Load saved avatar from localStorage
+      try {
+        const profile = JSON.parse(localStorage.getItem("neoshy_profile") || "{}");
+        if (profile.avatar) {
+          const img = document.getElementById("navAvatarImg");
+          const ph = document.getElementById("navAvatarPh");
+          img.src = profile.avatar;
+          img.style.display = "block";
+          ph.style.display = "none";
+        }
+        if (profile.displayName) {
+          document.getElementById("userLabel").textContent = profile.displayName;
+        }
+      } catch (e) {}
     }
 
     async function logout() {
       await db.auth.signOut();
       isLoggedIn = false;
       document.getElementById("loginBtn").style.display = "inline-flex";
-      document.getElementById("userBar").classList.remove("show");
-      const manageCard = document.getElementById("manageCard");
-      manageCard.classList.add("portal-locked");
-      manageCard.href = "#";
-      document.getElementById("manageFooter").innerHTML = `<i class="fa-solid fa-lock"></i> Login required`;
-    }
-
-    function handleManageClick(e) {
-      if (!isLoggedIn) {
-        e.preventDefault();
-        openLogin();
-        return false;
-      }
-      return true;
+      document.getElementById("accountBtn").style.display = "none";
     }
 
     function togglePass() {
@@ -858,7 +1398,168 @@
       }
     }
 
-    /* Particle system — same as Vault */
+    
+
+
+    /* ── Order Service Form (dynamic prices) ── */
+    const PRICE_KEY = "neoshy_service_prices";
+    const DEFAULT_SERVICES = [];
+
+    async function loadServiceCatalog() {
+      try {
+        const { data, error } = await db.from("service_catalog")
+          .select("id, type, label, price, discount_price, discount_percent, discount_label, sort_order")
+          .order("sort_order", { ascending: true });
+        if (!error) {
+          const list = (data || []).map(row => ({
+            id: row.id,
+            type: row.type || "satuan",
+            label: row.label || "",
+            price: Number(row.price) || 0,
+            discount_price: row.discount_price == null ? null : Number(row.discount_price),
+            discount_percent: row.discount_percent == null ? null : Number(row.discount_percent),
+            discount_label: row.discount_label || ""
+          }));
+          try { localStorage.setItem(PRICE_KEY, JSON.stringify(list)); } catch (e) {}
+          return list; // may be empty — user adds via Account Center
+        }
+        console.warn("service_catalog", error.message);
+      } catch (e) { console.warn(e); }
+      try { localStorage.removeItem(PRICE_KEY); } catch (e) {}
+      return [];
+    }
+
+    function escapeHtmlBadge(s) {
+      return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+    function formatRp(n) {
+      return "Rp" + Number(n || 0).toLocaleString("id-ID");
+    }
+
+    function effectivePrice(item) {
+      const price = Number(item.price) || 0;
+      let pct = item.discount_percent;
+      if (pct != null && pct !== "" && !isNaN(pct) && Number(pct) > 0 && Number(pct) <= 100) {
+        return Math.round(price * (1 - Number(pct) / 100));
+      }
+      const d = item.discount_price;
+      if (d != null && d !== "" && !isNaN(d) && Number(d) >= 0 && Number(d) < price) {
+        return Number(d);
+      }
+      return price;
+    }
+
+    async function renderServiceChecklist() {
+      const box = document.getElementById("svcChecklist");
+      if (!box) return;
+      const catalog = await loadServiceCatalog();
+      const groups = [
+        { key: "satuan", title: "Layanan Satuan" },
+        { key: "paket", title: "Paket Hemat & Komplit" },
+        { key: "khusus", title: "Layanan Khusus & Advanced" }
+      ];
+      let html = "";
+      groups.forEach(g => {
+        const items = catalog.filter(i => i.type === g.key);
+        if (!items.length) return;
+        html += '<div class="svc-group-title">' + g.title + '</div>';
+        items.forEach(item => {
+          const base = Number(item.price) || 0;
+          const eff = effectivePrice(item);
+          const hasDisc = eff < base;
+          let pctShow = item.discount_percent;
+          if ((pctShow == null || pctShow === "") && hasDisc && base > 0) {
+            pctShow = Math.round((1 - eff / base) * 100);
+          }
+          const hemat = hasDisc ? (base - eff) : 0;
+          let priceHtml = "";
+          if (hasDisc) {
+            priceHtml = '<span class="svc-price-row">' +
+              '<span class="old">' + formatRp(base) + '</span>' +
+              '<span class="price-arrow">→</span>' +
+              '<b>' + formatRp(eff) + '</b>' +
+              '</span>';
+          } else {
+            priceHtml = '<b>' + formatRp(base) + '</b>';
+          }
+          let badgeText = "";
+          if (hasDisc) {
+            if (pctShow) badgeText = "−" + pctShow + "%";
+            if (item.discount_label) badgeText = escapeHtmlBadge(item.discount_label) + (pctShow ? " · −" + pctShow + "%" : "");
+          }
+          const badge = hasDisc
+            ? '<span class="disc-badge">' + badgeText + '</span>'
+            : '';
+          html += '<label class="svc-item">' +
+            '<input type="checkbox" name="svc" value="' + item.id + '" data-price="' + eff + '" data-label="' + String(item.label).replace(/"/g, '&quot;') + '">' +
+            '<span class="svc-body"><span class="svc-label">' + item.label + badge + '</span>' +
+            '<span class="svc-prices">' + priceHtml + '</span></span></label>';
+        });
+      });
+      box.innerHTML = html || '<p style="color:#94a3b8;font-size:12px">Belum ada layanan.</p>';
+    }
+
+    function calcOrderTotal() {
+      let total = 0;
+      document.querySelectorAll('#svcChecklist input[name="svc"]:checked').forEach(cb => {
+        total += parseInt(cb.getAttribute("data-price") || "0", 10);
+      });
+      const el = document.getElementById("orderTotal");
+      if (el) el.textContent = formatRp(total);
+      return total;
+    }
+
+    async function openOrder(preselect) {
+      await renderServiceChecklist();
+      document.getElementById("orderModal").classList.add("show");
+      document.body.style.overflow = "hidden";
+      document.querySelectorAll('#svcChecklist input[name="svc"]').forEach(cb => {
+        cb.checked = preselect ? (cb.value === preselect) : false;
+      });
+      calcOrderTotal();
+    }
+
+    function closeOrder() {
+      document.getElementById("orderModal").classList.remove("show");
+      document.body.style.overflow = "";
+    }
+
+    document.getElementById("orderModal").addEventListener("click", (e) => {
+      if (e.target.id === "orderModal") closeOrder();
+    });
+    document.getElementById("svcChecklist").addEventListener("change", calcOrderTotal);
+    document.getElementById("orderForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("orderName").value.trim();
+      const device = document.getElementById("orderDevice").value.trim();
+      const notes = document.getElementById("orderNotes").value.trim();
+      const selected = [];
+      document.querySelectorAll('#svcChecklist input[name="svc"]:checked').forEach(cb => {
+        selected.push(cb.getAttribute("data-label") + " (" + formatRp(cb.getAttribute("data-price")) + ")");
+      });
+      if (!selected.length) {
+        alert("Pilih minimal 1 layanan.");
+        return;
+      }
+      const total = calcOrderTotal();
+      let lines = [
+        "*ORDER LAYANAN NEOSHY*",
+        "",
+        "*Nama:* " + name,
+        "*Device:* " + device,
+        "*Layanan:*"
+      ];
+      selected.forEach(s => lines.push("• " + s));
+      lines.push("*Total Estimasi:* " + formatRp(total));
+      if (notes) lines.push("*Notes:* " + notes);
+      lines.push("", "_Dikirim dari website NeoShy — menunggu konfirmasi admin_");
+      const msg = encodeURIComponent(lines.join("\n"));
+      window.open("https://wa.me/6285755182796?text=" + msg, "_blank");
+    });
+
+
+
+    /* Particle system */
     const canvas = document.getElementById("particleCanvas");
     const ctx = canvas.getContext("2d");
     let particles = [];

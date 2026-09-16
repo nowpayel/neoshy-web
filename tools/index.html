@@ -11,11 +11,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
-
-    /* hide all scrollbars */
-    *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
-    * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
-
     :root {
       --bg: #070a12;
       --bg-card: rgba(17, 23, 38, 0.75);
@@ -82,21 +77,39 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 60px;
+      height: 72px;
       gap: 12px;
     }
     .logo {
       font-weight: 800;
-      font-size: 1.1rem;
-      letter-spacing: -0.02em;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
       color: var(--accent);
       text-decoration: none;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+      gap: 2px;
       white-space: nowrap;
+      line-height: 1;
     }
-    .logo span { color: var(--text); font-weight: 600; }
+    .logo .nav-logo {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      border-radius: 8px;
+      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 8px rgba(0, 217, 255, 0.55));
+      mix-blend-mode: screen;
+    }
+    .logo .brand-text {
+      color: var(--text);
+      font-weight: 700;
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .logo .brand-text span { color: var(--accent); }
     .nav-links {
       display: flex;
       gap: 22px;
@@ -677,14 +690,9 @@
   <!-- NAV -->
   <nav>
     <div class="container inner">
-      <a href="../index.html" class="logo" style="display:flex;align-items:center;gap:10px;text-decoration:none">
-        <div style="width:38px;height:38px;background:rgba(13,19,33,0.7);border:1px solid rgba(0,217,255,0.35);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 12px rgba(0,217,255,0.15)">
-          <img src="logo.png" alt="NEOSHY" style="width:28px;height:28px;object-fit:contain;filter:invert(1) hue-rotate(180deg) drop-shadow(0 0 6px rgba(0,217,255,0.5));mix-blend-mode:screen" onerror="this.style.display='none'">
-        </div>
-        <div>
-          <div style="font-size:15px;font-weight:800;letter-spacing:0.04em;background:linear-gradient(to right,#22d3ee,#e0f2fe);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1">NEOSHY</div>
-          <div style="font-size:9px;font-family:var(--font-mono);color:rgba(0,217,255,0.55);letter-spacing:0.06em;margin-top:1px">REMOTE TOOL</div>
-        </div>
+      <a href="../main/index.html" class="logo">
+        <img src="logo.png" alt="NEOSHY" class="nav-logo" onerror="this.style.display='none'">
+        <span class="brand-text">NEO<span>SHY</span></span>
       </a>
       <ul class="nav-links" id="navLinks">
         <li><a href="#features">Features</a></li>
@@ -703,7 +711,7 @@
   <header class="hero">
     <div class="container">
       <!-- Glass logo same style as Vault -->
-      <div class="hero-logo-wrapper" onclick="location.href='../index.html'" style="cursor:pointer">
+      <div class="hero-logo-wrapper">
         <div class="logo-card">
           <img src="logo.png" alt="NEOSHY Logo" class="logo-img">
         </div>

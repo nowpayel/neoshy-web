@@ -1,0 +1,40 @@
+-- ========== JALANKAN SEMUA SEKALI ==========
+drop table if exists public.service_catalog;
+
+create table public.service_catalog (
+  id text primary key,
+  type text not null default 'satuan',
+  label text not null,
+  price int not null default 0,
+  discount_price int null,
+  discount_label text null,
+  sort_order int not null default 0
+);
+
+alter table public.service_catalog enable row level security;
+
+drop policy if exists "public read service_catalog" on public.service_catalog;
+create policy "public read service_catalog"
+  on public.service_catalog for select
+  using (true);
+
+drop policy if exists "auth write service_catalog" on public.service_catalog;
+create policy "auth write service_catalog"
+  on public.service_catalog for all
+  using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');
+
+grant usage on schema public to anon, authenticated;
+grant select on table public.service_catalog to anon, authenticated;
+grant insert, update, delete on table public.service_catalog to authenticated;
+
+-- Cek kolom
+select column_name, data_type
+from information_schema.columns
+where table_schema = 'public' and table_name = 'service_catalog'
+order by ordinal_position;
+
+
+-- Jika tabel sudah ada, tambah kolom persen diskon:
+alter table public.service_catalog
+  add column if not exists discount_percent int null;

@@ -3,18 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEOSHY - Account</title>
+  <title>NEOSHY — Account & Control Center</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
-
-    /* hide all scrollbars */
-    *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
-    * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
-
     :root {
       --bg: #070a12;
-      --panel: rgba(17, 23, 38, 0.7);
+      --panel: rgba(17, 23, 38, 0.72);
       --border-cyan: rgba(0, 217, 255, 0.35);
       --cyan: #00d9ff;
       --blue: #0077ff;
@@ -22,15 +18,15 @@
     body {
       background-color: var(--bg);
       background-image:
-        radial-gradient(circle at 50% 0%, rgba(0, 217, 255, 0.15) 0%, transparent 65%),
-        radial-gradient(circle at 80% 50%, rgba(0, 119, 255, 0.08) 0%, transparent 50%);
+        radial-gradient(circle at 50% 0%, rgba(0, 217, 255, 0.14) 0%, transparent 65%),
+        radial-gradient(circle at 80% 50%, rgba(0, 119, 255, 0.07) 0%, transparent 50%);
     }
     .neo-card {
       background: var(--panel);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--border-cyan);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.12);
     }
     .neo-input {
       background: rgba(3, 7, 18, 0.85);
@@ -40,14 +36,15 @@
     .neo-input:focus {
       border-color: var(--cyan);
       box-shadow: 0 0 12px rgba(0, 217, 255, 0.4);
+      outline: none;
     }
     .neo-btn {
       background: linear-gradient(135deg, var(--blue) 0%, var(--cyan) 100%);
-      box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+      box-shadow: 0 0 15px rgba(0, 217, 255, 0.35);
       transition: all 0.3s ease;
     }
     .neo-btn:hover {
-      box-shadow: 0 0 25px rgba(0, 217, 255, 0.7);
+      box-shadow: 0 0 25px rgba(0, 217, 255, 0.6);
       transform: translateY(-1px);
     }
     .neo-btn:disabled {
@@ -55,277 +52,871 @@
       cursor: not-allowed;
       transform: none;
     }
+    .portal-card {
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .portal-card:hover {
+      border-color: rgba(0, 217, 255, 0.55);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(0, 217, 255, 0.15);
+    }
+    .avatar-ring {
+      box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.35), 0 0 24px rgba(0, 217, 255, 0.25);
+    }
+    .avatar-img {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: rgba(0, 217, 255, 0.08);
+    }
+    .avatar-placeholder {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(0, 119, 255, 0.25), rgba(0, 217, 255, 0.15));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      color: var(--cyan);
+    }
   </style>
 </head>
 <body class="text-slate-100 min-h-screen p-3 md:p-8 font-sans">
-  <div class="w-full max-w-2xl mx-auto space-y-5">
+
+  <div id="loginGate" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <div class="neo-card max-w-sm w-full p-6 rounded-2xl space-y-4">
+      <h2 class="text-lg font-bold text-cyan-300 text-center">Login Required</h2>
+      <p class="text-xs text-slate-400 text-center font-mono">Open Account from the main site after login, or sign in here.</p>
+      <a href="../main/index.html" class="neo-btn block text-center text-slate-950 font-bold py-2.5 rounded-xl text-sm">Go to Main Site</a>
+    </div>
+  </div>
+
+  <div id="app" class="w-full max-w-3xl mx-auto space-y-5 hidden">
 
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-cyan-500/20 pb-4 gap-3">
       <div>
-        <a href="index.html" class="inline-flex items-center gap-1 text-xs font-mono text-cyan-400/70 hover:text-cyan-300 transition mb-1">&larr; Back to Service Manager</a> &nbsp; <a href="../index.html" class="inline-flex items-center gap-1 text-xs font-mono text-cyan-400/70 hover:text-cyan-300 transition">Home</a>
+        <a href="../main/index.html" class="inline-flex items-center gap-1.5 text-xs font-mono text-cyan-400/70 hover:text-cyan-300 transition mb-1">
+          <i class="fa-solid fa-arrow-left"></i> Back to Home
+        </a>
         <h1 class="text-xl md:text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-sky-200">
-          Account Settings
+          Account Center
         </h1>
-        <p class="text-[10px] md:text-xs text-cyan-400/60 font-mono tracking-wider">PASSWORD • USERNAMES • USERS</p>
+        <p class="text-[10px] md:text-xs text-cyan-400/60 font-mono tracking-wider">PROFILE • ADMIN PORTALS • USERS</p>
       </div>
       <button onclick="logout()" class="text-xs font-mono text-rose-400 hover:text-rose-300 bg-rose-950/40 border border-rose-500/30 px-3 py-2 rounded-xl transition">
-        Logout
+        <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
       </button>
     </div>
 
-    <div class="neo-card p-4 md:p-5 rounded-2xl space-y-2">
-      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">Current Account</h2>
-      <p class="text-sm text-slate-300 font-mono">Email: <span id="current-email" class="text-cyan-300">-</span></p>
+    <!-- Profile card -->
+    <div class="neo-card p-5 md:p-6 rounded-2xl">
+      <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+        <div class="relative flex-shrink-0">
+          <div id="avatarWrap" class="avatar-ring rounded-full overflow-hidden">
+            <div id="avatarPlaceholder" class="avatar-placeholder">
+              <i class="fa-solid fa-user"></i>
+            </div>
+            <img id="avatarImg" class="avatar-img hidden" alt="Profile">
+          </div>
+          <label class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-cyan-500 text-slate-950 flex items-center justify-center cursor-pointer shadow-lg hover:bg-cyan-400 transition" title="Change photo">
+            <i class="fa-solid fa-camera text-xs"></i>
+            <input type="file" id="avatarInput" accept="image/*" class="hidden">
+          </label>
+        </div>
+        <div class="flex-1 text-center sm:text-left space-y-2 w-full">
+          <div>
+            <label class="block text-[10px] font-mono uppercase tracking-wider text-cyan-400/70 mb-1">Username (juga untuk login)</label>
+            <div class="flex gap-2">
+              <input type="text" id="displayName" placeholder="username" class="neo-input flex-1 rounded-lg px-3 py-2 text-sm text-white font-mono" maxlength="40">
+              <button id="btnSaveName" class="neo-btn text-slate-950 font-bold px-4 rounded-lg text-xs whitespace-nowrap">Save</button>
+            </div>
+          </div>
+          <p class="text-sm text-slate-300 font-mono">
+            Email: <span id="current-email" class="text-cyan-300">-</span>
+          </p>
+          <p id="profileMsg" class="text-xs font-mono hidden"></p>
+        </div>
+      </div>
     </div>
 
-    <div class="neo-card p-4 md:p-5 rounded-2xl space-y-4">
-      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">Change Password</h2>
-      <form id="form-password" class="space-y-3" autocomplete="off">
-        <div>
-          <label class="block text-xs font-mono text-cyan-300/70 mb-1">Current Password</label>
-          <div class="relative">
-            <input type="password" id="current-password" required class="neo-input w-full rounded-lg p-2.5 pr-10 text-sm text-white focus:outline-none font-mono">
-            <button type="button" onclick="togglePass('current-password','eye0','eye0off')" class="absolute right-2 top-1/2 -translate-y-1/2 text-cyan-400/70 hover:text-cyan-300 p-0.5">
-              <svg id="eye0" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-              <svg id="eye0off" class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
-            </button>
+    <!-- Admin Portals -->
+    <div>
+      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 mb-3 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Admin Portals
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <a href="index.html" class="portal-card neo-card p-5 rounded-2xl flex items-start gap-4 no-underline">
+          <div class="w-11 h-11 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-lg flex-shrink-0">
+            <i class="fa-solid fa-clipboard-list"></i>
           </div>
-        </div>
+          <div>
+            <h3 class="font-bold text-slate-100 text-sm mb-0.5">Service Manager</h3>
+            <p class="text-[11px] text-slate-400 font-mono leading-relaxed">Service notes, income tracking, customer history & UBL timer.</p>
+            <span class="inline-flex items-center gap-1 text-[10px] text-cyan-400 font-mono mt-2">Open <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
+          </div>
+        </a>
+        <a href="../vault/admin.html" class="portal-card neo-card p-5 rounded-2xl flex items-start gap-4 no-underline">
+          <div class="w-11 h-11 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-300 text-lg flex-shrink-0">
+            <i class="fa-solid fa-box-archive"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-100 text-sm mb-0.5">Vault Manager</h3>
+            <p class="text-[11px] text-slate-400 font-mono leading-relaxed">Add, edit & delete files, tools, modules & drivers in the Vault.</p>
+            <span class="inline-flex items-center gap-1 text-[10px] text-purple-300 font-mono mt-2">Open <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="neo-card p-5 md:p-6 rounded-2xl space-y-4">
+      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Change Password
+      </h2>
+      <form id="form-pass" class="space-y-3" autocomplete="off">
         <div>
           <label class="block text-xs font-mono text-cyan-300/70 mb-1">New Password</label>
-          <div class="relative">
-            <input type="password" id="new-password" required minlength="6" class="neo-input w-full rounded-lg p-2.5 pr-10 text-sm text-white focus:outline-none font-mono">
-            <button type="button" onclick="togglePass('new-password','eye1','eye1off')" class="absolute right-2 top-1/2 -translate-y-1/2 text-cyan-400/70 hover:text-cyan-300 p-0.5">
-              <svg id="eye1" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-              <svg id="eye1off" class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
-            </button>
-          </div>
+          <input type="password" id="new-pass" required minlength="6" class="neo-input w-full rounded-lg p-2.5 text-sm text-white font-mono">
         </div>
         <div>
-          <label class="block text-xs font-mono text-cyan-300/70 mb-1">Confirm New Password</label>
-          <input type="password" id="confirm-password" required minlength="6" class="neo-input w-full rounded-lg p-2.5 text-sm text-white focus:outline-none font-mono">
+          <label class="block text-xs font-mono text-cyan-300/70 mb-1">Confirm Password</label>
+          <input type="password" id="confirm-pass" required minlength="6" class="neo-input w-full rounded-lg p-2.5 text-sm text-white font-mono">
         </div>
         <p id="pass-msg" class="text-xs font-mono hidden"></p>
         <button type="submit" id="btn-pass" class="neo-btn text-slate-950 font-bold py-2.5 px-5 rounded-lg text-sm">Update Password</button>
       </form>
     </div>
 
-    <div class="neo-card p-4 md:p-5 rounded-2xl space-y-4">
-      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">Login Usernames</h2>
-      <p class="text-[11px] text-slate-400 font-mono">Short usernames for login instead of the full email.</p>
-      <div id="alias-list" class="space-y-2 text-sm font-mono">
-        <div class="text-slate-500 text-xs">Loading...</div>
-      </div>
-      <form id="form-alias" class="flex flex-col sm:flex-row gap-2 pt-2 border-t border-cyan-500/10">
-        <input type="text" id="alias-username" required placeholder="new username" class="neo-input flex-1 rounded-lg p-2.5 text-sm text-white placeholder-slate-600 focus:outline-none font-mono" autocomplete="off">
-        <input type="email" id="alias-email" required placeholder="target email" class="neo-input flex-1 rounded-lg p-2.5 text-sm text-white placeholder-slate-600 focus:outline-none font-mono" autocomplete="off">
+    <!-- Login Aliases -->
+    <div class="neo-card p-5 md:p-6 rounded-2xl space-y-4">
+      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Login Usernames
+      </h2>
+      <p class="text-[11px] text-slate-400 font-mono">Username di profil otomatis jadi username login. Kamu juga bisa tambah alias lain di sini.</p>
+      <div id="alias-list" class="space-y-2 text-sm font-mono"></div>
+      <form id="form-alias" class="flex flex-col sm:flex-row gap-2" autocomplete="off">
+        <input type="text" id="alias-username" required placeholder="new username" class="neo-input flex-1 rounded-lg p-2.5 text-sm text-white placeholder-slate-600 font-mono" autocomplete="off">
+        <input type="email" id="alias-email" required placeholder="target email" class="neo-input flex-1 rounded-lg p-2.5 text-sm text-white placeholder-slate-600 font-mono" autocomplete="off">
         <button type="submit" class="neo-btn text-slate-950 font-bold py-2.5 px-4 rounded-lg text-sm whitespace-nowrap">Add</button>
       </form>
       <p id="alias-msg" class="text-xs font-mono hidden"></p>
     </div>
 
-    <div class="neo-card p-4 md:p-5 rounded-2xl space-y-4">
-      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">Create New Login Account</h2>
-      <p class="text-[11px] text-slate-400 font-mono"></p>
+    <!-- Create New User -->
+    <div class="neo-card p-5 md:p-6 rounded-2xl space-y-4">
+      <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Create New Account
+      </h2>
       <form id="form-new-user" class="space-y-3" autocomplete="off">
         <div>
           <label class="block text-xs font-mono text-cyan-300/70 mb-1">Email</label>
-          <input type="email" id="new-user-email" required class="neo-input w-full rounded-lg p-2.5 text-sm text-white focus:outline-none font-mono">
+          <input type="email" id="new-user-email" required class="neo-input w-full rounded-lg p-2.5 text-sm text-white font-mono">
         </div>
         <div>
           <label class="block text-xs font-mono text-cyan-300/70 mb-1">Password</label>
-          <input type="password" id="new-user-pass" required minlength="6" class="neo-input w-full rounded-lg p-2.5 text-sm text-white focus:outline-none font-mono">
+          <input type="password" id="new-user-pass" required minlength="6" class="neo-input w-full rounded-lg p-2.5 text-sm text-white font-mono">
         </div>
         <div>
           <label class="block text-xs font-mono text-cyan-300/70 mb-1">Short username (optional)</label>
-          <input type="text" id="new-user-alias" placeholder="e.g. staff1" class="neo-input w-full rounded-lg p-2.5 text-sm text-white placeholder-slate-600 focus:outline-none font-mono">
+          <input type="text" id="new-user-alias" placeholder="e.g. staff1" class="neo-input w-full rounded-lg p-2.5 text-sm text-white placeholder-slate-600 font-mono">
         </div>
         <p id="newuser-msg" class="text-xs font-mono hidden"></p>
         <button type="submit" id="btn-newuser" class="neo-btn text-slate-950 font-bold py-2.5 px-5 rounded-lg text-sm">Create Account</button>
       </form>
     </div>
 
+
+    <!-- Service Prices & Discounts -->
+    <div class="neo-card p-5 md:p-6 rounded-2xl space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Harga Layanan & Diskon
+          </h2>
+          <p class="text-[11px] text-slate-400 font-mono mt-1">Ubah harga, diskon, atau tambah jasa baru. Form order ikut update otomatis.</p>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" id="btnResetPrices" class="text-[11px] font-mono text-slate-400 hover:text-cyan-300 border border-slate-600/40 px-3 py-1.5 rounded-lg transition">Reset default</button>
+        </div>
+      </div>
+
+      <div class="neo-card !bg-slate-950/50 p-3 rounded-xl space-y-2 border border-cyan-500/20">
+        <p class="text-[10px] font-mono text-cyan-400 uppercase tracking-wider">Tambah layanan baru</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+          <input type="text" id="newSvcLabel" placeholder="Nama layanan" class="neo-input rounded-lg px-3 py-2 text-sm text-white font-mono">
+          <select id="newSvcType" class="neo-input rounded-lg px-3 py-2 text-sm text-white font-mono">
+            <option value="satuan">Satuan</option>
+            <option value="paket">Paket / Bundling</option>
+            <option value="khusus">Khusus</option>
+          </select>
+          <input type="number" id="newSvcPrice" min="0" step="1000" placeholder="Harga Rp" class="neo-input rounded-lg px-3 py-2 text-sm text-white font-mono">
+          <button type="button" id="btnAddSvc" class="neo-btn text-slate-950 font-bold py-2 px-4 rounded-lg text-sm">+ Tambah</button>
+        </div>
+      </div>
+
+      <div id="priceEditor" class="space-y-3"></div>
+      <p id="priceMsg" class="text-xs font-mono hidden"></p>
+      <button type="button" id="btnSavePrices" class="neo-btn text-slate-950 font-bold py-2.5 px-5 rounded-lg text-sm">Simpan Harga</button>
+    </div>
+
+    <p class="text-center text-[10px] text-slate-500 font-mono pb-4">NEOSHY Control Center • 2026</p>
+  </div>
+
+  <!-- Crop Modal -->
+  <div id="cropModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="neo-card max-w-md w-full p-5 rounded-2xl space-y-4">
+      <h3 class="text-sm font-bold text-cyan-300 font-mono">Crop Profile Photo</h3>
+      <div class="relative overflow-hidden rounded-xl bg-slate-950 border border-cyan-500/20" style="width:100%;height:280px">
+        <canvas id="cropCanvas" style="display:block;width:100%;height:100%;cursor:move;touch-action:none"></canvas>
+      </div>
+      <p class="text-[10px] text-slate-400 font-mono text-center">Drag to position • Scroll / pinch to zoom</p>
+      <div class="flex gap-2">
+        <button type="button" id="cropCancel" class="flex-1 py-2.5 rounded-xl text-xs font-mono text-slate-300 bg-slate-800/60 border border-slate-600/40 hover:bg-slate-700/60 transition">Cancel</button>
+        <button type="button" id="cropApply" class="flex-1 neo-btn text-slate-950 font-bold py-2.5 rounded-xl text-xs">Apply Crop</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    // PASTE your real anon key from Supabase → Project Settings → API → anon public
     const SUPABASE_URL = "https://vsednhqbszdiwpazcoii.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzZWRuaHFic3pkaXdwYXpjb2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMjEyMDYsImV4cCI6MjEwMjY5NzIwNn0.SO5nMDZOqsT_Cwp9x4_9CFHPsVPpyNgndb2k_qVn89o";
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUserEmail = "";
-
-    (async function guardAuth() {
-      const { data: { session } } = await db.auth.getSession();
-      if (!session) {
-        window.location.href = 'index.html';
-        return;
-      }
-      currentUserEmail = session.user.email || "";
-      document.getElementById('current-email').innerText = currentUserEmail || '-';
-      document.getElementById('alias-email').value = currentUserEmail || '';
-      loadAliases();
-    })();
-
-    function togglePass(inputId, eyeId, eyeOffId) {
-      const input = document.getElementById(inputId);
-      const eye = document.getElementById(eyeId);
-      const eyeOff = document.getElementById(eyeOffId);
-      if (input.type === 'password') {
-        input.type = 'text';
-        eye.classList.add('hidden');
-        eyeOff.classList.remove('hidden');
-      } else {
-        input.type = 'password';
-        eye.classList.remove('hidden');
-        eyeOff.classList.add('hidden');
-      }
-    }
+    const PROFILE_KEY = "neoshy_profile";
 
     function showMsg(id, text, ok) {
       const el = document.getElementById(id);
-      el.innerText = text;
-      el.classList.remove('hidden', 'text-emerald-400', 'text-rose-400');
-      el.classList.add(ok ? 'text-emerald-400' : 'text-rose-400');
+      el.textContent = text;
+      el.className = "text-xs font-mono " + (ok ? "text-emerald-400" : "text-rose-400");
+      el.classList.remove("hidden");
+    }
+
+    function loadLocalProfile() {
+      try { return JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"); }
+      catch { return {}; }
+    }
+
+    function saveLocalProfile(data) {
+      const cur = loadLocalProfile();
+      localStorage.setItem(PROFILE_KEY, JSON.stringify({ ...cur, ...data }));
+    }
+
+    function applyAvatar(dataUrl) {
+      const img = document.getElementById("avatarImg");
+      const ph = document.getElementById("avatarPlaceholder");
+      if (dataUrl) {
+        img.src = dataUrl;
+        img.classList.remove("hidden");
+        ph.classList.add("hidden");
+      } else {
+        img.classList.add("hidden");
+        ph.classList.remove("hidden");
+      }
+    }
+
+    async function checkSession() {
+      const { data: { session } } = await db.auth.getSession();
+      if (!session) {
+        document.getElementById("loginGate").classList.remove("hidden");
+        return;
+      }
+      currentUserEmail = session.user.email || "";
+      document.getElementById("current-email").textContent = currentUserEmail || "-";
+      document.getElementById("alias-email").value = currentUserEmail || "";
+      document.getElementById("app").classList.remove("hidden");
+
+      const profile = loadLocalProfile();
+      if (profile.displayName) document.getElementById("displayName").value = profile.displayName;
+      if (profile.avatar) applyAvatar(profile.avatar);
+
+      loadAliases();
+      try { renderPriceEditor(); } catch (e) { console.error(e); }
     }
 
     async function logout() {
       await db.auth.signOut();
-      window.location.href = 'index.html';
+      window.location.href = "../main/index.html";
     }
 
-    document.getElementById('form-password').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const currentPass = document.getElementById('current-password').value;
-      const p1 = document.getElementById('new-password').value;
-      const p2 = document.getElementById('confirm-password').value;
+    // ── Avatar crop ──
+    let cropImg = null, cropScale = 1, cropX = 0, cropY = 0, dragStart = null;
 
-      if (p1 !== p2) {
-        showMsg('pass-msg', 'New passwords do not match.', false);
-        return;
-      }
-      if (p1.length < 6) {
-        showMsg('pass-msg', 'New password must be at least 6 characters.', false);
-        return;
-      }
-      if (p1 === currentPass) {
-        showMsg('pass-msg', 'New password must be different from current password.', false);
-        return;
-      }
+    function openCrop(dataUrl) {
+      const modal = document.getElementById("cropModal");
+      const canvas = document.getElementById("cropCanvas");
+      const img = new Image();
+      img.onload = () => {
+        cropImg = img;
+        // Show modal FIRST so parent has real size
+        modal.classList.remove("hidden");
+        requestAnimationFrame(() => {
+          const parent = canvas.parentElement;
+          const w = parent.clientWidth || 280;
+          const h = parent.clientHeight || 280;
+          canvas.width = w;
+          canvas.height = h;
+          canvas.style.width = w + "px";
+          canvas.style.height = h + "px";
+          const size = Math.min(w, h);
+          cropScale = Math.max(size / img.width, size / img.height) * 1.1;
+          cropX = (w - img.width * cropScale) / 2;
+          cropY = (h - img.height * cropScale) / 2;
+          drawCrop();
+        });
+      };
+      img.onerror = () => {
+        showMsg("profileMsg", "Failed to load image.", false);
+      };
+      img.src = dataUrl;
+    }
 
-      const btn = document.getElementById('btn-pass');
-      btn.disabled = true;
-      btn.innerText = 'Updating...';
+    function drawCrop() {
+      if (!cropImg) return;
+      const canvas = document.getElementById("cropCanvas");
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width, h = canvas.height;
+      if (!w || !h) return;
+      ctx.clearRect(0, 0, w, h);
+      // background
+      ctx.fillStyle = "#0a0e18";
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(cropImg, cropX, cropY, cropImg.width * cropScale, cropImg.height * cropScale);
+      // Dark overlay outside circle
+      const cx = w / 2, cy = h / 2;
+      const r = Math.min(w, h) * 0.38;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, w, h);
+      ctx.arc(cx, cy, r, 0, Math.PI * 2, true);
+      ctx.fillStyle = "rgba(0,0,0,0.55)";
+      ctx.fill("evenodd");
+      ctx.restore();
+      // Circle border
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(0,217,255,0.75)";
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    }
 
-      const { error: verifyErr } = await db.auth.signInWithPassword({
-        email: currentUserEmail,
-        password: currentPass
+    function applyCrop() {
+      if (!cropImg) return;
+      const canvas = document.getElementById("cropCanvas");
+      const w = canvas.width, h = canvas.height;
+      const cx = w / 2, cy = h / 2;
+      const r = Math.min(w, h) * 0.38;
+      // Source rect in image space under the circle
+      const sx = (cx - r - cropX) / cropScale;
+      const sy = (cy - r - cropY) / cropScale;
+      const sw = (r * 2) / cropScale;
+      const out = document.createElement("canvas");
+      out.width = 256;
+      out.height = 256;
+      const octx = out.getContext("2d");
+      octx.beginPath();
+      octx.arc(128, 128, 128, 0, Math.PI * 2);
+      octx.closePath();
+      octx.clip();
+      octx.drawImage(cropImg, sx, sy, sw, sw, 0, 0, 256, 256);
+      const dataUrl = out.toDataURL("image/jpeg", 0.9);
+      applyAvatar(dataUrl);
+      saveLocalProfile({ avatar: dataUrl });
+      showMsg("profileMsg", "Photo updated.", true);
+      document.getElementById("cropModal").classList.add("hidden");
+      cropImg = null;
+      document.getElementById("avatarInput").value = "";
+    }
+
+    (function initCropUI() {
+      const canvas = document.getElementById("cropCanvas");
+      canvas.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        dragStart = { x: e.clientX, y: e.clientY, cx: cropX, cy: cropY };
+        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
       });
+      canvas.addEventListener("pointermove", (e) => {
+        if (!dragStart) return;
+        cropX = dragStart.cx + (e.clientX - dragStart.x);
+        cropY = dragStart.cy + (e.clientY - dragStart.y);
+        drawCrop();
+      });
+      canvas.addEventListener("pointerup", () => { dragStart = null; });
+      canvas.addEventListener("pointercancel", () => { dragStart = null; });
+      canvas.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        if (!cropImg) return;
+        const delta = e.deltaY > 0 ? 0.92 : 1.08;
+        const old = cropScale;
+        cropScale = Math.max(0.05, Math.min(12, cropScale * delta));
+        const cx = canvas.width / 2, cy = canvas.height / 2;
+        cropX = cx - (cx - cropX) * (cropScale / old);
+        cropY = cy - (cy - cropY) * (cropScale / old);
+        drawCrop();
+      }, { passive: false });
+      document.getElementById("cropCancel").addEventListener("click", () => {
+        document.getElementById("cropModal").classList.add("hidden");
+        cropImg = null;
+        document.getElementById("avatarInput").value = "";
+      });
+      document.getElementById("cropApply").addEventListener("click", applyCrop);
+    })();
 
-      if (verifyErr) {
-        showMsg('pass-msg', 'Current password is incorrect.', false);
-        btn.disabled = false;
-        btn.innerText = 'Update Password';
+    document.getElementById("avatarInput").addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file || !file.type.startsWith("image/")) return;
+      if (file.size > 3 * 1024 * 1024) {
+        showMsg("profileMsg", "Image max 3MB.", false);
+        e.target.value = "";
         return;
       }
+      const reader = new FileReader();
+      reader.onload = () => openCrop(reader.result);
+      reader.readAsDataURL(file);
+    });
 
-      const { error } = await db.auth.updateUser({ password: p1 });
-      btn.disabled = false;
-      btn.innerText = 'Update Password';
-
-      if (error) {
-        showMsg('pass-msg', error.message, false);
-      } else {
-        showMsg('pass-msg', 'Password updated successfully.', true);
-        document.getElementById('form-password').reset();
+    document.getElementById("btnSaveName").addEventListener("click", async () => {
+      const raw = document.getElementById("displayName").value.trim();
+      const name = raw.toLowerCase().replace(/\s+/g, "");
+      if (raw && name !== raw.toLowerCase().replace(/\s+/g, "")) {
+        document.getElementById("displayName").value = name;
+      }
+      saveLocalProfile({ displayName: name || raw });
+      if (!name || name.includes("@")) {
+        showMsg("profileMsg", name ? "Username saved (local only)." : "Username cleared.", true);
+        return;
+      }
+      if (!currentUserEmail) {
+        showMsg("profileMsg", "Username saved locally. Login required to sync as login username.", true);
+        return;
+      }
+      try {
+        // Upsert: this username becomes a login username for current email
+        const { data: existing } = await db.from("login_aliases").select("id, email").eq("username", name).maybeSingle();
+        if (existing) {
+          if (existing.email !== currentUserEmail.toLowerCase()) {
+            showMsg("profileMsg", "Username \"" + name + "\" already used by another account.", false);
+            return;
+          }
+          showMsg("profileMsg", "Username saved. You can login with \"" + name + "\".", true);
+        } else {
+          const { error } = await db.from("login_aliases").insert([{ username: name, email: currentUserEmail.toLowerCase() }]);
+          if (error) {
+            showMsg("profileMsg", "Saved locally, but alias failed: " + error.message, false);
+            return;
+          }
+          showMsg("profileMsg", "Username saved. You can login with \"" + name + "\".", true);
+        }
+        loadAliases();
+      } catch (err) {
+        showMsg("profileMsg", "Saved locally. Alias sync error: " + (err.message || err), false);
       }
     });
 
+    document.getElementById("form-pass").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const p1 = document.getElementById("new-pass").value;
+      const p2 = document.getElementById("confirm-pass").value;
+      if (p1 !== p2) {
+        showMsg("pass-msg", "Passwords do not match.", false);
+        return;
+      }
+      const btn = document.getElementById("btn-pass");
+      btn.disabled = true;
+      btn.textContent = "Updating...";
+      const { error } = await db.auth.updateUser({ password: p1 });
+      if (error) showMsg("pass-msg", error.message, false);
+      else {
+        showMsg("pass-msg", "Password updated.", true);
+        document.getElementById("form-pass").reset();
+      }
+      btn.disabled = false;
+      btn.textContent = "Update Password";
+    });
+
     async function loadAliases() {
-      const box = document.getElementById('alias-list');
+      const box = document.getElementById("alias-list");
       try {
-        const { data, error } = await db
-          .from('login_aliases')
-          .select('id, username, email')
-          .order('username');
+        const { data, error } = await db.from("login_aliases").select("id, username, email").order("username");
         if (error) throw error;
-        if (!data || data.length === 0) {
+        if (!data || !data.length) {
           box.innerHTML = '<div class="text-slate-500 text-xs">No usernames yet. Add one below.</div>';
           return;
         }
-        box.innerHTML = data.map(row => `
-          <div class="flex items-center justify-between gap-2 bg-slate-950/50 border border-cyan-500/15 rounded-lg px-3 py-2">
-            <div class="min-w-0">
-              <span class="text-cyan-300 font-bold">${escapeHtml(row.username)}</span>
-              <span class="text-slate-500 text-xs block truncate">${escapeHtml(row.email)}</span>
-            </div>
-            <button type="button" onclick="deleteAlias(${row.id})" class="text-[10px] text-rose-400 hover:text-rose-300 border border-rose-500/30 px-2 py-1 rounded">Delete</button>
-          </div>
-        `).join('');
+        box.innerHTML = data.map(row =>
+          '<div class="flex items-center justify-between gap-2 bg-slate-950/40 border border-cyan-500/15 rounded-lg px-3 py-2">' +
+          '<div class="min-w-0"><span class="text-cyan-300 font-bold">' + escapeHtml(row.username) + '</span>' +
+          '<span class="text-slate-500 text-xs block truncate">' + escapeHtml(row.email) + '</span></div>' +
+          '<button onclick="deleteAlias(' + row.id + ')" class="text-rose-400 hover:text-rose-300 text-xs px-2 py-1 rounded border border-rose-500/30 bg-rose-950/30">Delete</button></div>'
+        ).join("");
       } catch (err) {
-        box.innerHTML = '<div class="text-rose-400 text-xs">Failed to load: ' + escapeHtml(err.message) + '. Check API key and login_aliases table.</div>';
+        box.innerHTML = '<div class="text-rose-400 text-xs">Failed to load: ' + escapeHtml(err.message) + '</div>';
       }
     }
 
     function escapeHtml(s) {
-      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
     }
 
-    document.getElementById('form-alias').addEventListener('submit', async (e) => {
+    document.getElementById("form-alias").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const username = document.getElementById('alias-username').value.trim().toLowerCase();
-      const email = document.getElementById('alias-email').value.trim().toLowerCase();
-      if (!username || username.includes('@')) {
-        showMsg('alias-msg', 'Username cannot be empty or an email address.', false);
+      const username = document.getElementById("alias-username").value.trim().toLowerCase();
+      const email = document.getElementById("alias-email").value.trim().toLowerCase();
+      if (!username || username.includes("@")) {
+        showMsg("alias-msg", "Username cannot be empty or an email address.", false);
         return;
       }
-      const { error } = await db.from('login_aliases').insert([{ username, email }]);
-      if (error) {
-        showMsg('alias-msg', error.message, false);
-        return;
-      }
-      showMsg('alias-msg', 'Username added.', true);
-      document.getElementById('alias-username').value = '';
+      const { error } = await db.from("login_aliases").insert([{ username, email }]);
+      if (error) { showMsg("alias-msg", error.message, false); return; }
+      showMsg("alias-msg", "Username added.", true);
+      document.getElementById("alias-username").value = "";
       loadAliases();
     });
 
     async function deleteAlias(id) {
-      if (!confirm('Delete this username?')) return;
-      const { error } = await db.from('login_aliases').delete().eq('id', id);
-      if (error) {
-        alert(error.message);
-        return;
-      }
+      if (!confirm("Delete this username?")) return;
+      const { error } = await db.from("login_aliases").delete().eq("id", id);
+      if (error) { alert(error.message); return; }
       loadAliases();
     }
 
-    document.getElementById('form-new-user').addEventListener('submit', async (e) => {
+    document.getElementById("form-new-user").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const email = document.getElementById('new-user-email').value.trim();
-      const password = document.getElementById('new-user-pass').value;
-      const alias = document.getElementById('new-user-alias').value.trim().toLowerCase();
-      const btn = document.getElementById('btn-newuser');
+      const email = document.getElementById("new-user-email").value.trim();
+      const password = document.getElementById("new-user-pass").value;
+      const alias = document.getElementById("new-user-alias").value.trim().toLowerCase();
+      const btn = document.getElementById("btn-newuser");
       btn.disabled = true;
-      btn.innerText = 'Creating...';
+      btn.textContent = "Creating...";
 
       const { error } = await db.auth.signUp({ email, password });
       if (error) {
-        showMsg('newuser-msg', error.message, false);
+        showMsg("newuser-msg", error.message, false);
         btn.disabled = false;
-        btn.innerText = 'Create Account';
+        btn.textContent = "Create Account";
         return;
       }
+      if (alias && !alias.includes("@")) {
+        await db.from("login_aliases").insert([{ username: alias, email: email.toLowerCase() }]);
+      }
+      await db.auth.signOut();
+      showMsg("newuser-msg", "Account created. Please log in again.", true);
+      btn.disabled = false;
+      btn.textContent = "Create Account";
+      setTimeout(function() { window.location.href = "../main/index.html"; }, 1500);
+    });
 
-      if (alias && !alias.includes('@')) {
-        await db.from('login_aliases').insert([{ username: alias, email: email.toLowerCase() }]);
+
+
+    // ── Service price editor (Supabase + localStorage cache) ──
+    const PRICE_KEY = "neoshy_service_prices";
+    const DEFAULT_SERVICES = [];
+    let catalogCache = null;
+    let catalogDbOk = null; // null unknown, true ok, false missing/error
+
+    function cacheLocal(list) {
+      try { localStorage.setItem(PRICE_KEY, JSON.stringify(list)); } catch (e) {}
+    }
+
+    function readLocal() {
+      try {
+        const raw = localStorage.getItem(PRICE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length) return parsed;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    let lastCatalogError = "";
+
+    async function fetchCatalogFromDb() {
+      lastCatalogError = "";
+      const { data, error } = await db.from("service_catalog")
+        .select("id, type, label, price, discount_price, discount_percent, discount_label, sort_order")
+        .order("sort_order", { ascending: true });
+      if (error) {
+        catalogDbOk = false;
+        lastCatalogError = error.message || String(error);
+        console.warn("service_catalog:", lastCatalogError);
+        return null;
+      }
+      catalogDbOk = true;
+      return (data || []).map(function(row) {
+        return {
+          id: row.id,
+          type: row.type || "satuan",
+          label: row.label || "",
+          price: Number(row.price) || 0,
+          discount_price: row.discount_price == null ? null : Number(row.discount_price),
+          discount_percent: row.discount_percent == null ? null : Number(row.discount_percent),
+          discount_label: row.discount_label || "",
+          sort_order: row.sort_order || 0
+        };
+      });
+    }
+
+    async function seedCatalogIfEmpty() {
+      if (catalogDbOk !== true) return false;
+      const { count, error } = await db.from("service_catalog").select("id", { count: "exact", head: true });
+      if (error) return false;
+      if (count && count > 0) return false;
+      const rows = DEFAULT_SERVICES.map(function(s, i) {
+        return {
+          id: s.id,
+          type: s.type,
+          label: s.label,
+          price: s.price,
+          discount_price: null,
+          discount_label: "",
+          sort_order: s.sort_order != null ? s.sort_order : (i + 1)
+        };
+      });
+      const { error: insErr } = await db.from("service_catalog").insert(rows);
+      if (insErr) {
+        console.warn("seed failed", insErr.message);
+        return false;
+      }
+      return true;
+    }
+
+    async function loadServiceCatalog(force) {
+      if (catalogCache && !force) return catalogCache.slice();
+
+      // Always prefer database. Empty table = empty list (manual add).
+      let list = await fetchCatalogFromDb();
+      if (catalogDbOk === true) {
+        catalogCache = list || [];
+        cacheLocal(catalogCache);
+        return catalogCache.slice();
       }
 
-      await db.auth.signOut();
-      showMsg('newuser-msg', 'Account created. Please log in again.', true);
-      btn.disabled = false;
-      btn.innerText = 'Create Account';
-      setTimeout(function() { window.location.href = 'index.html'; }, 1500);
+      // DB not ready → start EMPTY (do not revive old localStorage junk)
+      try { localStorage.removeItem(PRICE_KEY); } catch (e) {}
+      catalogCache = [];
+      return [];
+    }
+
+    async function persistCatalog(list) {
+      catalogCache = list.slice();
+      cacheLocal(list);
+
+      if (catalogDbOk === false) {
+        showMsg("priceMsg", "Tersimpan di browser saja. Tabel service_catalog belum ada di Supabase — lihat SQL di console.", true);
+        console.info(`SQL buat tabel:
+
+create table if not exists service_catalog (
+  id text primary key,
+  type text not null default 'satuan',
+  label text not null,
+  price int not null default 0,
+  discount_price int null,
+  discount_label text null,
+  sort_order int not null default 0
+);
+
+alter table service_catalog enable row level security;
+create policy "public read service_catalog" on service_catalog for select using (true);
+create policy "auth write service_catalog" on service_catalog for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+`);
+        return false;
+      }
+
+      // Upsert all rows
+      const rows = list.map(function(s, i) {
+        return {
+          id: s.id,
+          type: s.type || "satuan",
+          label: s.label,
+          price: Number(s.price) || 0,
+          discount_price: (s.discount_price === "" || s.discount_price == null) ? null : Number(s.discount_price),
+          discount_percent: (s.discount_percent === "" || s.discount_percent == null) ? null : Number(s.discount_percent),
+          discount_label: s.discount_label || null,
+          sort_order: s.sort_order != null ? s.sort_order : (i + 1)
+        };
+      });
+
+      const { error } = await db.from("service_catalog").upsert(rows, { onConflict: "id" });
+      if (error) {
+        catalogDbOk = false;
+        showMsg("priceMsg", "Gagal simpan ke database: " + error.message + " (disimpan lokal dulu)", false);
+        return false;
+      }
+      catalogDbOk = true;
+      return true;
+    }
+
+    async function deleteServiceFromDb(id) {
+      if (catalogDbOk === false) return true;
+      const { error } = await db.from("service_catalog").delete().eq("id", id);
+      if (error) {
+        console.warn("delete db", error.message);
+        return false;
+      }
+      return true;
+    }
+
+    function renderPriceEditorFromList(catalog) {
+      var box = document.getElementById("priceEditor");
+      if (!box) return;
+      var groups = [
+        { key: "satuan", title: "Layanan Satuan" },
+        { key: "paket", title: "Paket Hemat & Komplit" },
+        { key: "khusus", title: "Layanan Khusus & Advanced" }
+      ];
+      var html = "";
+      if (catalogDbOk === false) {
+        html += '<p class="text-[11px] font-mono text-amber-300/90 bg-amber-950/30 border border-amber-500/30 rounded-lg px-3 py-2">Belum terhubung database' + (lastCatalogError ? (': ' + escapeHtml(lastCatalogError)) : '') + '. Jalankan SQL lengkap di Supabase, lalu hard refresh.</p>';
+      } else if (catalogDbOk === true) {
+        html += '<p class="text-[11px] font-mono text-emerald-400/80">Terhubung database — perubahan tersimpan permanen.</p>';
+      }
+      groups.forEach(function(g) {
+        var items = catalog.filter(function(i) { return i.type === g.key; });
+        if (!items.length) return;
+        html += '<div class="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400/80 mt-3 mb-1.5">' + g.title + ' (' + items.length + ')</div>';
+        items.forEach(function(item) {
+          var discVal = (item.discount_price != null && item.discount_price !== "") ? item.discount_price : "";
+          var pctAuto = "";
+          if (discVal !== "" && Number(item.price) > 0 && Number(discVal) < Number(item.price)) {
+            pctAuto = Math.round((1 - Number(discVal) / Number(item.price)) * 100);
+          } else if (item.discount_percent != null && Number(item.discount_percent) > 0) {
+            pctAuto = Number(item.discount_percent);
+          }
+          var preview = "";
+          if (pctAuto !== "" && discVal !== "") {
+            preview = '<p class="text-[10px] font-mono text-amber-300/90 mt-1 disc-preview">Diskon otomatis: <b>−' + pctAuto + '%</b> &nbsp;|&nbsp; <span class="line-through text-slate-500">Rp' + Number(item.price).toLocaleString("id-ID") + '</span> → <b class="text-cyan-300">Rp' + Number(discVal).toLocaleString("id-ID") + '</b></p>';
+          } else {
+            preview = '<p class="text-[10px] font-mono text-slate-500 mt-1 disc-preview">Isi harga diskon lebih kecil dari harga awal untuk aktifkan promo.</p>';
+          }
+          html += '<div class="bg-slate-950/40 border border-cyan-500/15 rounded-xl p-3 space-y-2" data-price-id="' + item.id + '">' +
+            '<div class="flex items-center justify-between gap-2">' +
+            '<span class="text-sm text-slate-100 font-medium">' + escapeHtml(item.label) + '</span>' +
+            '<button type="button" class="text-rose-400 hover:text-rose-300 text-[10px] font-mono border border-rose-500/30 px-2 py-0.5 rounded" data-del-id="' + item.id + '">Hapus</button>' +
+            '</div>' +
+            '<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">' +
+            '<div><label class="block text-[10px] font-mono text-cyan-300/70 mb-1">Harga awal (Rp)</label>' +
+            '<input type="number" min="0" step="1000" class="neo-input w-full rounded-lg px-3 py-2 text-sm text-white font-mono price-normal" value="' + (item.price || 0) + '"></div>' +
+            '<div><label class="block text-[10px] font-mono text-cyan-300/70 mb-1">Harga diskon (Rp)</label>' +
+            '<input type="number" min="0" step="1000" class="neo-input w-full rounded-lg px-3 py-2 text-sm text-white font-mono price-disc" placeholder="kosong = tanpa promo" value="' + discVal + '"></div>' +
+            '<div><label class="block text-[10px] font-mono text-cyan-300/70 mb-1">Label promo</label>' +
+            '<input type="text" class="neo-input w-full rounded-lg px-3 py-2 text-sm text-white font-mono price-label" placeholder="opsional, mis. Flash Sale" maxlength="20" value="' + escapeHtml(item.discount_label || "") + '"></div>' +
+            '</div>' + preview + '</div>';
+        });
+      });
+      if (!catalog.length) html += '<p class="text-slate-500 text-xs font-mono">Belum ada layanan. Tambah di atas.</p>';
+      box.innerHTML = html;
+      box.querySelectorAll("[data-del-id]").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          deleteService(btn.getAttribute("data-del-id"));
+        });
+      });
+      box.querySelectorAll("[data-price-id]").forEach(function(row) {
+        function updatePreview() {
+          var n = parseInt((row.querySelector(".price-normal") || {}).value || "0", 10) || 0;
+          var dRaw = (row.querySelector(".price-disc") || {}).value;
+          var prev = row.querySelector(".disc-preview");
+          if (!prev) return;
+          if (dRaw === "" || dRaw == null || Number(dRaw) <= 0 || Number(dRaw) >= n) {
+            prev.className = "text-[10px] font-mono text-slate-500 mt-1 disc-preview";
+            prev.innerHTML = "Isi harga diskon lebih kecil dari harga awal untuk aktifkan promo.";
+            return;
+          }
+          var d = parseInt(dRaw, 10) || 0;
+          var pct = n > 0 ? Math.round((1 - d / n) * 100) : 0;
+          prev.className = "text-[10px] font-mono text-amber-300/90 mt-1 disc-preview";
+          prev.innerHTML = "Diskon otomatis: <b>−" + pct + "%</b> &nbsp;|&nbsp; <span class=\"line-through text-slate-500\">Rp" + n.toLocaleString("id-ID") + "</span> → <b class=\"text-cyan-300\">Rp" + d.toLocaleString("id-ID") + "</b>";
+        }
+        var nEl = row.querySelector(".price-normal");
+        var dEl = row.querySelector(".price-disc");
+        if (nEl) nEl.addEventListener("input", updatePreview);
+        if (dEl) dEl.addEventListener("input", updatePreview);
+      });
+    }
+
+    async function renderPriceEditor() {
+      var box = document.getElementById("priceEditor");
+      if (box) box.innerHTML = '<p class="text-slate-500 text-xs font-mono">Memuat harga...</p>';
+      var catalog = await loadServiceCatalog(true);
+      renderPriceEditorFromList(catalog);
+    }
+
+    function collectPricesFromEditor() {
+      var catalog = (catalogCache || []).slice();
+      var byId = {};
+      catalog.forEach(function(i) { byId[i.id] = Object.assign({}, i); });
+      document.querySelectorAll("#priceEditor [data-price-id]").forEach(function(row) {
+        var id = row.getAttribute("data-price-id");
+        if (!byId[id]) return;
+        var normalEl = row.querySelector(".price-normal");
+        var discEl = row.querySelector(".price-disc");
+        var labelEl = row.querySelector(".price-label");
+        var normal = Math.max(0, parseInt(normalEl ? normalEl.value : "0", 10) || 0);
+        var discRaw = discEl ? discEl.value : "";
+        var label = labelEl && labelEl.value ? labelEl.value.trim() : "";
+        byId[id].price = normal;
+        if (discRaw === "" || discRaw == null || Number(discRaw) <= 0 || Number(discRaw) >= normal) {
+          byId[id].discount_price = null;
+          byId[id].discount_percent = null;
+        } else {
+          var disc = Math.max(0, parseInt(discRaw, 10) || 0);
+          byId[id].discount_price = disc;
+          var pct = normal > 0 ? Math.round((1 - disc / normal) * 100) : 0;
+          byId[id].discount_percent = pct;
+          if (!label) label = "-" + pct + "%";
+        }
+        byId[id].discount_label = label;
+      });
+      return catalog.map(function(i) { return byId[i.id] || i; });
+    }
+
+    async function deleteService(id) {
+      if (!confirm("Hapus layanan ini?")) return;
+      var list = collectPricesFromEditor().filter(function(i) { return i.id !== id; });
+      await deleteServiceFromDb(id);
+      var ok = await persistCatalog(list);
+      renderPriceEditorFromList(list);
+      showMsg("priceMsg", ok ? "Layanan dihapus dari database." : "Layanan dihapus (lokal).", true);
+    }
+
+    document.getElementById("btnSavePrices").addEventListener("click", async function() {
+      var list = collectPricesFromEditor();
+      var ok = await persistCatalog(list);
+      showMsg("priceMsg", ok ? "Harga & diskon disimpan ke database." : "Disimpan lokal (database belum siap).", ok);
     });
+
+    document.getElementById("btnResetPrices").addEventListener("click", async function() {
+      if (!confirm("Reset semua harga ke default?")) return;
+      // wipe db rows then seed
+      if (catalogDbOk !== false) {
+        await db.from("service_catalog").delete().neq("id", "");
+      }
+      try { localStorage.removeItem(PRICE_KEY); } catch (e) {}
+      catalogCache = null;
+      catalogDbOk = null;
+      await renderPriceEditor();
+      showMsg("priceMsg", "Harga direset ke default.", true);
+    });
+
+    document.getElementById("btnAddSvc").addEventListener("click", async function() {
+      var label = (document.getElementById("newSvcLabel").value || "").trim();
+      var type = document.getElementById("newSvcType").value || "satuan";
+      var price = parseInt(document.getElementById("newSvcPrice").value || "0", 10) || 0;
+      if (!label) { showMsg("priceMsg", "Isi nama layanan dulu.", false); return; }
+      var list = collectPricesFromEditor();
+      var id = "svc_" + Date.now().toString(36);
+      list.push({ id: id, type: type, label: label, price: price, discount_price: null, discount_label: "", sort_order: list.length + 1 });
+      var ok = await persistCatalog(list);
+      document.getElementById("newSvcLabel").value = "";
+      document.getElementById("newSvcPrice").value = "";
+      renderPriceEditorFromList(list);
+      showMsg("priceMsg", ok ? "Layanan ditambah & disimpan ke database." : "Layanan ditambah (lokal).", ok);
+    });
+
+    checkSession();
   </script>
 </body>
 </html>

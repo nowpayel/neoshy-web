@@ -23,7 +23,7 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     *::-webkit-scrollbar { display: none; }
-    * { -ms-overflow-style: none; scrollbar-width: none !important; }
+    * { -ms-overflow-style: none; scrollbar-width: none; }
 
     body {
       background-color: var(--bg); color: var(--text); font-family: var(--font-main);
@@ -211,16 +211,11 @@
 </head>
 <body>
   <canvas id="particleCanvas"></canvas>
-  <a href="../index.html" class="back-home" style="gap:8px">
-    <div style="width:28px;height:28px;background:rgba(13,19,33,0.7);border:1px solid rgba(0,217,255,0.35);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden">
-      <img src="logo.png" alt="" style="width:20px;height:20px;object-fit:contain;filter:invert(1) hue-rotate(180deg);mix-blend-mode:screen" onerror="this.style.display='none'">
-    </div>
-    <span>NEOSHY</span>
-  </a>
+  <a href="../main/index.html" class="back-home"><i class="fa-solid fa-arrow-left"></i> Home</a>
 
   <section class="hero">
     <div class="wrap">
-      <div class="hero-logo-wrapper" onclick="location.href='../index.html'" style="cursor:pointer">
+      <div class="hero-logo-wrapper">
         <div class="logo-card">
           <img src="logo.png" alt="NEOSHY Logo" class="logo-img" onerror="this.style.display='none'">
         </div>
@@ -229,7 +224,7 @@
       <div class="hero-badge"><i class="fa-solid fa-shield-halved"></i> 100% CLEAN & TESTED REPOSITORY</div>
       <h1 class="hero-title">Download Tools & Modules<br><span>NeoShy.</span></h1>
       <div class="tool-bridge">
-        <a href="../tools/index.html">
+        <a href="https://neoshytool.vercel.app" target="_blank" rel="noopener">
           <i class="fa-solid fa-mobile-screen-button"></i>
           Open NeoShy Remote Tool
           <i class="fa-solid fa-arrow-right"></i>
@@ -262,8 +257,8 @@
     </button>
   </div>
 
-  <a href="admin.html" class="admin-btn" id="adminBtn">
-    <i class="fa-solid fa-lock"></i> <span id="adminBtnText">Admin</span>
+  <a href="../manage/account.html" class="admin-btn" id="adminBtn" style="display:none">
+    <i class="fa-solid fa-user-shield"></i> <span id="adminBtnText">Account Center</span>
   </a>
 
   <script>
@@ -272,6 +267,7 @@
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let globalData = [];
+
     let currentCategory = "all";
 
     const placeholders = {
@@ -284,9 +280,11 @@
       const { data: { session } } = await db.auth.getSession();
       if (session) {
         const btn = document.getElementById("adminBtn");
+        btn.style.display = "inline-flex";
         btn.classList.add("logged-in");
-        document.getElementById("adminBtnText").textContent = "Manage Vault";
-        btn.querySelector("i").className = "fa-solid fa-pen-to-square";
+        document.getElementById("adminBtnText").textContent = "Account Center";
+        btn.querySelector("i").className = "fa-solid fa-user-shield";
+        btn.href = "../manage/account.html";
       }
     }
 
@@ -294,14 +292,11 @@
       const { data, error } = await db.from("vault_files").select("*").order("sort_order", { ascending: true });
       if (error) {
         document.getElementById("fileContainer").innerHTML =
-          '<p style="color:#ff4d4d;text-align:center;padding:40px">Failed to load files.<br><small>' + error.message + '</small></p>';
+          '<p style="color:#ff4d4d;text-align:center;padding:40px">Gagal memuat file dari database.<br><small>' + error.message + '</small></p>';
+        globalData = [];
         return;
       }
-      // Hide NeoShy Remote Tool entries
-      globalData = (data || []).filter(f => {
-        const t = (f.title || "").toLowerCase();
-        return !t.includes("neoshy remote") && !t.includes("remote tool");
-      });
+      globalData = data || [];
       renderData(globalData);
     }
 

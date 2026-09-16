@@ -22,7 +22,7 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     *::-webkit-scrollbar { display: none; }
-    * { -ms-overflow-style: none; scrollbar-width: none !important; }
+    * { -ms-overflow-style: none; scrollbar-width: none; }
 
     body {
       background-color: var(--bg);
@@ -243,7 +243,7 @@
 <body>
   <div id="loginScreen">
     <div class="login-box neo-card">
-      <div class="hero-logo-wrapper" onclick="location.href='../index.html'" style="cursor:pointer">
+      <div class="hero-logo-wrapper">
         <div class="logo-card">
           <img src="logo.png" alt="NEOSHY" class="logo-img" onerror="this.style.display='none'">
         </div>
@@ -272,19 +272,9 @@
 
   <div id="adminScreen">
     <div class="topbar">
-      <div style="display:flex;align-items:center;gap:12px">
-        <a href="index.html" class="btn-sm"><i class="fa-solid fa-arrow-left"></i> Back</a>
-        <a href="../index.html" class="topbar-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none">
-          <div style="width:36px;height:36px;background:rgba(13,19,33,0.7);border:1px solid rgba(0,217,255,0.35);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 12px rgba(0,217,255,0.15)">
-            <img src="logo.png" alt="NEOSHY" style="width:26px;height:26px;object-fit:contain;filter:invert(1) hue-rotate(180deg) drop-shadow(0 0 6px rgba(0,217,255,0.5));mix-blend-mode:screen" onerror="this.style.display='none'">
-          </div>
-          <div>
-            <div style="font-size:14px;font-weight:800;letter-spacing:0.04em;background:linear-gradient(to right,#22d3ee,#e0f2fe);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1">NEOSHY</div>
-            <div style="font-size:9px;font-family:var(--font-mono);color:rgba(0,217,255,0.55);letter-spacing:0.06em;margin-top:1px">VAULT ADMIN</div>
-          </div>
-        </a>
-      </div>
+      <h1><i class="fa-solid fa-box-archive" style="color:var(--cyan)"></i> Vault Admin</h1>
       <div class="topbar-actions">
+        <a href="../manage/account.html" class="btn-sm"><i class="fa-solid fa-arrow-left"></i> Account</a>
         <button class="btn-sm btn-danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
       </div>
     </div>
@@ -320,7 +310,10 @@
         <button class="neo-btn" onclick="addFile()"><i class="fa-solid fa-plus"></i> Add File</button>
       </div>
 
-      <div class="section-title"><span class="dot"></span> All Files (<span id="fileCount">0</span>)</div>
+      <div class="section-title" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px">
+        <span><span class="dot"></span> All Files (<span id="fileCount">0</span>)</span>
+        <input type="search" id="adminSearch" class="neo-input" placeholder="Cari title / group / url..." style="max-width:280px;width:100%;padding:8px 12px;font-size:12px;font-family:var(--font-mono)" oninput="filterAdminFiles()">
+      </div>
 
       <!-- Desktop table -->
       <div class="table-desktop">
@@ -462,6 +455,19 @@
       else { input.type = "password"; icon.className = "fa-solid fa-eye"; }
     }
 
+    function filterAdminFiles() {
+      const q = ((document.getElementById("adminSearch") || {}).value || "").toLowerCase().trim();
+      const src = files || [];
+      const filtered = !q ? src.slice() : src.filter(function(f) {
+        const hay = [f.title, f.category, f.group_name || f.group, f.url, f.meta].join(" ").toLowerCase();
+        return hay.indexOf(q) !== -1;
+      });
+      renderTable(filtered);
+      renderCards(filtered);
+      const countEl = document.getElementById("fileCount");
+      if (countEl) countEl.textContent = q ? (filtered.length + " / " + src.length) : String(src.length);
+    }
+
     async function loadFiles() {
       const { data, error } = await db.from("vault_files").select("*").order("sort_order", { ascending: true });
       if (error) { showToast("Error: " + error.message); return; }
@@ -469,9 +475,7 @@
         const t = (f.title || "").toLowerCase();
         return !t.includes("neoshy remote") && !t.includes("remote tool");
       });
-      document.getElementById("fileCount").textContent = files.length;
-      renderTable();
-      renderCards();
+      filterAdminFiles();
     }
 
     function esc(str) {
@@ -479,13 +483,14 @@
       return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
     }
 
-    function renderTable() {
+    function renderTable(list) {
+      const data = list || files;
       const tbody = document.getElementById("fileTable");
-      if (!files.length) {
+      if (!data.length) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-muted);font-family:var(--font-mono);font-size:12px">No files yet</td></tr>';
         return;
       }
-      tbody.innerHTML = files.map(f =>
+      tbody.innerHTML = data.map(f =>
         '<tr><td><strong style="font-size:13px">' + esc(f.title) + '</strong></td>' +
         '<td><span class="cat-badge cat-' + f.category + '">' + f.category + '</span></td>' +
         '<td style="font-size:12px;color:var(--text-muted)">' + esc(f.group_name || "") + '</td>' +
@@ -497,13 +502,14 @@
       ).join("");
     }
 
-    function renderCards() {
+    function renderCards(list) {
+      const data = list || files;
       const el = document.getElementById("fileCards");
-      if (!files.length) {
+      if (!data.length) {
         el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);font-family:var(--font-mono);font-size:12px">No files yet</div>';
         return;
       }
-      el.innerHTML = files.map(f =>
+      el.innerHTML = data.map(f =>
         '<div class="file-card neo-card">' +
         '<div class="file-card-top">' +
         '<div><div class="file-card-title">' + esc(f.title) + '</div>' +
