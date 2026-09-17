@@ -684,9 +684,44 @@
       .cta-btns .btn { width: 100%; }
       .stat .num { font-size: 1.25rem; }
     }
+  
+    #pageLoader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(10, 14, 23, 0.72);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+    }
+    #pageLoader.show { opacity: 1; pointer-events: all; }
+    #pageLoader .pl-box {
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      padding: 22px 28px; border-radius: 18px;
+      background: linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    #pageLoader .pl-spin {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 3px solid rgba(59, 158, 255, 0.2);
+      border-top-color: #3b9eff;
+      animation: plSpin 0.7s linear infinite;
+    }
+    #pageLoader .pl-text {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #94a3b8;
+    }
+    @keyframes plSpin { to { transform: rotate(360deg); } }
+
   </style>
 </head>
 <body>
+
+  <div id="pageLoader" aria-live="polite" aria-busy="true">
+    <div class="pl-box">
+      <div class="pl-spin"></div>
+      <div class="pl-text" id="pageLoaderText">Loading...</div>
+    </div>
+  </div>
+
 
   <!-- Particle Background -->
   <canvas id="particleCanvas"></canvas>
@@ -694,8 +729,8 @@
   <!-- NAV -->
   <nav>
     <div class="container inner">
-      <a href="/" class="logo">
-        <img src="/tools/logo.png" alt="NEOSHY" class="nav-logo" onerror="this.style.display='none'">
+      <a href="../index.html" class="logo">
+        <img src="logo.png" alt="NEOSHY" class="nav-logo" onerror="this.style.display='none'">
         <span class="brand-text">NEO<span>SHY</span></span>
       </a>
       <ul class="nav-links" id="navLinks">
@@ -717,7 +752,7 @@
       <!-- Glass logo same style as Vault -->
       <div class="hero-logo-wrapper">
         <div class="logo-card">
-          <img src="/tools/logo.png" alt="NEOSHY Logo" class="logo-img">
+          <img src="logo.png" alt="NEOSHY Logo" class="logo-img">
         </div>
       </div>
 
@@ -741,7 +776,7 @@
           Previous Version
         </a>
       </div>
-      <img src="/tools/assets/main-ui.png" alt="NeoShy Remote Tool main interface" class="hero-shot" onclick="openLightbox(this.src)" />
+      <img src="assets/main-ui.png" alt="NeoShy Remote Tool main interface" class="hero-shot" onclick="openLightbox(this.src)" />
     </div>
   </header>
 
@@ -831,7 +866,7 @@
       </div>
 
       <div class="full-shot" style="margin-bottom: 28px;">
-        <img src="/tools/assets/main-ui.png" alt="NeoShy Remote Tool main interface — sidebar + Command Log" onclick="openLightbox(this.src)" />
+        <img src="assets/main-ui.png" alt="NeoShy Remote Tool main interface — sidebar + Command Log" onclick="openLightbox(this.src)" />
       </div>
       <p style="text-align:center;color:var(--text-muted);font-size:0.85rem;margin-bottom:36px;">
         Main window — Device Status, Command Tools tabs, and real-time Command Log side by side.
@@ -840,7 +875,7 @@
       <div class="showcase-grid">
         <div class="shot-card">
           <div class="img-wrap">
-            <img src="/tools/assets/adb-commands.png" alt="ADB Commands panel" onclick="openLightbox(this.src)" />
+            <img src="assets/adb-commands.png" alt="ADB Commands panel" onclick="openLightbox(this.src)" />
           </div>
           <div class="caption">
             <h3>ADB Commands</h3>
@@ -849,7 +884,7 @@
         </div>
         <div class="shot-card">
           <div class="img-wrap">
-            <img src="/tools/assets/fastboot-panel.png" alt="Fastboot panel" onclick="openLightbox(this.src)" />
+            <img src="assets/fastboot-panel.png" alt="Fastboot panel" onclick="openLightbox(this.src)" />
           </div>
           <div class="caption">
             <h3>Fastboot Tools</h3>
@@ -858,7 +893,7 @@
         </div>
         <div class="shot-card">
           <div class="img-wrap">
-            <img src="/tools/assets/xiaomi-flash.png" alt="Xiaomi firmware flash" onclick="openLightbox(this.src)" />
+            <img src="assets/xiaomi-flash.png" alt="Xiaomi firmware flash" onclick="openLightbox(this.src)" />
           </div>
           <div class="caption">
             <h3>Xiaomi Flash Mode</h3>
@@ -867,7 +902,7 @@
         </div>
         <div class="shot-card">
           <div class="img-wrap">
-            <img src="/tools/assets/samsung-heimdall.png" alt="Samsung Heimdall / Odin" onclick="openLightbox(this.src)" />
+            <img src="assets/samsung-heimdall.png" alt="Samsung Heimdall / Odin" onclick="openLightbox(this.src)" />
           </div>
           <div class="caption">
             <h3>Samsung · Heimdall</h3>
@@ -876,7 +911,7 @@
         </div>
         <div class="shot-card">
           <div class="img-wrap">
-            <img src="/tools/assets/payload-dump.png" alt="Payload Dump" onclick="openLightbox(this.src)" />
+            <img src="assets/payload-dump.png" alt="Payload Dump" onclick="openLightbox(this.src)" />
           </div>
           <div class="caption">
             <h3>Payload Dump</h3>
@@ -886,7 +921,7 @@
       </div>
 
       <div class="full-shot" style="margin-top: 28px;">
-        <img src="/tools/assets/mirror-controls.png" alt="Scrcpy floating control panel" onclick="openLightbox(this.src)" />
+        <img src="assets/mirror-controls.png" alt="Scrcpy floating control panel" onclick="openLightbox(this.src)" />
       </div>
       <p style="text-align:center;color:var(--text-muted);font-size:0.82rem;margin-top:12px;">
         Floating control panel while mirroring — Power, Restart, Notifications, Clipboard, Screenshot, Push File & more.
@@ -903,7 +938,7 @@
       </div>
       <div class="social-grid">
         <div class="qr-card">
-          <img src="/tools/wa-qr.png" alt="WhatsApp QR Code NeoShy" width="200" height="200" />
+          <img src="wa-qr.png" alt="WhatsApp QR Code NeoShy" width="200" height="200" />
           <h3>Scan for WhatsApp</h3>
           <p>Scan the QR code or tap the number below</p>
           <a href="https://wa.me/6285755182796" class="wa-number" target="_blank" rel="noopener">
@@ -1096,5 +1131,32 @@
     initParticles();
     animateParticles();
   </script>
+<script>
+
+    window.showPageLoader = function(msg) {
+      var el = document.getElementById("pageLoader");
+      var tx = document.getElementById("pageLoaderText");
+      if (tx) tx.textContent = msg || "Loading...";
+      if (el) el.classList.add("show");
+    };
+    window.hidePageLoader = function() {
+      var el = document.getElementById("pageLoader");
+      if (el) el.classList.remove("show");
+    };
+    document.addEventListener("DOMContentLoaded", function() {
+      hidePageLoader();
+      document.body.addEventListener("click", function(e) {
+        var a = e.target.closest("a[href]");
+        if (!a) return;
+        var href = a.getAttribute("href") || "";
+        if (!href || href.charAt(0) === "#" || href.indexOf("javascript:") === 0) return;
+        if (a.target === "_blank" || a.hasAttribute("download")) return;
+        if (/^https?:\/\//i.test(href) && href.indexOf(location.host) === -1) return;
+        showPageLoader("Loading...");
+      }, true);
+    });
+    window.addEventListener("pageshow", function() { hidePageLoader(); });
+
+</script>
 </body>
 </html>

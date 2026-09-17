@@ -56,16 +56,51 @@
     .docs-scroll::-webkit-scrollbar-track { background: rgba(3, 7, 18, 0.5); border-radius: 8px; }
     .docs-scroll::-webkit-scrollbar-thumb { background: rgba(59, 158, 255, 0.3); border-radius: 8px; }
     .docs-scroll::-webkit-scrollbar-thumb:hover { background: rgba(59, 158, 255, 0.6); }
+  
+    #pageLoader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(10, 14, 23, 0.72);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+    }
+    #pageLoader.show { opacity: 1; pointer-events: all; }
+    #pageLoader .pl-box {
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      padding: 22px 28px; border-radius: 18px;
+      background: linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    #pageLoader .pl-spin {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 3px solid rgba(59, 158, 255, 0.2);
+      border-top-color: #3b9eff;
+      animation: plSpin 0.7s linear infinite;
+    }
+    #pageLoader .pl-text {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #94a3b8;
+    }
+    @keyframes plSpin { to { transform: rotate(360deg); } }
+
   </style>
 </head>
 <body class="text-slate-100 min-h-screen p-3 md:p-8 font-sans">
+
+  <div id="pageLoader" aria-live="polite" aria-busy="true">
+    <div class="pl-box">
+      <div class="pl-spin"></div>
+      <div class="pl-text" id="pageLoaderText">Loading...</div>
+    </div>
+  </div>
+
 
   <div class="w-full max-w-5xl mx-auto space-y-5 md:space-y-6">
 
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center border-b border-cyan-500/20 pb-4 gap-3">
       <div>
-        <a href="/manage" class="inline-flex items-center gap-1 text-xs font-mono text-cyan-400/70 hover:text-cyan-300 transition mb-1">&larr; Back to Dashboard</a>
+        <a href="../manage/index.html" class="inline-flex items-center gap-1 text-xs font-mono text-cyan-400/70 hover:text-cyan-300 transition mb-1">&larr; Back to Dashboard</a>
         <h1 class="text-xl md:text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-sky-200">
           Money Dashboard
         </h1>
@@ -190,7 +225,7 @@
     (async function guardAuth() {
       const { data: { session } } = await db.auth.getSession();
       if (!session) {
-        window.location.href = '/manage';
+        window.location.href = '../manage/index.html';
         return;
       }
     })();
@@ -453,5 +488,32 @@
 
     fetchAndRenderMoneyReport();
   </script>
+<script>
+
+    window.showPageLoader = function(msg) {
+      var el = document.getElementById("pageLoader");
+      var tx = document.getElementById("pageLoaderText");
+      if (tx) tx.textContent = msg || "Loading...";
+      if (el) el.classList.add("show");
+    };
+    window.hidePageLoader = function() {
+      var el = document.getElementById("pageLoader");
+      if (el) el.classList.remove("show");
+    };
+    document.addEventListener("DOMContentLoaded", function() {
+      hidePageLoader();
+      document.body.addEventListener("click", function(e) {
+        var a = e.target.closest("a[href]");
+        if (!a) return;
+        var href = a.getAttribute("href") || "";
+        if (!href || href.charAt(0) === "#" || href.indexOf("javascript:") === 0) return;
+        if (a.target === "_blank" || a.hasAttribute("download")) return;
+        if (/^https?:\/\//i.test(href) && href.indexOf(location.host) === -1) return;
+        showPageLoader("Loading...");
+      }, true);
+    });
+    window.addEventListener("pageshow", function() { hidePageLoader(); });
+
+</script>
 </body>
 </html>

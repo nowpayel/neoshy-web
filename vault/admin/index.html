@@ -241,14 +241,107 @@
       z-index: 100; transition: transform 0.3s ease; pointer-events: none; font-family: var(--font-mono);
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
+  
+    #pageLoader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(10, 14, 23, 0.72);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+    }
+    #pageLoader.show { opacity: 1; pointer-events: all; }
+    #pageLoader .pl-box {
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      padding: 22px 28px; border-radius: 18px;
+      background: linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    #pageLoader .pl-spin {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 3px solid rgba(59, 158, 255, 0.2);
+      border-top-color: #3b9eff;
+      animation: plSpin 0.7s linear infinite;
+    }
+    #pageLoader .pl-text {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #94a3b8;
+    }
+    @keyframes plSpin { to { transform: rotate(360deg); } }
+
+  
+    #neoConfirm {
+      position: fixed; inset: 0; z-index: 10000;
+      background: rgba(10, 14, 23, 0.75);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+    }
+    #neoConfirm.show { opacity: 1; pointer-events: all; }
+    #neoConfirm .nc-box {
+      width: 100%; max-width: 360px;
+      background: linear-gradient(160deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.12);
+      border-radius: 18px; padding: 22px 20px 18px;
+      font-family: 'Plus Jakarta Sans', 'JetBrains Mono', sans-serif;
+    }
+    #neoConfirm .nc-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(248, 113, 113, 0.12); border: 1px solid rgba(248, 113, 113, 0.35);
+      color: #f87171; font-size: 18px; margin-bottom: 12px;
+    }
+    #neoConfirm .nc-title {
+      font-size: 15px; font-weight: 700; color: #e2e8f0; margin-bottom: 6px;
+    }
+    #neoConfirm .nc-msg {
+      font-size: 13px; color: #94a3b8; line-height: 1.5; margin-bottom: 18px;
+    }
+    #neoConfirm .nc-actions { display: flex; gap: 10px; }
+    #neoConfirm .nc-btn {
+      flex: 1; padding: 11px 14px; border-radius: 12px; font-size: 13px; font-weight: 600;
+      border: 1px solid transparent; cursor: pointer; transition: 0.2s;
+      font-family: inherit;
+    }
+    #neoConfirm .nc-cancel {
+      background: rgba(148,163,184,0.1); border-color: rgba(148,163,184,0.25); color: #cbd5e1;
+    }
+    #neoConfirm .nc-cancel:hover { background: rgba(148,163,184,0.18); }
+    #neoConfirm .nc-ok {
+      background: linear-gradient(135deg, #f87171, #e11d48); color: #fff;
+      box-shadow: 0 6px 20px rgba(225, 29, 72, 0.35);
+    }
+    #neoConfirm .nc-ok:hover { filter: brightness(1.08); }
+
   </style>
 </head>
 <body>
+
+  
+  <div id="neoConfirm" role="dialog" aria-modal="true">
+    <div class="nc-box">
+      <div class="nc-icon">!</div>
+      <div class="nc-title" id="neoConfirmTitle">Konfirmasi</div>
+      <div class="nc-msg" id="neoConfirmMsg">Yakin?</div>
+      <div class="nc-actions">
+        <button type="button" class="nc-btn nc-cancel" id="neoConfirmCancel">Batal</button>
+        <button type="button" class="nc-btn nc-ok" id="neoConfirmOk">Hapus</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pageLoader" aria-live="polite" aria-busy="true">
+    <div class="pl-box">
+      <div class="pl-spin"></div>
+      <div class="pl-text" id="pageLoaderText">Loading...</div>
+    </div>
+  </div>
+
   <div id="loginScreen">
     <div class="login-box neo-card">
       <div class="hero-logo-wrapper">
         <div class="logo-card">
-          <img src="/vault/admin/logo.png" alt="NEOSHY" class="logo-img" onerror="this.style.display='none'">
+          <img src="logo.png" alt="NEOSHY" class="logo-img" onerror="this.style.display='none'">
         </div>
       </div>
       <h2>VAULT ADMIN</h2>
@@ -272,12 +365,34 @@
       </form>
     </div>
   </div>
+  <script>
+    // Prevent flash of login when session tokens are passed via hash (file:// transfer)
+    (function () {
+      try {
+        if (location.hash && location.hash.indexOf("access_token") !== -1) {
+          var ls = document.getElementById("loginScreen");
+          if (ls) ls.style.display = "none";
+          window.__neoshyHasToken = true;
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   <div id="adminScreen">
+    <script>
+      (function () {
+        try {
+          if (window.__neoshyHasToken) {
+            var as = document.getElementById("adminScreen");
+            if (as) as.style.display = "block";
+          }
+        } catch (e) {}
+      })();
+    </script>
     <div class="topbar">
       <h1><i class="fa-solid fa-box-archive" style="color:var(--cyan)"></i> Vault Admin</h1>
       <div class="topbar-actions">
-        <a href="/account" class="btn-sm"><i class="fa-solid fa-arrow-left"></i> Account</a>
+        <a href="../../account/index.html" id="linkBackAccount" class="btn-sm"><i class="fa-solid fa-arrow-left"></i> Account</a>
         <button class="btn-sm btn-danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
       </div>
     </div>
@@ -376,8 +491,18 @@
   <script>
     const SUPABASE_URL = "https://vsednhqbszdiwpazcoii.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzZWRuaHFic3pkaXdwYXpjb2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMjEyMDYsImV4cCI6MjEwMjY5NzIwNn0.SO5nMDZOqsT_Cwp9x4_9CFHPsVPpyNgndb2k_qVn89o";
-    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storage: window.localStorage }
+    });
     let files = [];
+
+    function decodeJwtPayload(token) {
+      try {
+        const part = token.split(".")[1];
+        if (!part) return null;
+        return JSON.parse(atob(part.replace(/-/g, "+").replace(/_/g, "/")));
+      } catch (e) { return null; }
+    }
 
     function onCategoryChange() {
       const cat = document.getElementById("newCategory").value;
@@ -404,8 +529,54 @@
     onCategoryChange();
 
     async function checkSession() {
-      const { data: { session } } = await db.auth.getSession();
-      if (session) { showAdmin(); loadFiles(); }
+      try {
+        let access_token = null, refresh_token = null;
+        if (window.location.hash && window.location.hash.indexOf("access_token") !== -1) {
+          try {
+            const hash = window.location.hash.substring(1);
+            const m1 = hash.match(/access_token=([^&]+)/);
+            const m2 = hash.match(/refresh_token=([^&]+)/);
+            if (m1) access_token = decodeURIComponent(m1[1]);
+            if (m2) refresh_token = decodeURIComponent(m2[1]);
+          } catch (e) {}
+          try { history.replaceState(null, "", window.location.href.split("#")[0]); } catch (e) {}
+        }
+        if (access_token) {
+          let ok = false;
+          if (refresh_token) {
+            try {
+              const { data, error } = await db.auth.setSession({ access_token, refresh_token });
+              if (!error && data && data.session) ok = true;
+            } catch (e) {}
+          }
+          if (!ok) {
+            try {
+              const payload = decodeJwtPayload(access_token) || {};
+              const expiresAt = payload.exp || (Math.floor(Date.now() / 1000) + 3600);
+              localStorage.setItem("sb-vsednhqbszdiwpazcoii-auth-token", JSON.stringify({
+                access_token, refresh_token: refresh_token || "",
+                expires_in: Math.max(0, expiresAt - Math.floor(Date.now() / 1000)),
+                expires_at: expiresAt, token_type: "bearer",
+                user: { id: payload.sub || "", email: payload.email || "", role: "authenticated" }
+              }));
+            } catch (e) {}
+          }
+          showAdmin(); await loadFiles();
+          return;
+        }
+        const { data: { session } } = await db.auth.getSession();
+        if (session) { showAdmin(); await loadFiles(); }
+        else {
+          try {
+            const raw = localStorage.getItem("sb-vsednhqbszdiwpazcoii-auth-token");
+            if (raw && JSON.parse(raw).access_token) { showAdmin(); await loadFiles(); }
+          } catch (e) {}
+        }
+      } catch (e) {
+        console.warn("session", e);
+      } finally {
+        if (window.hidePageLoader) hidePageLoader();
+      }
     }
 
     async function resolveEmail(input) {
@@ -526,22 +697,47 @@
       ).join("");
     }
 
+    window.neoConfirm = function(opts) {
+      opts = opts || {};
+      return new Promise(function(resolve) {
+        var el = document.getElementById("neoConfirm");
+        if (!el) { resolve(window.confirm(opts.message || "Yakin?")); return; }
+        document.getElementById("neoConfirmTitle").textContent = opts.title || "Konfirmasi";
+        document.getElementById("neoConfirmMsg").textContent = opts.message || "Yakin lanjut?";
+        document.getElementById("neoConfirmOk").textContent = opts.okText || "Hapus";
+        document.getElementById("neoConfirmCancel").textContent = opts.cancelText || "Batal";
+        el.classList.add("show");
+        function cleanup(val) {
+          el.classList.remove("show");
+          okBtn.onclick = null; cancelBtn.onclick = null; el.onclick = null;
+          resolve(val);
+        }
+        var okBtn = document.getElementById("neoConfirmOk");
+        var cancelBtn = document.getElementById("neoConfirmCancel");
+        okBtn.onclick = function() { cleanup(true); };
+        cancelBtn.onclick = function() { cleanup(false); };
+        el.onclick = function(e) { if (e.target === el) cleanup(false); };
+      });
+    };
+
     async function addFile() {
+      if (window.showPageLoader) showPageLoader("Menambah file...");
       const category = document.getElementById("newCategory").value;
       let group_name = document.getElementById("newGroup").value.trim();
       const title = document.getElementById("newTitle").value.trim();
       const url = document.getElementById("newUrl").value.trim();
       if (category === "module") group_name = "Modules";
-      if (!title || !url) { showToast("Please fill title and URL"); return; }
-      if (category === "tool" && !group_name) { showToast("Please fill group name for Tool"); return; }
+      if (!title || !url) { if (window.hidePageLoader) hidePageLoader(); showToast("Please fill title and URL"); return; }
+      if (category === "tool" && !group_name) { if (window.hidePageLoader) hidePageLoader(); showToast("Please fill group name for Tool"); return; }
       const maxOrder = files.reduce((m, f) => Math.max(m, f.sort_order || 0), 0);
       const { error } = await db.from("vault_files").insert({ category, group_name, title, url, sort_order: maxOrder + 1 });
-      if (error) { showToast("Error: " + error.message); return; }
+      if (error) { if (window.hidePageLoader) hidePageLoader(); showToast("Error: " + error.message); return; }
       document.getElementById("newTitle").value = "";
       document.getElementById("newUrl").value = "";
       if (category === "tool") document.getElementById("newGroup").value = "";
       showToast("File added");
-      loadFiles();
+      await loadFiles();
+      if (window.hidePageLoader) hidePageLoader();
     }
 
     function openEdit(id) {
@@ -558,6 +754,7 @@
     function closeEdit() { document.getElementById("editModal").classList.remove("show"); }
 
     async function saveEdit() {
+      if (window.showPageLoader) showPageLoader("Menyimpan...");
       const id = document.getElementById("editId").value;
       const category = document.getElementById("editCategory").value;
       let group_name = document.getElementById("editGroup").value.trim();
@@ -569,15 +766,19 @@
         updated_at: new Date().toISOString()
       };
       const { error } = await db.from("vault_files").update(payload).eq("id", id);
-      if (error) { showToast("Error: " + error.message); return; }
-      closeEdit(); showToast("Saved"); loadFiles();
+      if (error) { if (window.hidePageLoader) hidePageLoader(); showToast("Error: " + error.message); return; }
+      closeEdit(); showToast("Saved"); await loadFiles();
+      if (window.hidePageLoader) hidePageLoader();
     }
 
     async function deleteFile(id) {
-      if (!confirm("Delete this file?")) return;
+      var okDel = await neoConfirm({ title: "Hapus file?", message: "File ini akan dihapus dari Vault. Tidak bisa dibatalkan.", okText: "Hapus" });
+      if (!okDel) return;
+      if (window.showPageLoader) showPageLoader("Menghapus...");
       const { error } = await db.from("vault_files").delete().eq("id", id);
-      if (error) { showToast("Error: " + error.message); return; }
-      showToast("Deleted"); loadFiles();
+      if (error) { if (window.hidePageLoader) hidePageLoader(); showToast("Error: " + error.message); return; }
+      showToast("Deleted"); await loadFiles();
+      if (window.hidePageLoader) hidePageLoader();
     }
 
     function showToast(msg) {
@@ -587,7 +788,64 @@
       setTimeout(() => t.classList.remove("show"), 2500);
     }
 
+    // Transfer session when going back to Account Center
+    (function () {
+      const a = document.getElementById("linkBackAccount");
+      if (!a) return;
+      a.addEventListener("click", async function (e) {
+        e.preventDefault();
+        try {
+          let access_token = null, refresh_token = null;
+          try {
+            const { data: { session } } = await db.auth.getSession();
+            if (session) { access_token = session.access_token; refresh_token = session.refresh_token; }
+          } catch (err) {}
+          if (!access_token) {
+            try {
+              const raw = localStorage.getItem("sb-vsednhqbszdiwpazcoii-auth-token");
+              if (raw) { const p = JSON.parse(raw); access_token = p.access_token; refresh_token = p.refresh_token; }
+            } catch (err) {}
+          }
+          if (access_token) {
+            const params = new URLSearchParams();
+            params.set("access_token", access_token);
+            if (refresh_token) params.set("refresh_token", refresh_token);
+            window.location.href = "../../account/index.html#" + params.toString();
+            return;
+          }
+        } catch (err) {}
+        window.location.href = "../../account/index.html";
+      });
+    })();
+
     checkSession();
   </script>
+<script>
+
+    window.showPageLoader = function(msg) {
+      var el = document.getElementById("pageLoader");
+      var tx = document.getElementById("pageLoaderText");
+      if (tx) tx.textContent = msg || "Loading...";
+      if (el) el.classList.add("show");
+    };
+    window.hidePageLoader = function() {
+      var el = document.getElementById("pageLoader");
+      if (el) el.classList.remove("show");
+    };
+    document.addEventListener("DOMContentLoaded", function() {
+      hidePageLoader();
+      document.body.addEventListener("click", function(e) {
+        var a = e.target.closest("a[href]");
+        if (!a) return;
+        var href = a.getAttribute("href") || "";
+        if (!href || href.charAt(0) === "#" || href.indexOf("javascript:") === 0) return;
+        if (a.target === "_blank" || a.hasAttribute("download")) return;
+        if (/^https?:\/\//i.test(href) && href.indexOf(location.host) === -1) return;
+        showPageLoader("Loading...");
+      }, true);
+    });
+    window.addEventListener("pageshow", function() { hidePageLoader(); });
+
+</script>
 </body>
 </html>

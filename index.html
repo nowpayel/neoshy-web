@@ -514,6 +514,57 @@
       margin-top: 12px; font-size: 12px; font-weight: 600; color: var(--cyan);
       display: flex; align-items: center; gap: 6px;
     }
+    
+    .order-sub { font-size: 12.5px; color: var(--text-muted); margin: -4px 0 12px; }
+    .order-steps {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+      padding: 10px 12px; border-radius: 12px;
+      background: rgba(59, 158, 255, 0.06); border: 1px solid rgba(59, 158, 255, 0.15);
+    }
+    .order-step {
+      font-size: 11px; font-weight: 600; color: #64748b; font-family: var(--font-mono);
+    }
+    .order-step.active { color: var(--cyan); }
+    .order-step-sep {
+      flex: 1; height: 1px; background: rgba(148, 163, 184, 0.25); max-width: 28px;
+    }
+    .order-section {
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 12px 12px 10px; margin-bottom: 12px;
+    }
+    .order-section-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+      color: var(--cyan); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;
+      font-family: var(--font-mono);
+    }
+    .order-section-title .opt { color: #64748b; font-weight: 500; text-transform: none; letter-spacing: 0; }
+    .svc-count {
+      font-size: 10px; font-weight: 600; color: #94a3b8; background: rgba(148,163,184,0.12);
+      border: 1px solid rgba(148,163,184,0.2); padding: 2px 8px; border-radius: 999px;
+      text-transform: none; letter-spacing: 0;
+    }
+    .svc-count.has { color: var(--cyan); background: rgba(59,158,255,0.12); border-color: rgba(59,158,255,0.3); }
+    .req { color: #f87171; }
+    .device-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .device-chips .chip-btn {
+      font-size: 11px; padding: 5px 10px; border-radius: 8px; cursor: pointer;
+      background: rgba(59,158,255,0.08); border: 1px solid rgba(59,158,255,0.22);
+      color: #93c5fd; font-family: var(--font-mono); transition: 0.15s;
+    }
+    .device-chips .chip-btn:hover { background: rgba(59,158,255,0.18); border-color: rgba(59,158,255,0.45); }
+    .order-footer {
+      position: sticky; bottom: 0; margin-top: 4px; padding-top: 10px;
+      background: linear-gradient(to top, rgba(10,14,23,0.98) 60%, transparent);
+    }
+    .order-footer .order-total {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px; padding: 12px 14px; border-radius: 12px;
+      background: rgba(59, 158, 255, 0.1); border: 1px solid rgba(59, 158, 255, 0.28);
+    }
+    .order-footer .order-total span { font-size: 12px; color: #94a3b8; font-weight: 500; }
+    .order-footer .order-total strong { font-size: 18px; color: var(--cyan); font-family: var(--font-mono); }
+
     .order-modal { max-width: 440px; max-height: 90vh; overflow-y: auto; position: relative; }
     .modal-close {
       position: absolute; top: 12px; right: 14px; background: none; border: none;
@@ -888,7 +939,8 @@
       flex: 1; line-height: 1.35;
       display: flex; justify-content: space-between; gap: 16px; align-items: center;
     }
-    .svc-item .svc-label { flex: 1; }
+    .svc-item .svc-name { flex: 0 1 auto; min-width: 0; }
+    .svc-item .svc-label { flex: 1; min-width: 0; word-break: break-word; overflow-wrap: anywhere; line-height: 1.35; }
     .svc-item .svc-prices { text-align: right; font-family: var(--font-mono); white-space: nowrap; }
     .svc-item .svc-prices b { color: var(--cyan); font-weight: 700; font-size: 13px; }
     .svc-item .svc-prices .old {
@@ -1088,23 +1140,140 @@
       .hero-cta { flex-direction: column; align-items: center; gap: 10px; }
       .hero-cta .btn { width: 100%; max-width: 300px; justify-content: center; }
     }
+  
+    #pageLoader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(10, 14, 23, 0.72);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+    }
+    #pageLoader.show { opacity: 1; pointer-events: all; }
+    #pageLoader .pl-box {
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      padding: 22px 28px; border-radius: 18px;
+      background: linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    #pageLoader .pl-spin {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 3px solid rgba(59, 158, 255, 0.2);
+      border-top-color: #3b9eff;
+      animation: plSpin 0.7s linear infinite;
+    }
+    #pageLoader .pl-text {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #94a3b8;
+    }
+    @keyframes plSpin { to { transform: rotate(360deg); } }
+
+  
+    /* === Order form alignment (final) === */
+    .svc-checklist { display: flex; flex-direction: column; gap: 8px; }
+    .svc-group-title {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--cyan); opacity: 0.85; margin: 10px 0 4px; font-family: var(--font-mono);
+      text-align: left;
+    }
+    .svc-item {
+      display: grid !important;
+      grid-template-columns: 18px 1fr;
+      column-gap: 10px;
+      align-items: start;
+      padding: 11px 12px !important;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(15, 23, 42, 0.55);
+      cursor: pointer;
+      margin: 0;
+      text-align: left;
+    }
+    .svc-item input[type="checkbox"] {
+      margin: 3px 0 0 0 !important;
+      width: 16px; height: 16px;
+      accent-color: var(--cyan);
+    }
+    .svc-item .svc-body {
+      display: grid !important;
+      grid-template-columns: 1fr auto;
+      column-gap: 12px;
+      align-items: center;
+      width: 100%;
+      min-width: 0;
+    }
+    .svc-item .svc-label {
+      font-size: 13px; font-weight: 500; color: #e2e8f0;
+      line-height: 1.4; text-align: left;
+      word-break: break-word; overflow-wrap: anywhere;
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+    }
+    .svc-item .svc-prices {
+      text-align: right !important;
+      font-family: var(--font-mono);
+      white-space: nowrap;
+      justify-self: end;
+    }
+    .svc-item .svc-prices b {
+      color: var(--cyan); font-weight: 700; font-size: 13px;
+      float: none !important; display: inline;
+    }
+    .svc-item .svc-prices .old {
+      text-decoration: line-through; color: #64748b; font-size: 11px; margin-right: 4px;
+    }
+    .svc-item .svc-prices .price-arrow { color: #475569; margin: 0 3px; font-size: 11px; }
+    .svc-item .disc-badge {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      color: #fbbf24; background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      padding: 2px 7px; border-radius: 6px; font-family: var(--font-mono);
+      flex: 0 0 auto !important;
+      width: auto !important;
+      max-width: max-content;
+      white-space: nowrap;
+      align-self: center;
+    }
+    .svc-item .svc-label {
+      display: flex !important;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 8px;
+    }
+    .order-section-title { text-align: left; }
+    .order-section .form-group label { text-align: left; display: block; }
+    @media (max-width: 480px) {
+      .svc-item .svc-body {
+        grid-template-columns: 1fr;
+        row-gap: 6px;
+      }
+      .svc-item .svc-prices { text-align: left !important; justify-self: start; }
+    }
+
   </style>
 </head>
 <body>
+
+  <div id="pageLoader" aria-live="polite" aria-busy="true">
+    <div class="pl-box">
+      <div class="pl-spin"></div>
+      <div class="pl-text" id="pageLoaderText">Loading...</div>
+    </div>
+  </div>
+
 
   <canvas id="particleCanvas"></canvas>
 
   <!-- NAV -->
   <nav>
     <div class="wrap inner">
-      <a href="/" class="logo">
-        <img src="/logo.png" alt="NEOSHY" class="nav-logo" onerror="this.style.display='none'">
+      <a href="index.html" class="logo">
+        <img src="logo.png" alt="NEOSHY" class="nav-logo" onerror="this.style.display='none'">
         <span class="brand-text">NEO<span>SHY</span></span>
       </a>
 
       <ul class="nav-links" id="navLinks">
         <li><a href="#services">Services</a></li>
-        <li><a href="/vault">Vault</a></li>
+        <li><a href="testimoni/index.html">Testimoni</a></li>
+        <li><a href="vault/index.html">Vault</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
 
@@ -1112,7 +1281,7 @@
         <button class="account-btn" id="loginBtn" onclick="openLogin()" type="button">
           <i class="fa-solid fa-lock"></i> <span>Login</span>
         </button>
-        <a href="/account" class="account-btn" id="accountBtn" style="display:none" title="Account Center">
+        <a href="account/index.html" class="account-btn" id="accountBtn" style="display:none" title="Account Center">
           <span class="acc-avatar-ph" id="navAvatarPh"><i class="fa-solid fa-user"></i></span>
           <img class="acc-avatar" id="navAvatarImg" style="display:none" alt="">
           <span class="acc-name" id="userLabel">admin</span>
@@ -1129,7 +1298,7 @@
     <div class="wrap">
       <div class="hero-logo-wrapper">
         <div class="logo-card">
-          <img src="/logo.png" alt="NEOSHY" class="logo-img" onerror="this.style.display='none'">
+          <img src="logo.png" alt="NEOSHY" class="logo-img" onerror="this.style.display='none'">
         </div>
       </div>
 
@@ -1153,11 +1322,14 @@
         <a href="#contact" class="btn btn-ghost">
           <i class="fa-brands fa-whatsapp"></i> Contact
         </a>
-        <a href="/tools" class="btn btn-ghost">
+        <a href="tools/index.html" class="btn btn-ghost">
           <i class="fa-solid fa-mobile-screen-button"></i> Remote Tool
         </a>
-        <a href="/vault" class="btn btn-ghost">
+        <a href="vault/index.html" class="btn btn-ghost">
           <i class="fa-solid fa-box-archive"></i> Vault
+        </a>
+        <a href="testimoni/index.html" class="btn btn-ghost">
+          <i class="fa-solid fa-images"></i> Testimoni
         </a>
       </div>
     </div>
@@ -1260,35 +1432,56 @@
   <div class="modal-overlay" id="orderModal">
     <div class="modal order-modal">
       <button type="button" class="modal-close" onclick="closeOrder()" aria-label="Close">&times;</button>
-      <h2>Order Service</h2>
-      <p>Pilih layanan, isi data, lihat total harga, lalu kirim chat order via WhatsApp.</p>
+      <h2>Order Jasa</h2>
+      <p class="order-sub">Isi data → pilih layanan → kirim ke WhatsApp</p>
+      <div class="order-steps">
+        <span class="order-step active">1. Data</span>
+        <span class="order-step-sep"></span>
+        <span class="order-step">2. Layanan</span>
+        <span class="order-step-sep"></span>
+        <span class="order-step">3. Kirim</span>
+      </div>
       <form id="orderForm" autocomplete="off">
-        <div class="form-group">
-          <label>Nama</label>
-          <input type="text" id="orderName" required placeholder="Nama kamu">
+        <div class="order-section">
+          <div class="order-section-title">Data kamu</div>
+          <div class="form-group">
+            <label>Nama <span class="req">*</span></label>
+            <input type="text" id="orderName" required placeholder="Nama kamu">
+          </div>
+          <div class="form-group">
+            <label>Tipe HP / Model <span class="req">*</span></label>
+            <input type="text" id="orderDevice" required placeholder="Contoh: Redmi Note 12 / Poco F3">
+            <div class="device-chips" id="orderDeviceChips">
+              <button type="button" class="chip-btn" data-prefix="Xiaomi ">Xiaomi</button>
+              <button type="button" class="chip-btn" data-prefix="Poco ">Poco</button>
+              <button type="button" class="chip-btn" data-prefix="Redmi ">Redmi</button>
+              <button type="button" class="chip-btn" data-prefix="Samsung ">Samsung</button>
+              <button type="button" class="chip-btn" data-prefix="Realme ">Realme</button>
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Tipe HP / Model</label>
-          <input type="text" id="orderDevice" required placeholder="Contoh: Redmi Note 12 / Poco F3">
-        </div>
-        <div class="form-group">
-          <label>Pilih Layanan</label>
+        <div class="order-section">
+          <div class="order-section-title">Pilih layanan <span id="svcSelectedCount" class="svc-count">0 dipilih</span></div>
           <div id="svcChecklist" class="svc-checklist">
             <!-- filled by JS from price catalog -->
           </div>
         </div>
-        <div class="form-group">
-          <label>Notes (opsional)</label>
-          <textarea id="orderNotes" rows="2" placeholder="Catatan tambahan, masalah HP, dll."></textarea>
+        <div class="order-section">
+          <div class="order-section-title">Catatan <span class="opt">(opsional)</span></div>
+          <div class="form-group" style="margin-bottom:0">
+            <textarea id="orderNotes" rows="2" placeholder="Masalah HP, request khusus, dll."></textarea>
+          </div>
         </div>
-        <p class="order-note">Ketersediaan &amp; detail layanan akan dikonfirmasi oleh admin NeoShy setelah chat order dikirim.</p>
-        <div class="order-total">
-          <span>Total Estimasi</span>
-          <strong id="orderTotal">Rp0</strong>
+        <p class="order-note">Admin NeoShy akan konfirmasi ketersediaan &amp; detail setelah chat terkirim.</p>
+        <div class="order-footer">
+          <div class="order-total">
+            <span>Total estimasi</span>
+            <strong id="orderTotal">Rp0</strong>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full" id="orderSubmit">
+            <i class="fa-brands fa-whatsapp"></i> Kirim via WhatsApp
+          </button>
         </div>
-        <button type="submit" class="btn btn-primary btn-full" id="orderSubmit">
-          <i class="fa-brands fa-whatsapp"></i> Kirim Chat Order via WhatsApp
-        </button>
       </form>
     </div>
   </div>
@@ -1389,8 +1582,16 @@
           errEl.style.display = "block";
           return;
         }
-        // After login → go to Account Center
-        window.location.href = "/account";
+        // After login → go to Account Center (pass session via hash so it works on file:// where localStorage is isolated per path)
+        const { data: { session } } = await db.auth.getSession();
+        if (session && session.access_token && session.refresh_token) {
+          const params = new URLSearchParams();
+          params.set("access_token", session.access_token);
+          params.set("refresh_token", session.refresh_token);
+          window.location.href = "account/index.html#" + params.toString();
+        } else {
+          window.location.href = "account/index.html";
+        }
       } catch (err) {
         errEl.textContent = err.message || "Login failed";
         errEl.style.display = "block";
@@ -1570,7 +1771,7 @@
             : '';
           html += '<label class="svc-item">' +
             '<input type="checkbox" name="svc" value="' + item.id + '" data-price="' + eff + '" data-label="' + String(item.label).replace(/"/g, '&quot;') + '">' +
-            '<span class="svc-body"><span class="svc-label">' + item.label + badge + '</span>' +
+            '<span class="svc-body"><span class="svc-label"><span class="svc-name">' + item.label + '</span>' + badge + '</span>' +
             '<span class="svc-prices">' + priceHtml + '</span></span></label>';
         });
       });
@@ -1579,22 +1780,34 @@
 
     function calcOrderTotal() {
       let total = 0;
+      let n = 0;
       document.querySelectorAll('#svcChecklist input[name="svc"]:checked').forEach(cb => {
         total += parseInt(cb.getAttribute("data-price") || "0", 10);
+        n++;
       });
       const el = document.getElementById("orderTotal");
       if (el) el.textContent = formatRp(total);
+      const cnt = document.getElementById("svcSelectedCount");
+      if (cnt) {
+        cnt.textContent = n + " dipilih";
+        if (n > 0) cnt.classList.add("has"); else cnt.classList.remove("has");
+      }
       return total;
     }
 
     async function openOrder(preselect) {
-      await renderServiceChecklist();
-      document.getElementById("orderModal").classList.add("show");
-      document.body.style.overflow = "hidden";
-      document.querySelectorAll('#svcChecklist input[name="svc"]').forEach(cb => {
-        cb.checked = preselect ? (cb.value === preselect) : false;
-      });
-      calcOrderTotal();
+      if (window.showPageLoader) showPageLoader("Membuka form...");
+      try {
+        await renderServiceChecklist();
+        document.getElementById("orderModal").classList.add("show");
+        document.body.style.overflow = "hidden";
+        document.querySelectorAll('#svcChecklist input[name="svc"]').forEach(cb => {
+          cb.checked = preselect ? (cb.value === preselect) : false;
+        });
+        calcOrderTotal();
+      } finally {
+        if (window.hidePageLoader) hidePageLoader();
+      }
     }
 
     function closeOrder() {
@@ -1605,6 +1818,23 @@
     document.getElementById("orderModal").addEventListener("click", (e) => {
       if (e.target.id === "orderModal") closeOrder();
     });
+    
+    (function() {
+      var chips = document.getElementById("orderDeviceChips");
+      if (!chips) return;
+      chips.addEventListener("click", function(e) {
+        var btn = e.target.closest("[data-prefix]");
+        if (!btn) return;
+        var input = document.getElementById("orderDevice");
+        if (!input) return;
+        var prefix = btn.getAttribute("data-prefix") || "";
+        var cur = (input.value || "").trim();
+        // if already starts with a brand, replace brand prefix
+        input.value = prefix + cur.replace(/^(Xiaomi|Poco|Redmi|Samsung|Realme)\s+/i, "");
+        input.focus();
+      });
+    })();
+
     document.getElementById("svcChecklist").addEventListener("change", calcOrderTotal);
     document.getElementById("orderForm").addEventListener("submit", (e) => {
       e.preventDefault();
@@ -1637,25 +1867,25 @@
 
 
 
-    /* Particle system */
+    /* Particle system — optimized (fewer particles, lighter links, pause when hidden) */
     const canvas = document.getElementById("particleCanvas");
     const ctx = canvas.getContext("2d");
     let particles = [];
+    let animId = null;
+    let isVisible = true;
 
     function resizeCanvas() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
 
     class Particle {
       constructor() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 0.5;
-        this.speedX = (Math.random() - 0.5) * 0.8;
-        this.speedY = (Math.random() - 0.5) * 0.8;
+        this.size = Math.random() * 1.6 + 0.4;
+        this.speedX = (Math.random() - 0.5) * 0.45;
+        this.speedY = (Math.random() - 0.5) * 0.45;
       }
       update() {
         this.x += this.speedX;
@@ -1666,7 +1896,7 @@
         if (this.y < 0) this.y = canvas.height;
       }
       draw() {
-        ctx.fillStyle = "rgba(59, 158, 255, 0.6)";
+        ctx.fillStyle = "rgba(59, 158, 255, 0.5)";
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
@@ -1675,35 +1905,107 @@
 
     function initParticles() {
       particles = [];
-      const count = Math.floor((canvas.width * canvas.height) / 18000);
+      const area = canvas.width * canvas.height;
+      const count = Math.min(45, Math.max(18, Math.floor(area / 28000)));
       for (let i = 0; i < count; i++) particles.push(new Particle());
     }
-    initParticles();
 
     function animateParticles() {
+      if (!isVisible) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (let i = 0; i < particles.length; i++) {
+      const len = particles.length;
+      for (let i = 0; i < len; i++) {
         particles[i].update();
         particles[i].draw();
-        for (let j = i; j < particles.length; j++) {
+        // Skip every other particle for lighter connection cost
+        for (let j = i + 2; j < len; j += 2) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance < 90) {
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 70) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(59, 158, 255, ${1 - distance / 90 - 0.2})`;
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = `rgba(59, 158, 255, ${0.55 - dist / 70})`;
+            ctx.lineWidth = 0.4;
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
             ctx.stroke();
           }
         }
       }
-      requestAnimationFrame(animateParticles);
+      animId = requestAnimationFrame(animateParticles);
     }
+
+    document.addEventListener("visibilitychange", () => {
+      isVisible = !document.hidden;
+      if (isVisible && !animId) animateParticles();
+      if (!isVisible && animId) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+    });
+
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        resizeCanvas();
+        initParticles();
+      }, 150);
+    });
+
+    resizeCanvas();
+    initParticles();
     animateParticles();
+
+    // Transfer session to Account Center when clicking the account button
+    // (file:// treats different paths as different origins → localStorage not shared)
+    (function () {
+      const accBtn = document.getElementById("accountBtn");
+      if (!accBtn) return;
+      accBtn.addEventListener("click", async function (e) {
+        e.preventDefault();
+        try {
+          const { data: { session } } = await db.auth.getSession();
+          if (session && session.access_token && session.refresh_token) {
+            const params = new URLSearchParams();
+            params.set("access_token", session.access_token);
+            params.set("refresh_token", session.refresh_token);
+            window.location.href = "account/index.html#" + params.toString();
+            return;
+          }
+        } catch (err) {}
+        window.location.href = "account/index.html";
+      });
+    })();
 
     checkSession();
   </script>
+<script>
+
+    window.showPageLoader = function(msg) {
+      var el = document.getElementById("pageLoader");
+      var tx = document.getElementById("pageLoaderText");
+      if (tx) tx.textContent = msg || "Loading...";
+      if (el) el.classList.add("show");
+    };
+    window.hidePageLoader = function() {
+      var el = document.getElementById("pageLoader");
+      if (el) el.classList.remove("show");
+    };
+    document.addEventListener("DOMContentLoaded", function() {
+      hidePageLoader();
+      document.body.addEventListener("click", function(e) {
+        var a = e.target.closest("a[href]");
+        if (!a) return;
+        var href = a.getAttribute("href") || "";
+        if (!href || href.charAt(0) === "#" || href.indexOf("javascript:") === 0) return;
+        if (a.target === "_blank" || a.hasAttribute("download")) return;
+        if (/^https?:\/\//i.test(href) && href.indexOf(location.host) === -1) return;
+        showPageLoader("Loading...");
+      }, true);
+    });
+    window.addEventListener("pageshow", function() { hidePageLoader(); });
+
+</script>
 </body>
 </html>

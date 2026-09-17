@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>NEOSHY — Testimoni</title>
+  <meta name="description" content="Dokumentasi hasil jasa NeoShy: Custom ROM, Unlock Bootloader, Root, Fix Bootloop. Lihat foto device yang sudah dikerjakan." />
+  <meta name="theme-color" content="#0a0e17" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --panel: rgba(16, 22, 36, 0.55);
+      --card-bg: rgba(20, 28, 45, 0.45);
+      --border: rgba(255, 255, 255, 0.10);
+      --border-cyan: rgba(59, 158, 255, 0.28);
+      --cyan: #3b9eff;
+      --blue: #0078e0;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --font-main: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius: 16px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+      --glass: rgba(255, 255, 255, 0.06);
+      --glass-border: rgba(255, 255, 255, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 120, 224, 0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 60%, rgba(59, 158, 255, 0.06), transparent);
+      color: var(--text);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      line-height: 1.6;
+    }
+
+    #particleCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(24px) saturate(1.4);
+      -webkit-backdrop-filter: blur(24px) saturate(1.4);
+      background: rgba(10, 14, 23, 0.65);
+      border-bottom: 1px solid var(--glass-border);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    nav .inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      gap: 16px;
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      color: var(--cyan);
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      white-space: nowrap;
+      line-height: 1;
+    }
+
+    .nav-logo {
+      height: 28px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .brand-text {
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+    }
+    .brand-text span { color: #fff; }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 8px;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--cyan);
+      background: rgba(59, 158, 255, 0.1);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 18px;
+      border-radius: 14px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: var(--font-main);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(59, 158, 255, 0.85), rgba(0, 120, 224, 0.75));
+      color: #0a0e17;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 20px rgba(0, 120, 224, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    .btn-primary:hover {
+      opacity: 0.95;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0, 120, 224, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border: 1px solid var(--glass-border);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    .btn-ghost:hover {
+      background: rgba(59, 158, 255, 0.1);
+      border-color: rgba(59, 158, 255, 0.4);
+      color: var(--cyan);
+    }
+
+    /* HERO */
+    .hero {
+      padding: 60px 0 40px;
+      text-align: center;
+    }
+    .hero-title {
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    .hero-title span { color: var(--cyan); }
+    .hero-desc {
+      color: var(--text-muted);
+      font-size: 15px;
+      max-width: 520px;
+      margin: 0 auto 28px;
+    }
+
+    /* CONTENT */
+    .section-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .section-sub {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Device cards */
+    .device-list {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding-bottom: 80px;
+    }
+
+    .device-card {
+      background: var(--card-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: var(--shadow);
+      transition: border-color 0.25s;
+    }
+    .device-card:hover {
+      border-color: var(--border-cyan);
+    }
+
+    .device-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 20px;
+      cursor: pointer;
+      user-select: none;
+      flex-wrap: wrap;
+    }
+    .device-header:hover {
+      background: rgba(59, 158, 255, 0.04);
+    }
+
+    .device-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .device-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .device-name i {
+      color: var(--cyan);
+      font-size: 14px;
+    }
+    .device-meta {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .device-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .device-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-count {
+      background: rgba(59, 158, 255, 0.15);
+      color: var(--cyan);
+      border: 1px solid rgba(59, 158, 255, 0.3);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-family: var(--font-mono);
+    }
+
+    .toggle-icon {
+      color: var(--text-muted);
+      transition: transform 0.25s;
+      font-size: 14px;
+    }
+    .device-card.open .toggle-icon {
+      transform: rotate(180deg);
+      color: var(--cyan);
+    }
+
+    .device-gallery {
+      display: none;
+      padding: 0 20px 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .device-card.open .device-gallery {
+      display: block;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      padding-top: 16px;
+    }
+
+    .gallery-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--glass-border);
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .gallery-item:hover {
+      transform: scale(1.03);
+      border-color: var(--cyan);
+    }
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .gallery-item .placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 20px;
+    }
+
+    .gallery-loading {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .gallery-loading i {
+      animation: spin 0.8s linear infinite;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .gallery-empty {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Empty / loading states */
+    .state-box {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .state-box i {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+      opacity: 0.5;
+      display: block;
+    }
+    .state-box p { font-size: 14px; }
+
+    /* Image modal */
+    .img-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      cursor: zoom-out;
+    }
+    .img-modal.show { display: flex; }
+    .img-modal img {
+      max-width: 95vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      cursor: default;
+    }
+    .img-modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background 0.2s;
+    }
+    .img-modal-close:hover { background: rgba(255,255,255,0.2); }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 24px 0 40px;
+      color: var(--text-muted);
+      font-size: 12.5px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    footer a { color: var(--cyan); text-decoration: none; }
+
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 8px;
+      }
+      .device-header { padding: 14px 16px; }
+      .device-gallery { padding: 0 16px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- NAV -->
+  <nav>
+    <div class="wrap inner">
+      <a href="../index.html" class="logo">
+        <img src="logo.png" alt="NEOSHY" class="nav-logo" onerror="this.style.display='none'">
+        <span class="brand-text">NEO<span>SHY</span></span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="../index.html#services">Services</a></li>
+        <li><a href="index.html" class="active">Testimoni</a></li>
+        <li><a href="../vault/index.html">Vault</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+      <a href="../index.html" class="btn btn-ghost" style="padding:8px 14px;font-size:13px">
+        <i class="fa-solid fa-arrow-left"></i> Beranda
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <h1 class="hero-title">Testimoni & <span>Dokumentasi</span></h1>
+      <p class="hero-desc">
+        Foto hasil pengerjaan jasa NeoShy. Hanya menampilkan device yang memiliki dokumentasi di Manage Service.
+      </p>
+    </div>
+  </section>
+
+  <!-- LIST -->
+  <section>
+    <div class="wrap">
+      <div class="section-header">
+        <h2 class="section-title">Daftar Device</h2>
+        <p class="section-sub">Klik device untuk melihat foto dokumentasi</p>
+      </div>
+
+      <div id="deviceList" class="device-list">
+        <div class="state-box">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          <p>Memuat daftar testimoni...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      &copy; NeoShy — Android Tools & Services · <a href="../index.html">Kembali ke beranda</a>
+    </div>
+  </footer>
+
+  <!-- Image Modal -->
+  <div class="img-modal" id="imgModal" onclick="closeImgModal(event)">
+    <button class="img-modal-close" onclick="closeImgModal(event)" aria-label="Tutup">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <img id="imgModalSrc" src="" alt="Dokumentasi" />
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://vsednhqbszdiwpazcoii.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzZWRuaHFic3pkaXdwYXpjb2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMjEyMDYsImV4cCI6MjEwMjY5NzIwNn0.SO5nMDZOqsT_Cwp9x4_9CFHPsVPpyNgndb2k_qVn89o";
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const listEl = document.getElementById("deviceList");
+    // Cache of loaded galleries by id
+    const galleryCache = {};
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "-";
+      try {
+        const d = new Date(dateStr + (dateStr.includes("T") ? "" : "T00:00:00"));
+        if (isNaN(d.getTime())) return dateStr;
+        return d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+      } catch {
+        return dateStr;
+      }
+    }
+
+    async function loadList() {
+      try {
+        // Light query: no heavy base64 fields
+        const { data, error } = await db
+          .from("rekap_jasa")
+          .select("id, hp_model, service, tanggal")
+          .not("dokumentasi", "is", null)
+          .order("tanggal", { ascending: false })
+          .limit(80);
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          listEl.innerHTML = `
+            <div class="state-box">
+              <i class="fa-solid fa-images"></i>
+              <p>Belum ada dokumentasi foto yang tersedia.</p>
+            </div>`;
+          return;
+        }
+
+        // Group by hp_model (keep order of first appearance)
+        const groups = new Map();
+        data.forEach((row) => {
+          const key = (row.hp_model || "Unknown Device").trim();
+          if (!groups.has(key)) {
+            groups.set(key, []);
+          }
+          groups.get(key).push(row);
+        });
+
+        let html = "";
+        for (const [model, rows] of groups) {
+          const ids = rows.map((r) => r.id);
+          const services = [...new Set(rows.map((r) => r.service).filter(Boolean))];
+          const latest = rows[0];
+          const entryCount = rows.length;
+
+          html += `
+            <div class="device-card" data-ids="${escapeHtml(ids.join(","))}">
+              <div class="device-header" onclick="toggleDevice(this)">
+                <div class="device-info">
+                  <div class="device-name">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    ${escapeHtml(model)}
+                  </div>
+                  <div class="device-meta">
+                    ${services.length ? `<span><i class="fa-solid fa-screwdriver-wrench"></i> ${escapeHtml(services.join(", "))}</span>` : ""}
+                    <span><i class="fa-regular fa-calendar"></i> ${formatDate(latest.tanggal)}</span>
+                    ${entryCount > 1 ? `<span>${entryCount} entry</span>` : ""}
+                  </div>
+                </div>
+                <div class="device-actions">
+                  <span class="badge-count"><i class="fa-solid fa-image"></i> Foto</span>
+                  <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                </div>
+              </div>
+              <div class="device-gallery">
+                <div class="gallery-loading"><i class="fa-solid fa-spinner"></i> Memuat foto...</div>
+              </div>
+            </div>`;
+        }
+
+        listEl.innerHTML = html;
+      } catch (err) {
+        console.error(err);
+        listEl.innerHTML = `
+          <div class="state-box">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <p>Gagal memuat data. Coba refresh halaman.</p>
+          </div>`;
+      }
+    }
+
+    async function toggleDevice(headerEl) {
+      const card = headerEl.closest(".device-card");
+      const isOpen = card.classList.contains("open");
+
+      // Close others optionally (accordion style) — keep all openable for now
+      if (isOpen) {
+        card.classList.remove("open");
+        return;
+      }
+
+      card.classList.add("open");
+      const galleryEl = card.querySelector(".device-gallery");
+      const idsStr = card.dataset.ids || "";
+      const ids = idsStr.split(",").filter(Boolean);
+
+      if (!ids.length) {
+        galleryEl.innerHTML = `<div class="gallery-empty">Tidak ada foto.</div>`;
+        return;
+      }
+
+      // Already loaded?
+      if (card.dataset.loaded === "1") return;
+
+      galleryEl.innerHTML = `<div class="gallery-loading"><i class="fa-solid fa-spinner"></i> Memuat foto...</div>`;
+
+      try {
+        // Fetch dokumentasi only for these ids (on demand)
+        const { data, error } = await db
+          .from("rekap_jasa")
+          .select("id, dokumentasi")
+          .in("id", ids);
+
+        if (error) throw error;
+
+        const allImages = [];
+        (data || []).forEach((row) => {
+          if (!row.dokumentasi) return;
+          const arr = Array.isArray(row.dokumentasi) ? row.dokumentasi : [row.dokumentasi];
+          arr.forEach((src) => {
+            if (src && typeof src === "string" && src.startsWith("data:")) {
+              allImages.push(src);
+            }
+          });
+        });
+
+        if (allImages.length === 0) {
+          galleryEl.innerHTML = `<div class="gallery-empty">Tidak ada foto dokumentasi.</div>`;
+          card.dataset.loaded = "1";
+          return;
+        }
+
+        let grid = `<div class="gallery-grid">`;
+        allImages.forEach((src, idx) => {
+          grid += `
+            <div class="gallery-item" onclick="openImgModal(this.querySelector('img'))">
+              <img src="${src}" alt="Dokumentasi ${idx + 1}" loading="lazy" decoding="async" />
+            </div>`;
+        });
+        grid += `</div>`;
+        galleryEl.innerHTML = grid;
+        card.dataset.loaded = "1";
+      } catch (err) {
+        console.error(err);
+        galleryEl.innerHTML = `<div class="gallery-empty">Gagal memuat foto.</div>`;
+      }
+    }
+
+    function openImgModal(imgEl) {
+      if (!imgEl || !imgEl.src) return;
+      const modal = document.getElementById("imgModal");
+      const modalImg = document.getElementById("imgModalSrc");
+      modalImg.src = imgEl.src;
+      modal.classList.add("show");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeImgModal(e) {
+      if (e && e.target && e.target.tagName === "IMG") return;
+      const modal = document.getElementById("imgModal");
+      modal.classList.remove("show");
+      document.getElementById("imgModalSrc").src = "";
+      document.body.style.overflow = "";
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeImgModal();
+    });
+
+    /* Optimized particles */
+    const canvas = document.getElementById("particleCanvas");
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+    let animId = null;
+    let isVisible = true;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 1.6 + 0.4;
+        this.speedX = (Math.random() - 0.5) * 0.45;
+        this.speedY = (Math.random() - 0.5) * 0.45;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x > canvas.width) this.x = 0;
+        if (this.x < 0) this.x = canvas.width;
+        if (this.y > canvas.height) this.y = 0;
+        if (this.y < 0) this.y = canvas.height;
+      }
+      draw() {
+        ctx.fillStyle = "rgba(59, 158, 255, 0.5)";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function initParticles() {
+      particles = [];
+      const area = canvas.width * canvas.height;
+      const count = Math.min(40, Math.max(16, Math.floor(area / 30000)));
+      for (let i = 0; i < count; i++) particles.push(new Particle());
+    }
+
+    function animateParticles() {
+      if (!isVisible) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const len = particles.length;
+      for (let i = 0; i < len; i++) {
+        particles[i].update();
+        particles[i].draw();
+        for (let j = i + 2; j < len; j += 2) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 70) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(59, 158, 255, ${0.55 - dist / 70})`;
+            ctx.lineWidth = 0.4;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+      animId = requestAnimationFrame(animateParticles);
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      isVisible = !document.hidden;
+      if (isVisible && !animId) animateParticles();
+      if (!isVisible && animId) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+    });
+
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        resizeCanvas();
+        initParticles();
+      }, 150);
+    });
+
+    resizeCanvas();
+    initParticles();
+    animateParticles();
+
+    // Start
+    loadList();
+  </script>
+</body>
+</html>

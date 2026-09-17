@@ -246,24 +246,59 @@
       .file-item { flex-wrap: wrap; }
       .dl-btn { width: 100%; justify-content: center; }
     }
+  
+    #pageLoader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(10, 14, 23, 0.72);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+    }
+    #pageLoader.show { opacity: 1; pointer-events: all; }
+    #pageLoader .pl-box {
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      padding: 22px 28px; border-radius: 18px;
+      background: linear-gradient(160deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    #pageLoader .pl-spin {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 3px solid rgba(59, 158, 255, 0.2);
+      border-top-color: #3b9eff;
+      animation: plSpin 0.7s linear infinite;
+    }
+    #pageLoader .pl-text {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #94a3b8;
+    }
+    @keyframes plSpin { to { transform: rotate(360deg); } }
+
   </style>
 </head>
 <body>
+
+  <div id="pageLoader" aria-live="polite" aria-busy="true">
+    <div class="pl-box">
+      <div class="pl-spin"></div>
+      <div class="pl-text" id="pageLoaderText">Loading...</div>
+    </div>
+  </div>
+
   <canvas id="particleCanvas"></canvas>
-  <a href="/" class="back-home"><i class="fa-solid fa-arrow-left"></i> Home</a>
+  <a href="../index.html" class="back-home"><i class="fa-solid fa-arrow-left"></i> Home</a>
 
   <section class="hero">
     <div class="wrap">
       <div class="hero-logo-wrapper">
         <div class="logo-card">
-          <img src="/vault/logo.png" alt="NEOSHY Logo" class="logo-img" onerror="this.style.display='none'">
+          <img src="logo.png" alt="NEOSHY Logo" class="logo-img" onerror="this.style.display='none'">
         </div>
       </div>
       <br>
       <div class="hero-badge"><i class="fa-solid fa-shield-halved"></i> 100% CLEAN & TESTED REPOSITORY</div>
       <h1 class="hero-title">Download Tools & Modules<br><span>NeoShy.</span></h1>
       <div class="tool-bridge">
-        <a href="/tools">
+        <a href="../tools/index.html">
           <i class="fa-solid fa-mobile-screen-button"></i>
           Open NeoShy Remote Tool
           <i class="fa-solid fa-arrow-right"></i>
@@ -296,7 +331,7 @@
     </button>
   </div>
 
-  <a href="/account" class="admin-btn" id="adminBtn" style="display:none">
+  <a href="../account/index.html" class="admin-btn" id="adminBtn" style="display:none">
     <i class="fa-solid fa-user-shield"></i> <span id="adminBtnText">Account Center</span>
   </a>
 
@@ -457,8 +492,8 @@
     class Particle {
       constructor() {
         this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 2 + 0.5;
-        this.speedX = (Math.random() - 0.5) * 0.8; this.speedY = (Math.random() - 0.5) * 0.8;
+        this.size = Math.random() * 1.6 + 0.4;
+        this.speedX = (Math.random() - 0.5) * 0.45; this.speedY = (Math.random() - 0.5) * 0.45;
       }
       update() {
         this.x += this.speedX; this.y += this.speedY;
@@ -466,37 +501,74 @@
         if (this.y > canvas.height) this.y = 0; if (this.y < 0) this.y = canvas.height;
       }
       draw() {
-        ctx.fillStyle = "rgba(59, 158, 255, 0.6)";
+        ctx.fillStyle = "rgba(59, 158, 255, 0.5)";
         ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
       }
     }
     function initParticles() {
       particles = [];
-      const count = Math.floor((canvas.width * canvas.height) / 18000);
+      const area = canvas.width * canvas.height;
+      const count = Math.min(45, Math.max(18, Math.floor(area / 28000)));
       for (let i = 0; i < count; i++) particles.push(new Particle());
     }
-    initParticles();
+    let animId = null;
+    let isVisible = true;
     function animateParticles() {
+      if (!isVisible) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (let i = 0; i < particles.length; i++) {
+      const len = particles.length;
+      for (let i = 0; i < len; i++) {
         particles[i].update(); particles[i].draw();
-        for (let j = i; j < particles.length; j++) {
+        for (let j = i + 2; j < len; j += 2) {
           const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance < 90) {
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 70) {
             ctx.beginPath();
-            ctx.strokeStyle = "rgba(59, 158, 255, " + (1 - distance / 90 - 0.2) + ")";
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = "rgba(59, 158, 255, " + (0.55 - dist / 70) + ")";
+            ctx.lineWidth = 0.4;
             ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
           }
         }
       }
-      requestAnimationFrame(animateParticles);
+      animId = requestAnimationFrame(animateParticles);
     }
+    document.addEventListener("visibilitychange", () => {
+      isVisible = !document.hidden;
+      if (isVisible && !animId) animateParticles();
+      if (!isVisible && animId) { cancelAnimationFrame(animId); animId = null; }
+    });
+    initParticles();
     animateParticles();
 
     checkSession();
     loadFiles();
   </script>
+<script>
+
+    window.showPageLoader = function(msg) {
+      var el = document.getElementById("pageLoader");
+      var tx = document.getElementById("pageLoaderText");
+      if (tx) tx.textContent = msg || "Loading...";
+      if (el) el.classList.add("show");
+    };
+    window.hidePageLoader = function() {
+      var el = document.getElementById("pageLoader");
+      if (el) el.classList.remove("show");
+    };
+    document.addEventListener("DOMContentLoaded", function() {
+      hidePageLoader();
+      document.body.addEventListener("click", function(e) {
+        var a = e.target.closest("a[href]");
+        if (!a) return;
+        var href = a.getAttribute("href") || "";
+        if (!href || href.charAt(0) === "#" || href.indexOf("javascript:") === 0) return;
+        if (a.target === "_blank" || a.hasAttribute("download")) return;
+        if (/^https?:\/\//i.test(href) && href.indexOf(location.host) === -1) return;
+        showPageLoader("Loading...");
+      }, true);
+    });
+    window.addEventListener("pageshow", function() { hidePageLoader(); });
+
+</script>
 </body>
 </html>
