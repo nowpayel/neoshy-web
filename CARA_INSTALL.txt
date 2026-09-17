@@ -1,0 +1,19 @@
+VAULT ADMIN FIX — CARA DEPLOY
+=============================
+
+Masalah: /vault/admin blank karena file admin.html lama isinya redirect loop.
+
+Yang harus dilakukan:
+
+1. Di project kamu, BUKA folder vault/
+2. HAPUS file vault/admin.html yang LAMA (kalau masih ada yang kecil ~225 byte / isinya redirect)
+3. Copy SEMUA isi folder vault/ dari zip ini ke project kamu (replace):
+   - vault/admin.html          ← halaman admin LENGKAP (bukan redirect)
+   - vault/admin/index.html    ← sama, backup
+   - vault/index.html          ← halaman vault publik (opsional, kalau sama biarin)
+4. Copy vercel.json ke ROOT project (replace)
+5. Pastikan vault/logo.png tetap ada di project
+6. Deploy ulang ke Vercel (git push atau upload)
+7. Buka https://neoshy.vercel.app/vault/admin lalu hard refresh (Ctrl+F5)
+
+Setelah itu harus muncul form Login System Vault Admin.

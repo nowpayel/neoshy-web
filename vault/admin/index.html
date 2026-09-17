@@ -341,7 +341,7 @@
     <div class="login-box neo-card">
       <div class="hero-logo-wrapper">
         <div class="logo-card">
-          <img src="logo.png" alt="NEOSHY" class="logo-img" onerror="this.style.display='none'">
+          <img src="/vault/logo.png" alt="NEOSHY" class="logo-img" onerror="this.style.display='none'">
         </div>
       </div>
       <h2>VAULT ADMIN</h2>
@@ -392,7 +392,7 @@
     <div class="topbar">
       <h1><i class="fa-solid fa-box-archive" style="color:var(--cyan)"></i> Vault Admin</h1>
       <div class="topbar-actions">
-        <a href="../../account/index.html" id="linkBackAccount" class="btn-sm"><i class="fa-solid fa-arrow-left"></i> Account</a>
+        <a href="/account" id="linkBackAccount" class="btn-sm"><i class="fa-solid fa-arrow-left"></i> Account</a>
         <button class="btn-sm btn-danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
       </div>
     </div>
@@ -810,11 +810,11 @@
             const params = new URLSearchParams();
             params.set("access_token", access_token);
             if (refresh_token) params.set("refresh_token", refresh_token);
-            window.location.href = "../../account/index.html#" + params.toString();
+            window.location.href = "/account#" + params.toString();
             return;
           }
         } catch (err) {}
-        window.location.href = "../../account/index.html";
+        window.location.href = "/account";
       });
     })();
 
