@@ -33,6 +33,18 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
 
+    /* Hide scrollbar on testimoni page */
+    html, body {
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE/Edge */
+    }
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
     body {
       background-color: var(--bg);
       background-image:
@@ -446,7 +458,6 @@
   <nav>
     <div class="wrap inner">
       <a href="../index.html" class="logo">
-        <img src="logo.png" alt="NEOSHY" class="nav-logo" onerror="this.style.display='none'">
         <span class="brand-text">NEO<span>SHY</span></span>
       </a>
       <ul class="nav-links">
@@ -466,7 +477,7 @@
     <div class="wrap">
       <h1 class="hero-title">Testimoni & <span>Dokumentasi</span></h1>
       <p class="hero-desc">
-        Foto hasil pengerjaan jasa NeoShy. Hanya menampilkan device yang memiliki dokumentasi di Manage Service.
+        Foto hasil pengerjaan jasa NeoShy. Hanya menampilkan device yang memiliki dokumentasi.
       </p>
     </div>
   </section>
@@ -605,11 +616,45 @@
       }
     }
 
+    function renderGalleryGrid(allImages) {
+      if (!allImages || allImages.length === 0) {
+        return `<div class="gallery-empty">Tidak ada foto dokumentasi.</div>`;
+      }
+      let grid = `<div class="gallery-grid">`;
+      allImages.forEach((src, idx) => {
+        grid += `
+          <div class="gallery-item" onclick="openImgModal(this.querySelector('img'))">
+            <img src="${src}" alt="Dokumentasi ${idx + 1}" loading="lazy" decoding="async" />
+          </div>`;
+      });
+      grid += `</div>`;
+      return grid;
+    }
+
+    function appendImagesToGallery(galleryEl, newImages, startIdx) {
+      let grid = galleryEl.querySelector(".gallery-grid");
+      if (!grid) {
+        galleryEl.innerHTML = `<div class="gallery-grid"></div>`;
+        grid = galleryEl.querySelector(".gallery-grid");
+      }
+      // remove loading spinner if still present
+      const loading = galleryEl.querySelector(".gallery-loading");
+      if (loading) loading.remove();
+
+      newImages.forEach((src, i) => {
+        const idx = startIdx + i;
+        const div = document.createElement("div");
+        div.className = "gallery-item";
+        div.onclick = function () { openImgModal(this.querySelector("img")); };
+        div.innerHTML = `<img src="${src}" alt="Dokumentasi ${idx + 1}" loading="lazy" decoding="async" />`;
+        grid.appendChild(div);
+      });
+    }
+
     async function toggleDevice(headerEl) {
       const card = headerEl.closest(".device-card");
       const isOpen = card.classList.contains("open");
 
-      // Close others optionally (accordion style) — keep all openable for now
       if (isOpen) {
         card.classList.remove("open");
         return;
@@ -619,56 +664,78 @@
       const galleryEl = card.querySelector(".device-gallery");
       const idsStr = card.dataset.ids || "";
       const ids = idsStr.split(",").filter(Boolean);
+      const cacheKey = "ids:" + ids.join(",");
 
       if (!ids.length) {
         galleryEl.innerHTML = `<div class="gallery-empty">Tidak ada foto.</div>`;
         return;
       }
 
-      // Already loaded?
-      if (card.dataset.loaded === "1") return;
-
-      galleryEl.innerHTML = `<div class="gallery-loading"><i class="fa-solid fa-spinner"></i> Memuat foto...</div>`;
-
+      // Instant restore from cache
+      if (card.dataset.loaded === "1" && galleryCache[cacheKey]) {
+        galleryEl.innerHTML = renderGalleryGrid(galleryCache[cacheKey]);
+        return;
+      }
       try {
-        // Fetch dokumentasi only for these ids (on demand)
-        const { data, error } = await db
-          .from("rekap_jasa")
-          .select("id, dokumentasi")
-          .in("id", ids);
+        const sess = sessionStorage.getItem("neoshy_gal_" + cacheKey);
+        if (sess) {
+          const cachedImgs = JSON.parse(sess);
+          if (Array.isArray(cachedImgs) && cachedImgs.length) {
+            galleryCache[cacheKey] = cachedImgs;
+            galleryEl.innerHTML = renderGalleryGrid(cachedImgs);
+            card.dataset.loaded = "1";
+            return;
+          }
+        }
+      } catch (e) {}
 
-        if (error) throw error;
+      galleryEl.innerHTML = `<div class="gallery-loading"><i class="fa-solid fa-spinner fa-spin"></i> Memuat foto...</div>`;
 
-        const allImages = [];
-        (data || []).forEach((row) => {
-          if (!row.dokumentasi) return;
-          const arr = Array.isArray(row.dokumentasi) ? row.dokumentasi : [row.dokumentasi];
+      const allImages = [];
+      try {
+        // Fetch one record at a time so first photo appears ASAP
+        for (let i = 0; i < ids.length; i++) {
+          const id = ids[i];
+          const { data, error } = await db
+            .from("rekap_jasa")
+            .select("id, dokumentasi")
+            .eq("id", id)
+            .maybeSingle();
+
+          if (error) {
+            console.warn("fetch foto id", id, error.message);
+            continue;
+          }
+          if (!data || !data.dokumentasi) continue;
+
+          const arr = Array.isArray(data.dokumentasi) ? data.dokumentasi : [data.dokumentasi];
+          const batch = [];
           arr.forEach((src) => {
             if (src && typeof src === "string" && src.startsWith("data:")) {
-              allImages.push(src);
+              batch.push(src);
             }
           });
-        });
+          if (batch.length) {
+            const startIdx = allImages.length;
+            allImages.push(...batch);
+            appendImagesToGallery(galleryEl, batch, startIdx);
+          }
+        }
 
         if (allImages.length === 0) {
           galleryEl.innerHTML = `<div class="gallery-empty">Tidak ada foto dokumentasi.</div>`;
-          card.dataset.loaded = "1";
-          return;
         }
 
-        let grid = `<div class="gallery-grid">`;
-        allImages.forEach((src, idx) => {
-          grid += `
-            <div class="gallery-item" onclick="openImgModal(this.querySelector('img'))">
-              <img src="${src}" alt="Dokumentasi ${idx + 1}" loading="lazy" decoding="async" />
-            </div>`;
-        });
-        grid += `</div>`;
-        galleryEl.innerHTML = grid;
+        galleryCache[cacheKey] = allImages;
+        try {
+          sessionStorage.setItem("neoshy_gal_" + cacheKey, JSON.stringify(allImages));
+        } catch (e) {}
         card.dataset.loaded = "1";
       } catch (err) {
         console.error(err);
-        galleryEl.innerHTML = `<div class="gallery-empty">Gagal memuat foto.</div>`;
+        if (allImages.length === 0) {
+          galleryEl.innerHTML = `<div class="gallery-empty">Gagal memuat foto. Coba buka lagi.</div>`;
+        }
       }
     }
 

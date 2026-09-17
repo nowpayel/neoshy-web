@@ -1676,6 +1676,21 @@
     const DEFAULT_SERVICES = [];
 
     async function loadServiceCatalog() {
+      // Prefer cached catalog for instant form open
+      let cached = null;
+      try {
+        const raw = localStorage.getItem(PRICE_KEY);
+        if (raw) cached = JSON.parse(raw);
+      } catch (e) {}
+      if (Array.isArray(cached) && cached.length > 0) {
+        // Refresh in background (non-blocking)
+        loadServiceCatalogFresh().catch(() => {});
+        return cached;
+      }
+      return await loadServiceCatalogFresh();
+    }
+
+    async function loadServiceCatalogFresh() {
       try {
         const { data, error } = await db.from("service_catalog")
           .select("id, type, label, price, discount_price, discount_percent, discount_label, sort_order")
@@ -1695,7 +1710,11 @@
         }
         console.warn("service_catalog", error.message);
       } catch (e) { console.warn(e); }
-      try { localStorage.removeItem(PRICE_KEY); } catch (e) {}
+      // Keep existing cache on error; only clear if none
+      try {
+        const raw = localStorage.getItem(PRICE_KEY);
+        if (!raw) localStorage.removeItem(PRICE_KEY);
+      } catch (e) {}
       return [];
     }
 
@@ -1796,15 +1815,21 @@
     }
 
     async function openOrder(preselect) {
+      // Open modal immediately so form doesn't appear "closed" after loader
+      const modal = document.getElementById("orderModal");
+      if (modal) {
+        modal.classList.add("show");
+        document.body.style.overflow = "hidden";
+      }
       if (window.showPageLoader) showPageLoader("Membuka form...");
       try {
         await renderServiceChecklist();
-        document.getElementById("orderModal").classList.add("show");
-        document.body.style.overflow = "hidden";
         document.querySelectorAll('#svcChecklist input[name="svc"]').forEach(cb => {
           cb.checked = preselect ? (cb.value === preselect) : false;
         });
         calcOrderTotal();
+      } catch (err) {
+        console.warn("openOrder", err);
       } finally {
         if (window.hidePageLoader) hidePageLoader();
       }
