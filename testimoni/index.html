@@ -563,25 +563,16 @@
           return;
         }
 
-        // Group by hp_model (keep order of first appearance)
-        const groups = new Map();
-        data.forEach((row) => {
-          const key = (row.hp_model || "Unknown Device").trim();
-          if (!groups.has(key)) {
-            groups.set(key, []);
-          }
-          groups.get(key).push(row);
-        });
-
+        // Setiap entry ditampilkan terpisah (tidak digroup by model)
+        // supaya dokumentasi HP dengan tipe sama tidak tercampur
         let html = "";
-        for (const [model, rows] of groups) {
-          const ids = rows.map((r) => r.id);
-          const services = [...new Set(rows.map((r) => r.service).filter(Boolean))];
-          const latest = rows[0];
-          const entryCount = rows.length;
+        data.forEach((row) => {
+          const model = (row.hp_model || "Unknown Device").trim();
+          const service = row.service || "";
+          const id = row.id;
 
           html += `
-            <div class="device-card" data-ids="${escapeHtml(ids.join(","))}">
+            <div class="device-card" data-ids="${escapeHtml(String(id))}">
               <div class="device-header" onclick="toggleDevice(this)">
                 <div class="device-info">
                   <div class="device-name">
@@ -589,9 +580,8 @@
                     ${escapeHtml(model)}
                   </div>
                   <div class="device-meta">
-                    ${services.length ? `<span><i class="fa-solid fa-screwdriver-wrench"></i> ${escapeHtml(services.join(", "))}</span>` : ""}
-                    <span><i class="fa-regular fa-calendar"></i> ${formatDate(latest.tanggal)}</span>
-                    ${entryCount > 1 ? `<span>${entryCount} entry</span>` : ""}
+                    ${service ? `<span><i class="fa-solid fa-screwdriver-wrench"></i> ${escapeHtml(service)}</span>` : ""}
+                    <span><i class="fa-regular fa-calendar"></i> ${formatDate(row.tanggal)}</span>
                   </div>
                 </div>
                 <div class="device-actions">
@@ -603,7 +593,7 @@
                 <div class="gallery-loading"><i class="fa-solid fa-spinner"></i> Memuat foto...</div>
               </div>
             </div>`;
-        }
+        });
 
         listEl.innerHTML = html;
       } catch (err) {
@@ -671,11 +661,14 @@
         return;
       }
 
-      // Instant restore from cache
-      if (card.dataset.loaded === "1" && galleryCache[cacheKey]) {
+      // Instant from memory cache
+      if (galleryCache[cacheKey]) {
         galleryEl.innerHTML = renderGalleryGrid(galleryCache[cacheKey]);
+        card.dataset.loaded = "1";
         return;
       }
+
+      // Try sessionStorage (may fail if too large)
       try {
         const sess = sessionStorage.getItem("neoshy_gal_" + cacheKey);
         if (sess) {
@@ -693,28 +686,25 @@
 
       const allImages = [];
       try {
-        // Fetch one record at a time so first photo appears ASAP
-        for (let i = 0; i < ids.length; i++) {
-          const id = ids[i];
-          const { data, error } = await db
-            .from("rekap_jasa")
-            .select("id, dokumentasi")
-            .eq("id", id)
-            .maybeSingle();
+        // Fetch semua ID secara paralel biar lebih cepat
+        const results = await Promise.all(
+          ids.map((id) =>
+            db
+              .from("rekap_jasa")
+              .select("dokumentasi")
+              .eq("id", id)
+              .maybeSingle()
+              .then(({ data, error }) => {
+                if (error || !data || !data.dokumentasi) return [];
+                const arr = Array.isArray(data.dokumentasi) ? data.dokumentasi : [data.dokumentasi];
+                return arr.filter((src) => src && typeof src === "string" && src.startsWith("data:"));
+              })
+              .catch(() => [])
+          )
+        );
 
-          if (error) {
-            console.warn("fetch foto id", id, error.message);
-            continue;
-          }
-          if (!data || !data.dokumentasi) continue;
-
-          const arr = Array.isArray(data.dokumentasi) ? data.dokumentasi : [data.dokumentasi];
-          const batch = [];
-          arr.forEach((src) => {
-            if (src && typeof src === "string" && src.startsWith("data:")) {
-              batch.push(src);
-            }
-          });
+        // Tampilkan foto secara bertahap (progressive)
+        for (const batch of results) {
           if (batch.length) {
             const startIdx = allImages.length;
             allImages.push(...batch);
@@ -727,6 +717,7 @@
         }
 
         galleryCache[cacheKey] = allImages;
+        // Coba simpan ke sessionStorage (kalau terlalu besar akan di-skip)
         try {
           sessionStorage.setItem("neoshy_gal_" + cacheKey, JSON.stringify(allImages));
         } catch (e) {}
