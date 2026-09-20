@@ -1304,7 +1304,7 @@
       document.getElementById('modal-remaining-amount-display').innerText = formatRupiahWithDecimals(remaining);
     }
 
-    /** Compress & resize image before storing as base64 (max 1280px, JPEG ~0.72) */
+    /** Compress & resize image before storing (max 1280px, JPEG ~0.72) → returns dataURL for preview */
     function compressImage(file, maxSize = 1280, quality = 0.72) {
       return new Promise((resolve, reject) => {
         if (!file.type || !file.type.startsWith("image/")) {
@@ -1333,6 +1333,74 @@
         reader.onerror = () => reject(new Error("File read failed"));
         reader.readAsDataURL(file);
       });
+    }
+
+    /** Convert dataURL → Blob */
+    function dataURLtoBlob(dataURL) {
+      const arr = dataURL.split(",");
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) u8arr[n] = bstr.charCodeAt(n);
+      return new Blob([u8arr], { type: mime });
+    }
+
+    /** Upload satu gambar ke Supabase Storage, return public URL. Kalau sudah URL, return apa adanya. */
+    async function uploadDocToStorage(src) {
+      // Sudah berupa link (foto lama yang di-edit / sudah di-upload)
+      if (typeof src === "string" && (src.startsWith("http://") || src.startsWith("https://"))) {
+        return src;
+      }
+      // Base64 → upload
+      if (typeof src === "string" && src.startsWith("data:")) {
+        const blob = dataURLtoBlob(src);
+        const ext = blob.type === "image/png" ? "png" : "jpg";
+        const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 9)}.${ext}`;
+        const path = `docs/${fileName}`;
+
+        const { error } = await db.storage
+          .from("dokumentasi")
+          .upload(path, blob, {
+            contentType: blob.type,
+            upsert: false
+          });
+
+        if (error) throw error;
+
+        const { data } = db.storage.from("dokumentasi").getPublicUrl(path);
+        return data.publicUrl;
+      }
+      throw new Error("Format gambar tidak dikenali");
+    }
+
+    /** Upload semua item di list, return array of public URLs */
+    async function uploadAllDocs(list) {
+      if (!list || list.length === 0) return null;
+      const urls = [];
+      const errors = [];
+
+      for (let i = 0; i < list.length; i++) {
+        const src = list[i];
+        try {
+          const url = await uploadDocToStorage(src);
+          urls.push(url);
+        } catch (err) {
+          console.error("Gagal upload foto ke-" + (i + 1) + ":", err);
+          errors.push(`Foto ${i + 1}: ${err.message || err}`);
+        }
+      }
+
+      if (errors.length > 0) {
+        // Kalau SEMUA gagal → throw biar user tahu
+        if (urls.length === 0) {
+          throw new Error("Semua foto gagal di-upload:\n" + errors.join("\n"));
+        }
+        // Kalau sebagian gagal → tetap simpan yang berhasil, tapi kasih tahu
+        alert("Beberapa foto gagal di-upload (yang berhasil tetap disimpan):\n" + errors.join("\n"));
+      }
+
+      return urls.length > 0 ? urls : null;
     }
 
     function handleFileSelect(input) {
@@ -1795,6 +1863,20 @@
         dpFormatted = formatRupiahWithDecimals(parsedDP);
       }
 
+      // Upload foto ke Storage dulu (kalau ada)
+      let dokumentasiUrls = null;
+      try {
+        if (docBase64List.length > 0) {
+          btnSubmit.innerText = "Uploading photos...";
+          dokumentasiUrls = await uploadAllDocs(docBase64List);
+        }
+      } catch (upErr) {
+        alert("Gagal upload foto: " + upErr.message);
+        btnSubmit.innerText = "Save Record";
+        btnSubmit.disabled = false;
+        return;
+      }
+
       const payload = {
         tanggal: document.getElementById('tanggal').value,
         hp_model: document.getElementById('hp_model').value,
@@ -1806,10 +1888,11 @@
         customer_phone: document.getElementById('customer_phone').value || null,
         metode_pembayaran: document.getElementById('metode').value,
         notes: document.getElementById('notes').value || null,
-        dokumentasi: docBase64List.length > 0 ? docBase64List : null
+        dokumentasi: dokumentasiUrls
       };
 
       try {
+        btnSubmit.innerText = "Saving...";
         const { error } = await db.from('rekap_jasa').insert([payload]);
         if (error) throw error;
 
@@ -1855,6 +1938,20 @@
         dpFormatted = formatRupiahWithDecimals(parsedDP);
       }
 
+      // Upload foto ke Storage dulu (kalau ada)
+      let dokumentasiUrls = null;
+      try {
+        if (modalDocBase64List.length > 0) {
+          btnSubmit.innerText = "Uploading photos...";
+          dokumentasiUrls = await uploadAllDocs(modalDocBase64List);
+        }
+      } catch (upErr) {
+        alert("Gagal upload foto: " + upErr.message);
+        btnSubmit.innerText = "Update Record";
+        btnSubmit.disabled = false;
+        return;
+      }
+
       const payload = {
         tanggal: document.getElementById('modal-tanggal').value,
         hp_model: document.getElementById('modal-hp_model').value,
@@ -1866,10 +1963,11 @@
         customer_phone: document.getElementById('modal-customer_phone').value || null,
         metode_pembayaran: document.getElementById('modal-metode').value,
         notes: document.getElementById('modal-notes').value || null,
-        dokumentasi: modalDocBase64List.length > 0 ? modalDocBase64List : null
+        dokumentasi: dokumentasiUrls
       };
 
       try {
+        btnSubmit.innerText = "Updating...";
         const { error } = await db.from('rekap_jasa').update(payload).eq('id', editId);
         if (error) throw error;
 

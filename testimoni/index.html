@@ -697,7 +697,11 @@
               .then(({ data, error }) => {
                 if (error || !data || !data.dokumentasi) return [];
                 const arr = Array.isArray(data.dokumentasi) ? data.dokumentasi : [data.dokumentasi];
-                return arr.filter((src) => src && typeof src === "string" && src.startsWith("data:"));
+                // Terima base64 lama DAN URL baru dari Storage
+                return arr.filter((src) =>
+                  src && typeof src === "string" &&
+                  (src.startsWith("data:") || src.startsWith("http://") || src.startsWith("https://"))
+                );
               })
               .catch(() => [])
           )
