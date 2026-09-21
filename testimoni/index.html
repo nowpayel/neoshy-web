@@ -483,7 +483,7 @@
   </section>
 
   <!-- ADMIN BAR (hanya muncul jika login) -->
-  <div id="adminBar" class="hidden" style="background:rgba(16,22,36,0.95);border-bottom:1px solid rgba(59,158,255,0.25);padding:10px 0;position:sticky;top:0;z-index:50;">
+  <div id="adminBar" class="hidden" style="display:none;background:rgba(16,22,36,0.95);border-bottom:1px solid rgba(59,158,255,0.25);padding:10px 0;position:sticky;top:0;z-index:50;">
     <div class="wrap" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;">
       <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3b9eff;font-family:ui-monospace,monospace;">
         <i class="fa-solid fa-shield-halved"></i>
@@ -493,16 +493,27 @@
           Tampilkan yang disembunyikan
         </label>
       </div>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <a href="../manage/index.html" class="btn btn-ghost" style="padding:6px 12px;font-size:12px;">
           <i class="fa-solid fa-gear"></i> Control Center
         </a>
-        <button onclick="logoutAdmin()" class="btn btn-ghost" style="padding:6px 12px;font-size:12px;color:#f87171;">
+        <button type="button" onclick="exitAdminMode()" class="btn btn-ghost" style="padding:6px 12px;font-size:12px;color:#94a3b8;">
+          <i class="fa-solid fa-xmark"></i> Tutup Mode Admin
+        </button>
+        <button type="button" onclick="logoutAdmin()" class="btn btn-ghost" style="padding:6px 12px;font-size:12px;color:#f87171;">
           <i class="fa-solid fa-right-from-bracket"></i> Logout
         </button>
       </div>
     </div>
   </div>
+
+  <!-- Tombol kecil: hanya muncul kalau sudah login tapi BELUM mode admin -->
+  <button type="button" id="btnEnterAdmin" onclick="enterAdminMode()" title="Masuk Mode Admin"
+    style="display:none;position:fixed;bottom:20px;right:20px;z-index:60;width:44px;height:44px;border-radius:50%;
+    background:rgba(16,22,36,0.95);border:1px solid rgba(59,158,255,0.45);color:#3b9eff;cursor:pointer;
+    box-shadow:0 4px 20px rgba(0,0,0,0.4);font-size:16px;align-items:center;justify-content:center;">
+    <i class="fa-solid fa-shield-halved"></i>
+  </button>
 
   <!-- LIST -->
   <section>
@@ -545,8 +556,17 @@
     const listEl = document.getElementById("deviceList");
     // Cache of loaded galleries by id
     const galleryCache = {};
-    let isAdmin = false;
+    let isAdmin = false;       // true HANYA jika login + URL punya ?admin=1
+    let isLoggedIn = false;
     let currentSession = null;
+
+    function wantsAdminMode() {
+      try {
+        return new URLSearchParams(window.location.search).get("admin") === "1";
+      } catch (e) {
+        return false;
+      }
+    }
 
     function escapeHtml(str) {
       if (!str) return "";
@@ -568,12 +588,46 @@
       }
     }
 
-    function setAdminUI(active) {
-      isAdmin = !!active;
+    function applyAdminUI() {
+      // Admin mode = sudah login DAN URL punya ?admin=1
+      isAdmin = !!(isLoggedIn && wantsAdminMode());
       const bar = document.getElementById("adminBar");
+      const enterBtn = document.getElementById("btnEnterAdmin");
       if (bar) {
-        if (isAdmin) bar.classList.remove("hidden");
-        else bar.classList.add("hidden");
+        if (isAdmin) {
+          bar.classList.remove("hidden");
+          bar.style.display = "";
+        } else {
+          bar.classList.add("hidden");
+          bar.style.display = "none";
+        }
+      }
+      // Tombol masuk admin: hanya jika login tapi belum mode admin
+      if (enterBtn) {
+        if (isLoggedIn && !isAdmin) {
+          enterBtn.style.display = "flex";
+        } else {
+          enterBtn.style.display = "none";
+        }
+      }
+    }
+
+    function enterAdminMode() {
+      if (!isLoggedIn) {
+        alert("Silakan login dulu di Control Center (/manage), lalu kembali ke halaman ini.");
+        return;
+      }
+      try {
+        const u = new URL(window.location.href);
+        // file:// tidak support searchParams dengan baik di beberapa browser
+        if (u.protocol === "file:") {
+          alert("Jangan buka lewat file lokal (file://).\nBuka lewat website: https://neoshy.vercel.app/testimoni/\nSetelah login, klik ikon perisai di pojok kanan bawah.");
+          return;
+        }
+        u.searchParams.set("admin", "1");
+        window.location.href = u.toString();
+      } catch (e) {
+        window.location.search = "?admin=1";
       }
     }
 
@@ -582,22 +636,25 @@
         const { data: { session }, error } = await db.auth.getSession();
         if (error || !session || !session.user) {
           currentSession = null;
-          setAdminUI(false);
+          isLoggedIn = false;
+          applyAdminUI();
           return;
         }
-        // Double-check: token must not be expired
         const expiresAt = session.expires_at ? session.expires_at * 1000 : 0;
         if (expiresAt && Date.now() > expiresAt) {
-          await db.auth.signOut();
+          try { await db.auth.signOut(); } catch (e) {}
           currentSession = null;
-          setAdminUI(false);
+          isLoggedIn = false;
+          applyAdminUI();
           return;
         }
         currentSession = session;
-        setAdminUI(true);
+        isLoggedIn = true;
+        applyAdminUI();
       } catch (e) {
         currentSession = null;
-        setAdminUI(false);
+        isLoggedIn = false;
+        applyAdminUI();
       }
     }
 
@@ -605,31 +662,47 @@
     db.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT" || !session) {
         currentSession = null;
-        setAdminUI(false);
-        // Clear gallery cache supaya UI admin hilang
+        isLoggedIn = false;
+        applyAdminUI();
         Object.keys(galleryCache).forEach(k => delete galleryCache[k]);
         loadList();
       } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
         currentSession = session;
-        setAdminUI(true);
+        isLoggedIn = true;
+        applyAdminUI();
         loadList();
       }
     });
 
     async function logoutAdmin() {
-      try {
-        await db.auth.signOut();
-      } catch (e) {}
-      // Bersihkan token manual biar pasti hilang
+      try { await db.auth.signOut(); } catch (e) {}
       try {
         localStorage.removeItem("sb-vsednhqbszdiwpazcoii-auth-token");
-        const keys = Object.keys(localStorage);
-        keys.forEach(k => {
+        Object.keys(localStorage).forEach(k => {
           if (k.startsWith("sb-") && k.includes("auth")) localStorage.removeItem(k);
         });
       } catch (e) {}
       currentSession = null;
-      setAdminUI(false);
+      isLoggedIn = false;
+      applyAdminUI();
+      Object.keys(galleryCache).forEach(k => delete galleryCache[k]);
+      // Hapus ?admin=1 dari URL biar bar pasti hilang
+      try {
+        const u = new URL(window.location.href);
+        u.searchParams.delete("admin");
+        window.history.replaceState({}, "", u.pathname + u.search + u.hash);
+      } catch (e) {}
+      loadList();
+    }
+
+    /** Keluar dari mode admin tanpa logout (bar hilang, tetap login di manage) */
+    function exitAdminMode() {
+      try {
+        const u = new URL(window.location.href);
+        u.searchParams.delete("admin");
+        window.history.replaceState({}, "", u.pathname + u.search + u.hash);
+      } catch (e) {}
+      applyAdminUI();
       Object.keys(galleryCache).forEach(k => delete galleryCache[k]);
       loadList();
     }
