@@ -781,6 +781,7 @@
     }
     
     let cacheData = [];
+    let allRevenueData = []; // full dataset for accurate Total Revenue & filtered omset
     let currentEtaNote = "";
     let targetEtaISO = null;
     let docBase64List = []; 
@@ -1602,6 +1603,11 @@
         cacheData = reset ? data : [...cacheData, ...data];
         renderTable(cacheData);
 
+        // Always refresh full revenue totals (independent of pagination)
+        if (reset) {
+          loadAllRevenueData();
+        }
+
         const loadMoreBtn = document.getElementById('load-more-container');
         if (hasMoreData) {
           loadMoreBtn.classList.remove('hidden');
@@ -1632,6 +1638,49 @@
       calculateFilteredIncome();
     }
 
+    /** Load ALL rows (only revenue-related columns) so Total Revenue is accurate regardless of table pagination */
+    async function loadAllRevenueData() {
+      try {
+        let all = [];
+        let page = 0;
+        const size = 1000;
+        while (true) {
+          const from = page * size;
+          const to = from + size - 1;
+          const { data, error } = await db
+            .from('rekap_jasa')
+            .select('harga, status_bayar, dp_harga, tanggal')
+            .order('id', { ascending: false })
+            .range(from, to);
+          if (error) throw error;
+          if (!data || data.length === 0) break;
+          all = all.concat(data);
+          if (data.length < size) break;
+          page++;
+        }
+        allRevenueData = all;
+        updateRevenueDisplays();
+      } catch (err) {
+        console.error('Failed to load full revenue data:', err.message);
+      }
+    }
+
+    function getEffectiveIncome(row) {
+      const totalHargaNum = parseRawPrice(row.harga);
+      const dpHargaNum = parseRawPrice(row.dp_harga);
+      return row.status_bayar === 'DP' ? dpHargaNum : totalHargaNum;
+    }
+
+    function updateRevenueDisplays() {
+      // Total Revenue = sum of ALL records
+      let totalOmset = 0;
+      allRevenueData.forEach(row => {
+        totalOmset += getEffectiveIncome(row);
+      });
+      document.getElementById('total-omset').innerText = formatRupiahWithDecimals(totalOmset);
+      calculateFilteredIncome();
+    }
+
     function calculateFilteredIncome() {
       const rangeVal = document.getElementById('income-range-filter').value;
       const datePickerVal = document.getElementById('income-date-filter').value;
@@ -1640,12 +1689,11 @@
       const now = new Date();
       now.setHours(23, 59, 59, 999);
 
-      cacheData.forEach(row => {
+      // Always use full dataset, not just currently loaded table pages
+      allRevenueData.forEach(row => {
         if (!row.tanggal) return;
 
-        const totalHargaNum = parseRawPrice(row.harga);
-        const dpHargaNum = parseRawPrice(row.dp_harga);
-        const effectiveIncome = row.status_bayar === 'DP' ? dpHargaNum : totalHargaNum;
+        const effectiveIncome = getEffectiveIncome(row);
 
         const rowDate = new Date(row.tanggal);
         rowDate.setHours(0, 0, 0, 0);
@@ -1682,23 +1730,18 @@
       
       tbody.innerHTML = '';
       mobileCards.innerHTML = '';
-      
-      let totalOmset = 0;
 
       if (dataList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="9" class="text-center p-4 text-xs font-mono text-slate-500">No data found</td></tr>`;
         mobileCards.innerHTML = `<div class="text-center p-4 text-xs font-mono text-slate-500">No data found</div>`;
-        document.getElementById('total-omset').innerText = "Rp0,00";
-        document.getElementById('filtered-omset').innerText = "Rp0,00";
+        // Do NOT zero the revenue displays here — they come from allRevenueData
         return;
       }
 
       dataList.forEach(row => {
         const totalHargaNum = parseRawPrice(row.harga);
         const dpHargaNum = parseRawPrice(row.dp_harga);
-        const effectiveIncome = row.status_bayar === 'DP' ? dpHargaNum : totalHargaNum;
-        
-        totalOmset += effectiveIncome;
+        // effectiveIncome only used for display badge logic below, not for total
 
         const remainingDP = Math.max(0, totalHargaNum - dpHargaNum);
         const isDP = row.status_bayar === 'DP';
@@ -1780,8 +1823,8 @@
         `;
       });
 
-      document.getElementById('total-omset').innerText = formatRupiahWithDecimals(totalOmset);
-      calculateFilteredIncome();
+      // Revenue totals are handled by allRevenueData + updateRevenueDisplays()
+      // Do not recalculate from paginated dataList here
       updateLiveTimers();
     }
 

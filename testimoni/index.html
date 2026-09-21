@@ -482,6 +482,28 @@
     </div>
   </section>
 
+  <!-- ADMIN BAR (hanya muncul jika login) -->
+  <div id="adminBar" class="hidden" style="background:rgba(16,22,36,0.95);border-bottom:1px solid rgba(59,158,255,0.25);padding:10px 0;position:sticky;top:0;z-index:50;">
+    <div class="wrap" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;">
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3b9eff;font-family:ui-monospace,monospace;">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>Mode Admin Testimoni</span>
+        <label style="margin-left:12px;display:flex;align-items:center;gap:6px;cursor:pointer;color:#94a3b8;font-size:12px;">
+          <input type="checkbox" id="showHiddenToggle" onchange="loadList()" style="accent-color:#3b9eff;">
+          Tampilkan yang disembunyikan
+        </label>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <a href="../manage/index.html" class="btn btn-ghost" style="padding:6px 12px;font-size:12px;">
+          <i class="fa-solid fa-gear"></i> Control Center
+        </a>
+        <button onclick="logoutAdmin()" class="btn btn-ghost" style="padding:6px 12px;font-size:12px;color:#f87171;">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- LIST -->
   <section>
     <div class="wrap">
@@ -516,11 +538,15 @@
   <script>
     const SUPABASE_URL = "https://vsednhqbszdiwpazcoii.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzZWRuaHFic3pkaXdwYXpjb2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxMjEyMDYsImV4cCI6MjEwMjY5NzIwNn0.SO5nMDZOqsT_Cwp9x4_9CFHPsVPpyNgndb2k_qVn89o";
-    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storage: window.localStorage }
+    });
 
     const listEl = document.getElementById("deviceList");
     // Cache of loaded galleries by id
     const galleryCache = {};
+    let isAdmin = false;
+    let currentSession = null;
 
     function escapeHtml(str) {
       if (!str) return "";
@@ -542,60 +568,96 @@
       }
     }
 
+    async function checkAdmin() {
+      try {
+        const { data: { session } } = await db.auth.getSession();
+        currentSession = session;
+        isAdmin = !!session;
+        const bar = document.getElementById("adminBar");
+        if (bar) {
+          if (isAdmin) bar.classList.remove("hidden");
+          else bar.classList.add("hidden");
+        }
+      } catch (e) {
+        isAdmin = false;
+      }
+    }
+
+    async function logoutAdmin() {
+      try {
+        await db.auth.signOut();
+      } catch (e) {}
+      isAdmin = false;
+      currentSession = null;
+      const bar = document.getElementById("adminBar");
+      if (bar) bar.classList.add("hidden");
+      loadList();
+    }
+
+    async function setTampilTestimoni(id, show) {
+      if (!isAdmin) return;
+      if (!confirm(show ? "Tampilkan lagi entry ini di halaman Testimoni?" : "Sembunyikan entry ini dari halaman Testimoni publik?")) return;
+      try {
+        const { error } = await db
+          .from("rekap_jasa")
+          .update({ tampil_testimoni: show })
+          .eq("id", id);
+        if (error) {
+          // Fallback jika kolom belum ada
+          if (error.message && error.message.includes("tampil_testimoni")) {
+            alert("Kolom tampil_testimoni belum ada.\nJalankan dulu SQL di file SQL_testimoni_flag.txt di Supabase SQL Editor.");
+            return;
+          }
+          throw error;
+        }
+        loadList();
+      } catch (err) {
+        alert("Gagal update: " + err.message);
+      }
+    }
+
     async function loadList() {
       try {
+        const showHidden = isAdmin && document.getElementById("showHiddenToggle")?.checked;
+
         // Light query: no heavy base64 fields
-        const { data, error } = await db
+        let query = db
           .from("rekap_jasa")
-          .select("id, hp_model, service, tanggal")
+          .select("id, hp_model, service, tanggal, tampil_testimoni")
           .not("dokumentasi", "is", null)
           .order("tanggal", { ascending: false })
-          .limit(80);
+          .limit(100);
 
-        if (error) throw error;
-
-        if (!data || data.length === 0) {
-          listEl.innerHTML = `
-            <div class="state-box">
-              <i class="fa-solid fa-images"></i>
-              <p>Belum ada dokumentasi foto yang tersedia.</p>
-            </div>`;
-          return;
+        // Publik: hanya yang tampil_testimoni = true (atau null = dianggap true)
+        // Admin + toggle: tampilkan semua
+        if (!showHidden) {
+          // Filter client-side setelah fetch agar kompatibel sebelum & sesudah migrasi kolom
         }
 
-        // Setiap entry ditampilkan terpisah (tidak digroup by model)
-        // supaya dokumentasi HP dengan tipe sama tidak tercampur
-        let html = "";
-        data.forEach((row) => {
-          const model = (row.hp_model || "Unknown Device").trim();
-          const service = row.service || "";
-          const id = row.id;
+        const { data, error } = await query;
 
-          html += `
-            <div class="device-card" data-ids="${escapeHtml(String(id))}">
-              <div class="device-header" onclick="toggleDevice(this)">
-                <div class="device-info">
-                  <div class="device-name">
-                    <i class="fa-solid fa-mobile-screen-button"></i>
-                    ${escapeHtml(model)}
-                  </div>
-                  <div class="device-meta">
-                    ${service ? `<span><i class="fa-solid fa-screwdriver-wrench"></i> ${escapeHtml(service)}</span>` : ""}
-                    <span><i class="fa-regular fa-calendar"></i> ${formatDate(row.tanggal)}</span>
-                  </div>
-                </div>
-                <div class="device-actions">
-                  <span class="badge-count"><i class="fa-solid fa-image"></i> Foto</span>
-                  <i class="fa-solid fa-chevron-down toggle-icon"></i>
-                </div>
-              </div>
-              <div class="device-gallery">
-                <div class="gallery-loading"><i class="fa-solid fa-spinner"></i> Memuat foto...</div>
-              </div>
-            </div>`;
-        });
+        if (error) {
+          // Jika kolom tampil_testimoni belum ada, coba query tanpa kolom itu
+          if (error.message && (error.message.includes("tampil_testimoni") || error.code === "42703")) {
+            const fallback = await db
+              .from("rekap_jasa")
+              .select("id, hp_model, service, tanggal")
+              .not("dokumentasi", "is", null)
+              .order("tanggal", { ascending: false })
+              .limit(100);
+            if (fallback.error) throw fallback.error;
+            renderDeviceList((fallback.data || []).map(r => ({ ...r, tampil_testimoni: true })));
+            return;
+          }
+          throw error;
+        }
 
-        listEl.innerHTML = html;
+        let rows = data || [];
+        if (!showHidden) {
+          rows = rows.filter(r => r.tampil_testimoni !== false);
+        }
+
+        renderDeviceList(rows);
       } catch (err) {
         console.error(err);
         listEl.innerHTML = `
@@ -604,6 +666,69 @@
             <p>Gagal memuat data. Coba refresh halaman.</p>
           </div>`;
       }
+    }
+
+    function renderDeviceList(data) {
+      if (!data || data.length === 0) {
+        listEl.innerHTML = `
+          <div class="state-box">
+            <i class="fa-solid fa-images"></i>
+            <p>Belum ada dokumentasi foto yang tersedia.</p>
+          </div>`;
+        return;
+      }
+
+      let html = "";
+      data.forEach((row) => {
+        const model = (row.hp_model || "Unknown Device").trim();
+        const service = row.service || "";
+        const id = row.id;
+        const isHidden = row.tampil_testimoni === false;
+
+        let adminBtns = "";
+        if (isAdmin) {
+          if (isHidden) {
+            adminBtns = `
+              <button onclick="event.stopPropagation(); setTampilTestimoni(${id}, true)" 
+                style="font-size:11px;padding:4px 8px;border-radius:6px;background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.4);cursor:pointer;font-family:ui-monospace,monospace;">
+                <i class="fa-solid fa-eye"></i> Tampilkan
+              </button>`;
+          } else {
+            adminBtns = `
+              <button onclick="event.stopPropagation(); setTampilTestimoni(${id}, false)" 
+                style="font-size:11px;padding:4px 8px;border-radius:6px;background:rgba(244,63,94,0.15);color:#f87171;border:1px solid rgba(248,113,113,0.4);cursor:pointer;font-family:ui-monospace,monospace;">
+                <i class="fa-solid fa-eye-slash"></i> Sembunyikan
+              </button>`;
+          }
+        }
+
+        html += `
+          <div class="device-card ${isHidden ? 'opacity-60' : ''}" data-ids="${escapeHtml(String(id))}" style="${isHidden ? 'border-color:rgba(248,113,113,0.3);' : ''}">
+            <div class="device-header" onclick="toggleDevice(this)">
+              <div class="device-info">
+                <div class="device-name">
+                  <i class="fa-solid fa-mobile-screen-button"></i>
+                  ${escapeHtml(model)}
+                  ${isHidden ? '<span style="font-size:10px;color:#f87171;margin-left:6px;">[disembunyikan]</span>' : ''}
+                </div>
+                <div class="device-meta">
+                  ${service ? `<span><i class="fa-solid fa-screwdriver-wrench"></i> ${escapeHtml(service)}</span>` : ""}
+                  <span><i class="fa-regular fa-calendar"></i> ${formatDate(row.tanggal)}</span>
+                </div>
+              </div>
+              <div class="device-actions" style="display:flex;align-items:center;gap:8px;">
+                ${adminBtns}
+                <span class="badge-count"><i class="fa-solid fa-image"></i> Foto</span>
+                <i class="fa-solid fa-chevron-down toggle-icon"></i>
+              </div>
+            </div>
+            <div class="device-gallery">
+              <div class="gallery-loading"><i class="fa-solid fa-spinner"></i> Memuat foto...</div>
+            </div>
+          </div>`;
+      });
+
+      listEl.innerHTML = html;
     }
 
     function renderGalleryGrid(allImages) {
@@ -845,7 +970,10 @@
     animateParticles();
 
     // Start
-    loadList();
+    (async function init() {
+      await checkAdmin();
+      await loadList();
+    })();
   </script>
 </body>
 </html>
