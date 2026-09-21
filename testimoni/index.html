@@ -568,29 +568,69 @@
       }
     }
 
-    async function checkAdmin() {
-      try {
-        const { data: { session } } = await db.auth.getSession();
-        currentSession = session;
-        isAdmin = !!session;
-        const bar = document.getElementById("adminBar");
-        if (bar) {
-          if (isAdmin) bar.classList.remove("hidden");
-          else bar.classList.add("hidden");
-        }
-      } catch (e) {
-        isAdmin = false;
+    function setAdminUI(active) {
+      isAdmin = !!active;
+      const bar = document.getElementById("adminBar");
+      if (bar) {
+        if (isAdmin) bar.classList.remove("hidden");
+        else bar.classList.add("hidden");
       }
     }
+
+    async function checkAdmin() {
+      try {
+        const { data: { session }, error } = await db.auth.getSession();
+        if (error || !session || !session.user) {
+          currentSession = null;
+          setAdminUI(false);
+          return;
+        }
+        // Double-check: token must not be expired
+        const expiresAt = session.expires_at ? session.expires_at * 1000 : 0;
+        if (expiresAt && Date.now() > expiresAt) {
+          await db.auth.signOut();
+          currentSession = null;
+          setAdminUI(false);
+          return;
+        }
+        currentSession = session;
+        setAdminUI(true);
+      } catch (e) {
+        currentSession = null;
+        setAdminUI(false);
+      }
+    }
+
+    // Listen auth changes (login/logout dari tab lain atau manage)
+    db.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" || !session) {
+        currentSession = null;
+        setAdminUI(false);
+        // Clear gallery cache supaya UI admin hilang
+        Object.keys(galleryCache).forEach(k => delete galleryCache[k]);
+        loadList();
+      } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        currentSession = session;
+        setAdminUI(true);
+        loadList();
+      }
+    });
 
     async function logoutAdmin() {
       try {
         await db.auth.signOut();
       } catch (e) {}
-      isAdmin = false;
+      // Bersihkan token manual biar pasti hilang
+      try {
+        localStorage.removeItem("sb-vsednhqbszdiwpazcoii-auth-token");
+        const keys = Object.keys(localStorage);
+        keys.forEach(k => {
+          if (k.startsWith("sb-") && k.includes("auth")) localStorage.removeItem(k);
+        });
+      } catch (e) {}
       currentSession = null;
-      const bar = document.getElementById("adminBar");
-      if (bar) bar.classList.add("hidden");
+      setAdminUI(false);
+      Object.keys(galleryCache).forEach(k => delete galleryCache[k]);
       loadList();
     }
 
@@ -603,13 +643,16 @@
           .update({ tampil_testimoni: show })
           .eq("id", id);
         if (error) {
-          // Fallback jika kolom belum ada
           if (error.message && error.message.includes("tampil_testimoni")) {
             alert("Kolom tampil_testimoni belum ada.\nJalankan dulu SQL di file SQL_testimoni_flag.txt di Supabase SQL Editor.");
             return;
           }
           throw error;
         }
+        // invalidate cache
+        Object.keys(galleryCache).forEach(k => {
+          if (k.includes(String(id))) delete galleryCache[k];
+        });
         loadList();
       } catch (err) {
         alert("Gagal update: " + err.message);
@@ -731,28 +774,54 @@
       listEl.innerHTML = html;
     }
 
-    function renderGalleryGrid(allImages) {
-      if (!allImages || allImages.length === 0) {
-        return `<div class="gallery-empty">Tidak ada foto dokumentasi.</div>`;
+    function renderGalleryGrid(allImages, recordId) {
+      let html = "";
+      if (isAdmin && recordId) {
+        html += `
+          <div class="admin-photo-toolbar" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px;padding:8px 0;">
+            <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#3b9eff;cursor:pointer;background:rgba(59,158,255,0.12);border:1px solid rgba(59,158,255,0.35);padding:6px 12px;border-radius:8px;font-family:ui-monospace,monospace;">
+              <i class="fa-solid fa-plus"></i> Tambah Foto
+              <input type="file" accept="image/*" multiple style="display:none" onchange="adminAddPhotos(${recordId}, this)">
+            </label>
+            <span style="font-size:11px;color:#64748b;font-family:ui-monospace,monospace;">Max 10MB / foto</span>
+          </div>`;
       }
-      let grid = `<div class="gallery-grid">`;
+      if (!allImages || allImages.length === 0) {
+        html += `<div class="gallery-empty">Tidak ada foto dokumentasi.</div>`;
+        return html;
+      }
+      html += `<div class="gallery-grid">`;
       allImages.forEach((src, idx) => {
-        grid += `
-          <div class="gallery-item" onclick="openImgModal(this.querySelector('img'))">
-            <img src="${src}" alt="Dokumentasi ${idx + 1}" loading="lazy" decoding="async" />
+        const safeSrc = escapeHtml(src);
+        html += `
+          <div class="gallery-item" style="position:relative;" data-idx="${idx}">
+            <img src="${safeSrc}" alt="Dokumentasi ${idx + 1}" loading="lazy" decoding="async" onclick="openImgModal(this)" style="cursor:pointer;" />
+            ${isAdmin && recordId ? `
+              <button type="button" title="Hapus foto"
+                onclick="event.stopPropagation(); adminDeletePhoto(${recordId}, ${idx})"
+                style="position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;background:rgba(244,63,94,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,0.4);">
+                <i class="fa-solid fa-xmark"></i>
+              </button>` : ""}
           </div>`;
       });
-      grid += `</div>`;
-      return grid;
+      html += `</div>`;
+      return html;
     }
 
-    function appendImagesToGallery(galleryEl, newImages, startIdx) {
+    function appendImagesToGallery(galleryEl, newImages, startIdx, recordId) {
       let grid = galleryEl.querySelector(".gallery-grid");
       if (!grid) {
-        galleryEl.innerHTML = `<div class="gallery-grid"></div>`;
-        grid = galleryEl.querySelector(".gallery-grid");
+        // keep toolbar if present
+        const toolbar = galleryEl.querySelector(".admin-photo-toolbar");
+        const empty = galleryEl.querySelector(".gallery-empty");
+        if (empty) empty.remove();
+        const loading = galleryEl.querySelector(".gallery-loading");
+        if (loading) loading.remove();
+        const gridDiv = document.createElement("div");
+        gridDiv.className = "gallery-grid";
+        galleryEl.appendChild(gridDiv);
+        grid = gridDiv;
       }
-      // remove loading spinner if still present
       const loading = galleryEl.querySelector(".gallery-loading");
       if (loading) loading.remove();
 
@@ -760,8 +829,17 @@
         const idx = startIdx + i;
         const div = document.createElement("div");
         div.className = "gallery-item";
-        div.onclick = function () { openImgModal(this.querySelector("img")); };
-        div.innerHTML = `<img src="${src}" alt="Dokumentasi ${idx + 1}" loading="lazy" decoding="async" />`;
+        div.style.position = "relative";
+        div.dataset.idx = String(idx);
+        let delBtn = "";
+        if (isAdmin && recordId) {
+          delBtn = `<button type="button" title="Hapus foto"
+            onclick="event.stopPropagation(); adminDeletePhoto(${recordId}, ${idx})"
+            style="position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;background:rgba(244,63,94,0.9);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,0.4);">
+            <i class="fa-solid fa-xmark"></i>
+          </button>`;
+        }
+        div.innerHTML = `<img src="${src}" alt="Dokumentasi ${idx + 1}" loading="lazy" decoding="async" onclick="openImgModal(this)" style="cursor:pointer;" />${delBtn}`;
         grid.appendChild(div);
       });
     }
@@ -779,16 +857,19 @@
       const galleryEl = card.querySelector(".device-gallery");
       const idsStr = card.dataset.ids || "";
       const ids = idsStr.split(",").filter(Boolean);
+      const recordId = ids[0] || null;
       const cacheKey = "ids:" + ids.join(",");
 
       if (!ids.length) {
-        galleryEl.innerHTML = `<div class="gallery-empty">Tidak ada foto.</div>`;
+        galleryEl.innerHTML = isAdmin && recordId
+          ? renderGalleryGrid([], recordId)
+          : `<div class="gallery-empty">Tidak ada foto.</div>`;
         return;
       }
 
       // Instant from memory cache
       if (galleryCache[cacheKey]) {
-        galleryEl.innerHTML = renderGalleryGrid(galleryCache[cacheKey]);
+        galleryEl.innerHTML = renderGalleryGrid(galleryCache[cacheKey], recordId);
         card.dataset.loaded = "1";
         return;
       }
@@ -800,7 +881,7 @@
           const cachedImgs = JSON.parse(sess);
           if (Array.isArray(cachedImgs) && cachedImgs.length) {
             galleryCache[cacheKey] = cachedImgs;
-            galleryEl.innerHTML = renderGalleryGrid(cachedImgs);
+            galleryEl.innerHTML = renderGalleryGrid(cachedImgs, recordId);
             card.dataset.loaded = "1";
             return;
           }
@@ -811,7 +892,6 @@
 
       const allImages = [];
       try {
-        // Fetch semua ID secara paralel biar lebih cepat
         const results = await Promise.all(
           ids.map((id) =>
             db
@@ -822,7 +902,6 @@
               .then(({ data, error }) => {
                 if (error || !data || !data.dokumentasi) return [];
                 const arr = Array.isArray(data.dokumentasi) ? data.dokumentasi : [data.dokumentasi];
-                // Terima base64 lama DAN URL baru dari Storage
                 return arr.filter((src) =>
                   src && typeof src === "string" &&
                   (src.startsWith("data:") || src.startsWith("http://") || src.startsWith("https://"))
@@ -832,29 +911,182 @@
           )
         );
 
-        // Tampilkan foto secara bertahap (progressive)
+        // Build full list first, then render once (with admin controls)
         for (const batch of results) {
-          if (batch.length) {
-            const startIdx = allImages.length;
-            allImages.push(...batch);
-            appendImagesToGallery(galleryEl, batch, startIdx);
-          }
+          if (batch.length) allImages.push(...batch);
         }
 
-        if (allImages.length === 0) {
-          galleryEl.innerHTML = `<div class="gallery-empty">Tidak ada foto dokumentasi.</div>`;
-        }
+        galleryEl.innerHTML = renderGalleryGrid(allImages, recordId);
 
         galleryCache[cacheKey] = allImages;
-        // Coba simpan ke sessionStorage (kalau terlalu besar akan di-skip)
         try {
           sessionStorage.setItem("neoshy_gal_" + cacheKey, JSON.stringify(allImages));
         } catch (e) {}
         card.dataset.loaded = "1";
       } catch (err) {
         console.error(err);
-        if (allImages.length === 0) {
-          galleryEl.innerHTML = `<div class="gallery-empty">Gagal memuat foto. Coba buka lagi.</div>`;
+        galleryEl.innerHTML = `<div class="gallery-empty">Gagal memuat foto. Coba buka lagi.</div>`;
+      }
+    }
+
+    /* ========== Admin: tambah / hapus foto langsung di halaman Testimoni ========== */
+
+    function dataURLtoBlob(dataURL) {
+      const parts = dataURL.split(",");
+      const mime = parts[0].match(/:(.*?);/)[1];
+      const bstr = atob(parts[1]);
+      let n = bstr.length;
+      const u8 = new Uint8Array(n);
+      while (n--) u8[n] = bstr.charCodeAt(n);
+      return new Blob([u8], { type: mime });
+    }
+
+    function compressImage(file, maxW = 1600, quality = 0.82) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width, h = img.height;
+            if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+            const canvas = document.createElement("canvas");
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL("image/jpeg", quality));
+          };
+          img.onerror = reject;
+          img.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function uploadOneDoc(src) {
+      if (typeof src === "string" && (src.startsWith("http://") || src.startsWith("https://"))) return src;
+      if (typeof src === "string" && src.startsWith("data:")) {
+        const blob = dataURLtoBlob(src);
+        const ext = blob.type === "image/png" ? "png" : "jpg";
+        const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 9)}.${ext}`;
+        const path = `docs/${fileName}`;
+        const { error } = await db.storage.from("dokumentasi").upload(path, blob, {
+          contentType: blob.type,
+          upsert: false
+        });
+        if (error) throw error;
+        const { data } = db.storage.from("dokumentasi").getPublicUrl(path);
+        return data.publicUrl;
+      }
+      throw new Error("Format gambar tidak dikenali");
+    }
+
+    async function getDocsArray(id) {
+      const { data, error } = await db.from("rekap_jasa").select("dokumentasi").eq("id", id).maybeSingle();
+      if (error) throw error;
+      if (!data || !data.dokumentasi) return [];
+      const arr = Array.isArray(data.dokumentasi) ? data.dokumentasi : [data.dokumentasi];
+      return arr.filter(s => s && typeof s === "string");
+    }
+
+    async function saveDocsArray(id, arr) {
+      const payload = arr.length > 0 ? arr : null;
+      const { error } = await db.from("rekap_jasa").update({ dokumentasi: payload }).eq("id", id);
+      if (error) throw error;
+    }
+
+    function invalidateGalleryCache(id) {
+      const key = "ids:" + id;
+      delete galleryCache[key];
+      try { sessionStorage.removeItem("neoshy_gal_" + key); } catch (e) {}
+    }
+
+    async function adminDeletePhoto(id, idx) {
+      if (!isAdmin) return;
+      if (!confirm("Hapus foto ini dari dokumentasi?")) return;
+      try {
+        const arr = await getDocsArray(id);
+        if (idx < 0 || idx >= arr.length) {
+          alert("Index foto tidak valid");
+          return;
+        }
+        arr.splice(idx, 1);
+        await saveDocsArray(id, arr);
+        invalidateGalleryCache(id);
+        // Refresh gallery di card yang terbuka
+        const card = document.querySelector(`.device-card[data-ids="${id}"]`);
+        if (card) {
+          const galleryEl = card.querySelector(".device-gallery");
+          if (galleryEl) {
+            galleryCache["ids:" + id] = arr;
+            galleryEl.innerHTML = renderGalleryGrid(arr, id);
+          }
+        }
+      } catch (err) {
+        alert("Gagal hapus foto: " + err.message);
+      }
+    }
+
+    async function adminAddPhotos(id, inputEl) {
+      if (!isAdmin) return;
+      const files = Array.from(inputEl.files || []);
+      inputEl.value = "";
+      if (!files.length) return;
+
+      const card = document.querySelector(`.device-card[data-ids="${id}"]`);
+      const galleryEl = card ? card.querySelector(".device-gallery") : null;
+      if (galleryEl) {
+        galleryEl.insertAdjacentHTML("afterbegin",
+          `<div class="gallery-loading" id="upload-progress"><i class="fa-solid fa-spinner fa-spin"></i> Mengupload ${files.length} foto...</div>`);
+      }
+
+      try {
+        const existing = await getDocsArray(id);
+        const newUrls = [];
+
+        for (const file of files) {
+          if (file.size > 10 * 1024 * 1024) {
+            alert(`File ${file.name} melebihi 10MB, dilewati.`);
+            continue;
+          }
+          let dataUrl;
+          try {
+            dataUrl = await compressImage(file);
+          } catch {
+            dataUrl = await new Promise((res, rej) => {
+              const r = new FileReader();
+              r.onload = () => res(r.result);
+              r.onerror = rej;
+              r.readAsDataURL(file);
+            });
+          }
+          const url = await uploadOneDoc(dataUrl);
+          newUrls.push(url);
+        }
+
+        if (newUrls.length === 0) {
+          alert("Tidak ada foto yang berhasil di-upload.");
+          if (galleryEl) {
+            const p = document.getElementById("upload-progress");
+            if (p) p.remove();
+          }
+          return;
+        }
+
+        const merged = existing.concat(newUrls);
+        await saveDocsArray(id, merged);
+        invalidateGalleryCache(id);
+        galleryCache["ids:" + id] = merged;
+
+        if (galleryEl) {
+          galleryEl.innerHTML = renderGalleryGrid(merged, id);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Gagal upload foto: " + err.message);
+        if (galleryEl) {
+          const p = document.getElementById("upload-progress");
+          if (p) p.remove();
         }
       }
     }
