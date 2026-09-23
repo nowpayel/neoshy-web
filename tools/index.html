@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>NeoShy Remote Tool — Android ADB · Fastboot · Scrcpy All-in-One</title>
-  <meta name="description" content="NeoShy Remote Tool is a modern Windows desktop app for Android power users. ADB, Fastboot, Xiaomi flash, Samsung Odin/Heimdall, Payload Dump, and Scrcpy mirroring in one dark-themed interface." />
+  <meta name="description" content="Windows all-in-one tool: ADB, Fastboot, scrcpy mirroring, Xiaomi flash, Samsung Heimdall, and payload.bin dump." />
   <meta name="theme-color" content="#070a12" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -488,6 +488,88 @@
       border: 1px solid var(--border);
     }
 
+    /* ─── CHANGELOG MODAL ─── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: #0f1624;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      max-width: 560px;
+      width: 100%;
+      max-height: min(80vh, 640px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-header h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 8px;
+      line-height: 1;
+    }
+    .modal-close:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+    .modal-body {
+      padding: 16px 18px 20px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE/Edge */
+    }
+    .modal-body::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+    .modal-body h4 {
+      color: var(--accent);
+      font-size: 0.95rem;
+      margin: 14px 0 6px;
+    }
+    .modal-body h4:first-child { margin-top: 0; }
+    .modal-body ul {
+      margin: 0 0 4px 18px;
+      padding: 0;
+    }
+    .modal-body li { margin-bottom: 4px; }
+    .modal-body .ver {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #0a0e17;
+      background: var(--accent);
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-bottom: 4px;
+    }
+
     /* ─── SOCIAL / CONTACT ─── */
     .social-section {
       padding-bottom: 20px;
@@ -758,25 +840,28 @@
 
       <div class="badge">
         <span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;"></span>
-        Windows · New UI · ADB · Fastboot · Scrcpy
+        Windows · v1.0.2 · ADB · Fastboot · Scrcpy
       </div>
       <h1>All-in-one Android<br><span class="highlight">Remote & Flash Toolkit</span></h1>
       <p>
-        NeoShy Remote Tool brings ADB, Fastboot, Xiaomi firmware flash, Samsung Odin/Heimdall,
-        Payload.bin dump, and high-quality Scrcpy mirroring into a single modern dark UI —
-        now with a redesigned sidebar layout and live Command Log.
+        One Windows app for remote control, screen mirroring, ADB / Fastboot,
+        Xiaomi flash, Samsung Heimdall, and payload.bin dump.
       </p>
       <div class="hero-cta">
-        <a href="https://github.com/nowpayel/tool/releases/download/neoshytool/NeoShy_Remote_Tool_Setup_v1.0.1.exe" class="btn btn-primary" download>
+        <a href="https://github.com/nowpayel/tool/releases/download/v1.0.2/NeoShy_Remote_Tool_Setup_v1.0.2.exe" class="btn btn-primary" download>
           <i class="fa-solid fa-download"></i>
-          Download v1.0.1 (New UI)
+          Download v1.0.2
         </a>
-        <a href="https://github.com/nowpayel/tool/releases/download/tool/Neoshy.Remote.Tool.Setup.exe" class="btn btn-ghost" download>
+        <button type="button" class="btn btn-ghost" onclick="openChangelog()">
+          <i class="fa-solid fa-list"></i>
+          Changelog
+        </button>
+        <a href="https://github.com/nowpayel/tool/releases/download/neoshytool/NeoShy_Remote_Tool_Setup_v1.0.1.exe" class="btn btn-ghost" download>
           <i class="fa-solid fa-clock-rotate-left"></i>
-          Previous Version
+          v1.0.1
         </a>
       </div>
-      <img src="/tools/assets/main-ui.png" alt="NeoShy Remote Tool main interface" class="hero-shot" onclick="openLightbox(this.src)" />
+      <img src="assets/main-ui.png" alt="NeoShy Remote Tool main interface" class="hero-shot" onclick="openLightbox(this.src)" />
     </div>
   </header>
 
@@ -866,7 +951,7 @@
       </div>
 
       <div class="full-shot" style="margin-bottom: 28px;">
-        <img src="/tools/assets/main-ui.png" alt="NeoShy Remote Tool main interface — sidebar + Command Log" onclick="openLightbox(this.src)" />
+        <img src="assets/main-ui.png" alt="NeoShy Remote Tool main interface — sidebar + Command Log" onclick="openLightbox(this.src)" />
       </div>
       <p style="text-align:center;color:var(--text-muted);font-size:0.85rem;margin-bottom:36px;">
         Main window — Device Status, Command Tools tabs, and real-time Command Log side by side.
@@ -875,7 +960,7 @@
       <div class="showcase-grid">
         <div class="shot-card">
           <div class="img-wrap">
-            <img src="/tools/assets/adb-commands.png" alt="ADB Commands panel" onclick="openLightbox(this.src)" />
+            <img src="assets/adb-commands.png" alt="ADB Commands panel" onclick="openLightbox(this.src)" />
           </div>
           <div class="caption">
             <h3>ADB Commands</h3>
@@ -884,7 +969,7 @@
         </div>
         <div class="shot-card">
           <div class="img-wrap">
-            <img src="/tools/assets/fastboot-panel.png" alt="Fastboot panel" onclick="openLightbox(this.src)" />
+            <img src="assets/fastboot-panel.png" alt="Fastboot panel" onclick="openLightbox(this.src)" />
           </div>
           <div class="caption">
             <h3>Fastboot Tools</h3>
@@ -893,7 +978,7 @@
         </div>
         <div class="shot-card">
           <div class="img-wrap">
-            <img src="/tools/assets/xiaomi-flash.png" alt="Xiaomi firmware flash" onclick="openLightbox(this.src)" />
+            <img src="assets/xiaomi-flash.png" alt="Xiaomi firmware flash" onclick="openLightbox(this.src)" />
           </div>
           <div class="caption">
             <h3>Xiaomi Flash Mode</h3>
@@ -902,7 +987,7 @@
         </div>
         <div class="shot-card">
           <div class="img-wrap">
-            <img src="/tools/assets/samsung-heimdall.png" alt="Samsung Heimdall / Odin" onclick="openLightbox(this.src)" />
+            <img src="assets/samsung-heimdall.png" alt="Samsung Heimdall / Odin" onclick="openLightbox(this.src)" />
           </div>
           <div class="caption">
             <h3>Samsung · Heimdall</h3>
@@ -911,7 +996,7 @@
         </div>
         <div class="shot-card">
           <div class="img-wrap">
-            <img src="/tools/assets/payload-dump.png" alt="Payload Dump" onclick="openLightbox(this.src)" />
+            <img src="assets/payload-dump.png" alt="Payload Dump" onclick="openLightbox(this.src)" />
           </div>
           <div class="caption">
             <h3>Payload Dump</h3>
@@ -921,7 +1006,7 @@
       </div>
 
       <div class="full-shot" style="margin-top: 28px;">
-        <img src="/tools/assets/mirror-controls.png" alt="Scrcpy floating control panel" onclick="openLightbox(this.src)" />
+        <img src="assets/mirror-controls.png" alt="Scrcpy floating control panel" onclick="openLightbox(this.src)" />
       </div>
       <p style="text-align:center;color:var(--text-muted);font-size:0.82rem;margin-top:12px;">
         Floating control panel while mirroring — Power, Restart, Notifications, Clipboard, Screenshot, Push File & more.
@@ -981,17 +1066,21 @@
           Free for personal use. Windows 10/11. Requires a USB cable and ADB/USB debugging enabled on the device.
         </p>
         <div class="cta-btns" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
-          <a href="https://github.com/nowpayel/tool/releases/download/neoshytool/NeoShy_Remote_Tool_Setup_v1.0.1.exe" class="btn btn-primary" download>
+          <a href="https://github.com/nowpayel/tool/releases/download/v1.0.2/NeoShy_Remote_Tool_Setup_v1.0.2.exe" class="btn btn-primary" download>
             <i class="fa-solid fa-download"></i>
-            Download v1.0.1 (New UI)
+            Download v1.0.2
           </a>
-          <a href="https://github.com/nowpayel/tool/releases/download/tool/Neoshy.Remote.Tool.Setup.exe" class="btn btn-ghost" download>
+          <button type="button" class="btn btn-ghost" onclick="openChangelog()">
+            <i class="fa-solid fa-list"></i>
+            Changelog
+          </button>
+          <a href="https://github.com/nowpayel/tool/releases/download/neoshytool/NeoShy_Remote_Tool_Setup_v1.0.1.exe" class="btn btn-ghost" download>
             <i class="fa-solid fa-clock-rotate-left"></i>
-            Previous Version
+            v1.0.1
           </a>
         </div>
         <p style="margin-top:18px;font-size:0.82rem;color:var(--text-muted);">
-          v1.0.1 includes the redesigned sidebar + live Command Log interface.
+          v1.0.2 — more stable mirroring, cleaner 720p UI, tidier Xiaomi flash tab.
         </p>
         <p style="margin-top:12px;font-size:0.78rem;color:var(--text-muted);">
           ⚠️ Flashing firmware or partitions can brick devices. Always double-check model, slot, and image files. Use at your own risk.
@@ -1003,6 +1092,49 @@
   <!-- Lightbox -->
   <div class="lightbox" id="lightbox" onclick="this.classList.remove('open')">
     <img id="lightbox-img" src="" alt="Preview" />
+  </div>
+
+  <!-- Changelog modal -->
+  <div class="modal-overlay" id="changelogModal" onclick="if(event.target===this)closeChangelog()">
+    <div class="modal-box" role="dialog" aria-labelledby="changelogTitle">
+      <div class="modal-header">
+        <h3 id="changelogTitle">Changelog</h3>
+        <button type="button" class="modal-close" onclick="closeChangelog()" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <span class="ver">v1.0.2</span>
+        <h4>More stable mirroring</h4>
+        <ul>
+          <li>Fixed black / detached scrcpy (overlay + glue instead of child embed)</li>
+          <li>Lite mode: control panel sticks better when dragging or minimizing</li>
+          <li>Closing the mirror fully stops scrcpy and logs a confirmation</li>
+        </ul>
+        <h4>720p UI</h4>
+        <ul>
+          <li>Narrower default window width on laptop screens</li>
+          <li>Button text size aligned (Cancel Command, Clear Log, and others)</li>
+        </ul>
+        <h4>Xiaomi tab</h4>
+        <ul>
+          <li>Cleaner layout — less long text and emoji clutter</li>
+          <li>Clearer .bat selection (orange highlight), no auto-select</li>
+        </ul>
+        <h4>Other</h4>
+        <ul>
+          <li>NeoShy links updated to neoshy.vercel.app</li>
+          <li>Wi‑Fi ADB removed from the UI</li>
+        </ul>
+
+        <span class="ver" style="margin-top:16px;">v1.0.1</span>
+        <h4>Previous update</h4>
+        <ul>
+          <li>Floating popup mirror with control panel</li>
+          <li>Auto device aspect ratio</li>
+          <li>Bitrate / FPS presets and quick scrcpy fixes</li>
+          <li>Sidebar layout + live Command Log</li>
+        </ul>
+      </div>
+    </div>
   </div>
 
   <footer>
@@ -1018,8 +1150,22 @@
       document.getElementById('lightbox-img').src = src;
       document.getElementById('lightbox').classList.add('open');
     }
+
+    // Changelog modal
+    function openChangelog() {
+      document.getElementById('changelogModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeChangelog() {
+      document.getElementById('changelogModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('open');
+      if (e.key === 'Escape') {
+        document.getElementById('lightbox').classList.remove('open');
+        closeChangelog();
+      }
     });
 
     // Mobile menu
