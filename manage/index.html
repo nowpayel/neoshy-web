@@ -24,8 +24,8 @@
 
     .neo-card {
       background: var(--panel);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       border: 1px solid var(--border-cyan);
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15);
     }
@@ -65,16 +65,16 @@
       position: absolute;
       width: 140px;
       height: 140px;
-      background: radial-gradient(circle, rgba(59, 158, 255, 0.45) 0%, rgba(0, 120, 224, 0.15) 50%, transparent 70%);
-      filter: blur(30px);
+      background: radial-gradient(circle, rgba(59, 158, 255, 0.35) 0%, rgba(0, 120, 224, 0.12) 50%, transparent 70%);
+      filter: blur(20px);
       z-index: 0;
-      animation: pulseGlow 3.5s ease-in-out infinite alternate;
+      /* animation dimatikan agar lebih ringan di remote desktop / Ultra Viewer */
     }
 
     .logo-card {
       background: rgba(13, 19, 33, 0.7);
       border: 1px solid var(--border-cyan);
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(6px);
       border-radius: 24px;
       display: inline-flex;
       align-items: center;
@@ -82,8 +82,8 @@
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15);
       position: relative;
       overflow: hidden;
-      animation: floatLogo 4s ease-in-out infinite;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      /* animation dimatikan agar lebih ringan di remote desktop */
+      transition: all 0.2s ease;
       z-index: 1;
     }
 
@@ -148,13 +148,34 @@
       border-color: #0078e0;
     }
     
-    .docs-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-    .docs-scroll::-webkit-scrollbar-track { background: rgba(3, 7, 18, 0.5); border-radius: 8px; }
-    .docs-scroll::-webkit-scrollbar-thumb { background: rgba(59, 158, 255, 0.3); border-radius: 8px; }
-    .docs-scroll::-webkit-scrollbar-thumb:hover { background: rgba(59, 158, 255, 0.6); }
-
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* Sembunyikan semua scrollbar di seluruh web (termasuk mobile) */
+    html, body {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+      overflow-x: hidden;
+    }
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar,
+    *::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      background: transparent !important;
+    }
+    * {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+    .docs-scroll::-webkit-scrollbar,
+    .no-scrollbar::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none !important;
+      scrollbar-width: none !important;
+    }
   
     #pageLoader {
       position: fixed; inset: 0; z-index: 9999;
@@ -425,6 +446,9 @@
               </div>
               <datalist id="service-options">
                 <option value="UBL">
+                <option value="UBL Instant">
+                <option value="Hide&Fix Integrity">
+                <option value="Custom Recovery">
                 <option value="Root">
                 <option value="Custom ROM">
                 <option value="Flash Stock ROM">
@@ -435,6 +459,9 @@
               
               <div class="grid grid-cols-3 sm:flex sm:flex-wrap gap-1.5 mt-2">
                 <button type="button" onclick="toggleService('UBL')" class="chip-btn">+ UBL</button>
+                <button type="button" onclick="toggleService('UBL Instant')" class="chip-btn">+ UBL Instant</button>
+                <button type="button" onclick="toggleService('Hide&Fix Integrity')" class="chip-btn">+ Hide&Fix</button>
+                <button type="button" onclick="toggleService('Custom Recovery')" class="chip-btn">+ Custom Recovery</button>
                 <button type="button" onclick="toggleService('Root')" class="chip-btn">+ Root</button>
                 <button type="button" onclick="toggleService('Custom ROM')" class="chip-btn">+ Custom ROM</button>
                 <button type="button" onclick="toggleService('Flash Stock ROM')" class="chip-btn">+ Flash ROM</button>
@@ -449,7 +476,7 @@
             <span class="text-xs font-mono text-cyan-300 font-bold flex items-center gap-1.5">
               UBL Time Estimation
             </span>
-            <span id="ubl-eta-display" class="text-xs font-mono text-cyan-400 font-semibold">Ready: -</span>
+            <span id="ubl-eta-display" class="text-xs font-mono text-cyan-400 font-semibold">Siap: -</span>
           </div>
           
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -527,14 +554,22 @@
           </summary>
           <div class="p-3.5 pt-0 space-y-3 grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-mono text-cyan-300/70 mb-1">Customer Phone</label>
+              <label class="block text-xs font-mono text-cyan-300/70 mb-1">
+                Customer Phone
+                <span id="phone-required-badge" class="hidden text-rose-400 text-[10px] ml-1">*Wajib (UBL 72/168 jam)</span>
+              </label>
               <div class="relative">
-                <input type="text" id="customer_phone" placeholder="08xxxxxxxxxx" autocomplete="off" oninput="toggleClearBtn(this)" class="neo-input w-full rounded-lg p-2.5 pr-8 text-sm text-white placeholder-slate-600 focus:outline-none">
-                <button type="button" onclick="clearInput('customer_phone')" class="clear-btn">✕</button>
+                <input type="text" id="customer_phone" placeholder="08xxxxxxxxxx" autocomplete="off" oninput="toggleClearBtn(this); onCustomerPhoneChange()" class="neo-input w-full rounded-lg p-2.5 pr-8 text-sm text-white placeholder-slate-600 focus:outline-none">
+                <button type="button" onclick="clearInput('customer_phone', onCustomerPhoneChange)" class="clear-btn">✕</button>
               </div>
-              <button type="button" onclick="openWhatsApp(document.getElementById('customer_phone').value, document.getElementById('hp_model').value, document.getElementById('service').value)" class="mt-1.5 inline-flex items-center gap-1 text-[10px] bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-md hover:bg-emerald-800/60 transition font-mono">
-                WA Chat
-              </button>
+              <div class="flex flex-wrap gap-1.5 mt-1.5">
+                <button type="button" onclick="openWhatsApp(document.getElementById('customer_phone').value, document.getElementById('hp_model').value, document.getElementById('service').value)" class="inline-flex items-center gap-1 text-[10px] bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-md hover:bg-emerald-800/60 transition font-mono">
+                  WA Chat
+                </button>
+                <button type="button" onclick="generateCustomerNote()" class="inline-flex items-center gap-1 text-[10px] bg-cyan-950/60 text-cyan-300 border border-cyan-500/40 px-2 py-0.5 rounded-md hover:bg-cyan-800/60 transition font-mono">
+                  Generate Note
+                </button>
+              </div>
             </div>
             
             <div>
@@ -649,7 +684,7 @@
         <div id="modal-ubl-timer-section" class="hidden bg-cyan-950/30 border border-cyan-500/40 p-3 rounded-xl space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-mono text-cyan-300 font-bold">UBL Time Estimation</span>
-            <span id="modal-ubl-eta-display" class="text-xs font-mono text-cyan-400 font-semibold">Ready: -</span>
+            <span id="modal-ubl-eta-display" class="text-xs font-mono text-cyan-400 font-semibold">Siap: -</span>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
             <button type="button" onclick="setModalUBLHours(168)" class="text-xs font-mono bg-cyan-950 text-cyan-300 border border-cyan-500/40 py-1.5 rounded-lg hover:bg-cyan-800/60 transition">168 Hours (7d)</button>
@@ -718,14 +753,22 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-mono text-cyan-300/70 mb-1">Customer Phone</label>
+              <label class="block text-xs font-mono text-cyan-300/70 mb-1">
+                Customer Phone
+                <span id="modal-phone-required-badge" class="hidden text-rose-400 text-[10px] ml-1">*Wajib (UBL 72/168 jam)</span>
+              </label>
               <div class="relative">
-                <input type="text" id="modal-customer_phone" autocomplete="off" oninput="toggleClearBtn(this)" class="neo-input w-full rounded-lg p-2 pr-8 text-sm text-white focus:outline-none">
-                <button type="button" onclick="clearInput('modal-customer_phone')" class="clear-btn">✕</button>
+                <input type="text" id="modal-customer_phone" autocomplete="off" oninput="toggleClearBtn(this); onModalCustomerPhoneChange()" class="neo-input w-full rounded-lg p-2 pr-8 text-sm text-white focus:outline-none">
+                <button type="button" onclick="clearInput('modal-customer_phone', onModalCustomerPhoneChange)" class="clear-btn">✕</button>
               </div>
-              <button type="button" onclick="openWhatsApp(document.getElementById('modal-customer_phone').value, document.getElementById('modal-hp_model').value, document.getElementById('modal-service').value)" class="mt-1.5 inline-flex items-center gap-1 text-[10px] bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-md hover:bg-emerald-800/60 transition font-mono">
-                WA Chat
-              </button>
+              <div class="flex flex-wrap gap-1.5 mt-1.5">
+                <button type="button" onclick="openWhatsApp(document.getElementById('modal-customer_phone').value, document.getElementById('modal-hp_model').value, document.getElementById('modal-service').value)" class="inline-flex items-center gap-1 text-[10px] bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-md hover:bg-emerald-800/60 transition font-mono">
+                  WA Chat
+                </button>
+                <button type="button" onclick="generateModalCustomerNote()" class="inline-flex items-center gap-1 text-[10px] bg-cyan-950/60 text-cyan-300 border border-cyan-500/40 px-2 py-0.5 rounded-md hover:bg-cyan-800/60 transition font-mono">
+                  Generate Note
+                </button>
+              </div>
             </div>
 
             <div>
@@ -784,11 +827,15 @@
     let allRevenueData = []; // full dataset for accurate Total Revenue & filtered omset
     let currentEtaNote = "";
     let targetEtaISO = null;
+    let selectedUBLHours = 0;
+    let currentCustomerNote = "";
     let docBase64List = []; 
 
     let modalTargetEtaISO = null;
+    let modalSelectedUBLHours = 0;
     let modalDocBase64List = [];
     let modalCurrentEtaNote = "";
+    let modalCurrentCustomerNote = "";
 
     let PAGE_SIZE = 25;
     let currentPage = 0;
@@ -796,7 +843,7 @@
 
     function formatDateWithDay(dateStr) {
       if (!dateStr) return '-';
-      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
       const dateObj = new Date(dateStr + 'T00:00:00');
       if (isNaN(dateObj.getTime())) return dateStr;
       
@@ -843,23 +890,144 @@
       return digits;
     }
 
-    function openWhatsApp(phone, hpModel, service) {
+    function formatIndonesianDateTime(date) {
+      const daysId = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const monthsId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      const d = new Date(date);
+      const fmt = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Jakarta',
+        weekday: 'short',
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+      const parts = fmt.formatToParts(d);
+      const get = (type) => (parts.find(p => p.type === type) || {}).value || '';
+      // weekday short from en-US: Sun, Mon, ... map to index
+      const wdMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+      const dayName = daysId[wdMap[get('weekday')] ?? 0];
+      const day = String(get('day')).padStart(2, '0');
+      const month = monthsId[(parseInt(get('month'), 10) - 1)] || get('month');
+      const year = get('year');
+      const hours = String(get('hour')).padStart(2, '0');
+      const minutes = String(get('minute')).padStart(2, '0');
+      return `${dayName}, ${day} ${month} ${year} pukul ${hours}:${minutes} WIB`;
+    }
+
+    function buildCustomerMessage(hpModel, service, etaISO) {
+      const hp = hpModel || '-';
+      const svc = service || '-';
+      // Format khusus untuk kirim WA saja (tidak masuk ke notes)
+      // Contoh:
+      // *Selasa, 13 Oktober 2026 pukul 09:08 WIB*   ← tebal
+      // UBL, Custom Rom Poco F3
+      //
+      // 📌 _selama menunggu, HP masih bisa dipakai normal..._   ← miring + emoji
+      let msg = '';
+      if (etaISO) {
+        msg += `*${formatIndonesianDateTime(etaISO)}*\n`;
+      }
+      msg += `${svc} ${hp}\n\n`;
+      msg += `📌 _selama menunggu, HP masih bisa dipakai normal, tapi jangan logout atau binding ulang akun Mi di opsi developer ya_`;
+      return msg;
+    }
+
+    function openWhatsApp(phone, hpModel, service, etaISO) {
       const waNumber = normalizePhoneForWA(phone);
       if (!waNumber) {
-        alert("Customer WhatsApp number not available.");
+        alert("Nomor WhatsApp customer belum diisi.");
         return;
       }
-      const url = `https://wa.me/${waNumber}`;
+      // Prioritas: eta dari argumen (row tabel), lalu form aktif
+      let eta = etaISO || targetEtaISO || modalTargetEtaISO || null;
+      const message = buildCustomerMessage(hpModel, service, eta);
+      const encoded = encodeURIComponent(message);
+      const url = `https://wa.me/${waNumber}?text=${encoded}`;
       window.open(url, '_blank');
     }
 
-    function buildWaButton(phone, hpModel, service, extraClass = '') {
+    function buildWaButton(phone, hpModel, service, etaISO, extraClass = '') {
       if (!phone) return '';
       const safeHp = (hpModel || '').replace(/'/g, "\\'");
       const safeService = (service || '').replace(/'/g, "\\'");
-      return `<button type="button" onclick="openWhatsApp('${phone.replace(/'/g, "\\'")}', '${safeHp}', '${safeService}')" class="inline-flex items-center gap-1 text-[10px] bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-md hover:bg-emerald-800/60 transition font-mono whitespace-nowrap ${extraClass}">
+      const safeEta = (etaISO || '').replace(/'/g, "\\'");
+      return `<button type="button" onclick="openWhatsApp('${phone.replace(/'/g, "\\'")}', '${safeHp}', '${safeService}', '${safeEta}')" class="inline-flex items-center gap-1 text-[10px] bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-md hover:bg-emerald-800/60 transition font-mono whitespace-nowrap ${extraClass}">
         WA Chat
       </button>`;
+    }
+
+    function generateCustomerNote() {
+      // Hanya buka WA dengan teks auto — TIDAK masuk ke field Notes
+      const phone = document.getElementById('customer_phone').value.trim();
+      const hp = document.getElementById('hp_model').value.trim();
+      const svc = document.getElementById('service').value.trim();
+      if (!phone) {
+        alert("Isi nomor HP customer terlebih dahulu.");
+        return;
+      }
+      openWhatsApp(phone, hp, svc);
+    }
+
+    function generateModalCustomerNote() {
+      // Hanya buka WA dengan teks auto — TIDAK masuk ke field Notes
+      const phone = document.getElementById('modal-customer_phone').value.trim();
+      const hp = document.getElementById('modal-hp_model').value.trim();
+      const svc = document.getElementById('modal-service').value.trim();
+      if (!phone) {
+        alert("Isi nomor HP customer terlebih dahulu.");
+        return;
+      }
+      openWhatsApp(phone, hp, svc);
+    }
+
+    function onCustomerPhoneChange() {
+      updatePhoneRequiredUI();
+    }
+
+    function onModalCustomerPhoneChange() {
+      updateModalPhoneRequiredUI();
+    }
+
+    function isUBLWithEstimateRequired() {
+      // Wajib hanya jika layanan UBL DAN estimasi 72 jam atau 168 jam
+      const serviceVal = (document.getElementById('service')?.value || '').toUpperCase();
+      if (!serviceVal.includes('UBL')) return false;
+      return selectedUBLHours === 72 || selectedUBLHours === 168;
+    }
+
+    function isModalUBLWithEstimateRequired() {
+      const serviceVal = (document.getElementById('modal-service')?.value || '').toUpperCase();
+      if (!serviceVal.includes('UBL')) return false;
+      return modalSelectedUBLHours === 72 || modalSelectedUBLHours === 168;
+    }
+
+    function updatePhoneRequiredUI() {
+      const badge = document.getElementById('phone-required-badge');
+      const input = document.getElementById('customer_phone');
+      if (!badge || !input) return;
+      if (isUBLWithEstimateRequired()) {
+        badge.classList.remove('hidden');
+        input.setAttribute('required', 'required');
+      } else {
+        badge.classList.add('hidden');
+        input.removeAttribute('required');
+      }
+    }
+
+    function updateModalPhoneRequiredUI() {
+      const badge = document.getElementById('modal-phone-required-badge');
+      const input = document.getElementById('modal-customer_phone');
+      if (!badge || !input) return;
+      if (isModalUBLWithEstimateRequired()) {
+        badge.classList.remove('hidden');
+        input.setAttribute('required', 'required');
+      } else {
+        badge.classList.add('hidden');
+        input.removeAttribute('required');
+      }
     }
 
     function goToMoneyDashboard() {
@@ -1021,7 +1189,10 @@
       
       try { await loadData(true); } catch (e) { console.warn("loadData", e); }
       if (window.hidePageLoader) hidePageLoader();
-      try { setInterval(updateLiveTimers, 1000); } catch (e) {}
+      // Update timer tiap 5 detik (bukan 1 detik) agar lebih ringan di remote desktop / Ultra Viewer
+      try { setInterval(updateLiveTimers, 5000); } catch (e) {}
+      // Minta izin notifikasi browser untuk alert saat UBL READY
+      try { requestNotifPermission(); } catch (e) {}
     }
 
     async function logout() {
@@ -1064,6 +1235,9 @@
         ublSection.classList.add('hidden');
         resetUBLData();
       }
+      updatePhoneRequiredUI();
+      // Apply service template if matching special services
+      applyServiceTemplate();
     }
 
     function setUBLHours(hours) {
@@ -1078,12 +1252,15 @@
       const etaDisplay = document.getElementById('ubl-eta-display');
 
       if (isNaN(hrs) || hrs <= 0) {
-        etaDisplay.innerText = "Ready: - (No Estimate)";
+        etaDisplay.innerText = "Siap: - (Tanpa Estimasi)";
         removeCurrentEtaNote();
         targetEtaISO = null;
+        selectedUBLHours = 0;
+        updatePhoneRequiredUI();
         return;
       }
 
+      selectedUBLHours = hrs;
       const now = new Date();
       const etaDate = new Date(now.getTime() + hrs * 60 * 60 * 1000);
       targetEtaISO = etaDate.toISOString();
@@ -1091,22 +1268,19 @@
       const days = Math.floor(hrs / 24);
       const remainingHours = hrs % 24;
       let durationStr = "";
-      if (days > 0) durationStr += `${days} Days `;
-      if (remainingHours > 0) durationStr += `${remainingHours} Hours`;
+      if (days > 0) durationStr += `${days} Hari `;
+      if (remainingHours > 0) durationStr += `${remainingHours} Jam`;
 
-      const options = { 
-        weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', 
-        hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Jakarta'
-      };
-      const formattedWIB = new Intl.DateTimeFormat('en-GB', options).format(etaDate) + ' WIB';
-      const etaText = `[UBL ETA ${hrs} Hours: ${formattedWIB}]`;
-      etaDisplay.innerText = `Ready: ${formattedWIB} (${durationStr.trim()})`;
+      const formattedWIB = formatIndonesianDateTime(etaDate);
+      const etaText = `[UBL ETA ${hrs} Jam: ${formattedWIB}]`;
+      etaDisplay.innerText = `Siap: ${formattedWIB} (${durationStr.trim()})`;
 
       const notesInput = document.getElementById('notes');
       removeCurrentEtaNote();
       currentEtaNote = etaText;
       notesInput.value = notesInput.value ? `${notesInput.value.trim()} ${etaText}` : etaText;
       toggleClearBtn(notesInput);
+      updatePhoneRequiredUI();
     }
 
     function removeCurrentEtaNote() {
@@ -1125,9 +1299,11 @@
         toggleClearBtn(hoursInput);
       }
       const display = document.getElementById('ubl-eta-display');
-      if (display) display.innerText = "Ready: -";
+      if (display) display.innerText = "Siap: -";
       removeCurrentEtaNote();
       targetEtaISO = null;
+      selectedUBLHours = 0;
+      updatePhoneRequiredUI();
     }
 
     // Modal UBL Helpers
@@ -1140,6 +1316,53 @@
         ublSection.classList.add('hidden');
         resetModalUBLData();
       }
+      updateModalPhoneRequiredUI();
+      applyModalServiceTemplate();
+    }
+
+    // Template catatan otomatis untuk layanan khusus
+    const SERVICE_TEMPLATES = {
+      'HIDE&FIX INTEGRITY': 'Layanan Hide & Fix Integrity — menjaga integritas sistem tanpa menghapus data penting. Proses dilakukan dengan hati-hati sesuai tipe HP.',
+      'UBL INSTANT': 'Layanan UBL Instant — proses Unlock Bootloader dipercepat. Estimasi waktu lebih singkat dari UBL standar.',
+      'CUSTOM RECOVERY': 'Layanan Custom Recovery — instalasi recovery kustom (TWRP/Orangefox dll) sesuai tipe HP. Pastikan backup data sebelum proses.'
+    };
+
+    function applyServiceTemplate() {
+      const svc = (document.getElementById('service')?.value || '').toUpperCase();
+      const notesInput = document.getElementById('notes');
+      if (!notesInput) return;
+      // Cari template yang cocok (bisa multiple services dipisah koma)
+      const parts = svc.split(',').map(s => s.trim());
+      let templates = [];
+      for (const p of parts) {
+        if (SERVICE_TEMPLATES[p]) templates.push(SERVICE_TEMPLATES[p]);
+      }
+      if (templates.length === 0) return;
+      const templateText = templates.join(' | ');
+      // Jangan overwrite kalau sudah ada isi manual yang panjang, hanya tambah jika notes masih kosong atau hanya berisi ETA note
+      const current = notesInput.value.trim();
+      if (!current || (currentEtaNote && current === currentEtaNote)) {
+        notesInput.value = current ? `${current} ${templateText}` : templateText;
+        toggleClearBtn(notesInput);
+      }
+    }
+
+    function applyModalServiceTemplate() {
+      const svc = (document.getElementById('modal-service')?.value || '').toUpperCase();
+      const notesInput = document.getElementById('modal-notes');
+      if (!notesInput) return;
+      const parts = svc.split(',').map(s => s.trim());
+      let templates = [];
+      for (const p of parts) {
+        if (SERVICE_TEMPLATES[p]) templates.push(SERVICE_TEMPLATES[p]);
+      }
+      if (templates.length === 0) return;
+      const templateText = templates.join(' | ');
+      const current = notesInput.value.trim();
+      if (!current || (modalCurrentEtaNote && current === modalCurrentEtaNote)) {
+        notesInput.value = current ? `${current} ${templateText}` : templateText;
+        toggleClearBtn(notesInput);
+      }
     }
 
     function setModalUBLHours(hours) {
@@ -1147,12 +1370,15 @@
       const etaDisplay = document.getElementById('modal-ubl-eta-display');
 
       if (isNaN(hrs) || hrs <= 0) {
-        etaDisplay.innerText = "Ready: - (No Estimate)";
+        etaDisplay.innerText = "Siap: - (Tanpa Estimasi)";
         removeModalCurrentEtaNote();
         modalTargetEtaISO = null;
+        modalSelectedUBLHours = 0;
+        updateModalPhoneRequiredUI();
         return;
       }
 
+      modalSelectedUBLHours = hrs;
       const now = new Date();
       const etaDate = new Date(now.getTime() + hrs * 60 * 60 * 1000);
       modalTargetEtaISO = etaDate.toISOString();
@@ -1160,22 +1386,19 @@
       const days = Math.floor(hrs / 24);
       const remainingHours = hrs % 24;
       let durationStr = "";
-      if (days > 0) durationStr += `${days} Days `;
-      if (remainingHours > 0) durationStr += `${remainingHours} Hours`;
+      if (days > 0) durationStr += `${days} Hari `;
+      if (remainingHours > 0) durationStr += `${remainingHours} Jam`;
 
-      const options = { 
-        weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', 
-        hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Jakarta'
-      };
-      const formattedWIB = new Intl.DateTimeFormat('en-GB', options).format(etaDate) + ' WIB';
-      const etaText = `[UBL ETA ${hrs} Hours: ${formattedWIB}]`;
-      etaDisplay.innerText = `Ready: ${formattedWIB} (${durationStr.trim()})`;
+      const formattedWIB = formatIndonesianDateTime(etaDate);
+      const etaText = `[UBL ETA ${hrs} Jam: ${formattedWIB}]`;
+      etaDisplay.innerText = `Siap: ${formattedWIB} (${durationStr.trim()})`;
 
       const notesInput = document.getElementById('modal-notes');
       removeModalCurrentEtaNote();
       modalCurrentEtaNote = etaText;
       notesInput.value = notesInput.value ? `${notesInput.value.trim()} ${etaText}` : etaText;
       toggleClearBtn(notesInput);
+      updateModalPhoneRequiredUI();
     }
 
     function removeModalCurrentEtaNote() {
@@ -1189,9 +1412,11 @@
 
     function resetModalUBLData() {
       const display = document.getElementById('modal-ubl-eta-display');
-      if (display) display.innerText = "Ready: -";
+      if (display) display.innerText = "Siap: -";
       removeModalCurrentEtaNote();
       modalTargetEtaISO = null;
+      modalSelectedUBLHours = 0;
+      updateModalPhoneRequiredUI();
     }
 
     function parseRawPrice(val) {
@@ -1758,11 +1983,23 @@
              </button>`
           : `<span class="bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded text-[10px] font-mono inline-block mt-1">Paid</span>`;
 
-        const timerContainer = row.eta_iso 
-          ? `<div class="mt-1 bg-cyan-950/70 border border-cyan-500/30 p-1.5 rounded-md font-mono text-[11px] text-cyan-300" data-eta="${row.eta_iso}">
-               <span class="timer-display font-bold">Calculating...</span>
-             </div>` 
-          : '';
+        // Status badge: Waiting (masih countdown) / Ready (ETA lewat tapi belum lunas) / Done (sudah Paid)
+        // Pakai inline-flex + w-fit biar badge tidak memanjang penuh di mobile
+        const isPaid = row.status_bayar !== 'DP';
+        let timerContainer = '';
+        if (row.eta_iso) {
+          timerContainer = `<div class="mt-1 inline-flex w-fit bg-cyan-950/70 border border-cyan-500/30 px-2 py-0.5 rounded-md font-mono text-[10px] text-cyan-300" data-eta="${row.eta_iso}" data-paid="${isPaid ? '1' : '0'}">
+               <span class="timer-display font-bold">...</span>
+             </div>`;
+        } else if (isPaid) {
+          timerContainer = `<div class="mt-1 inline-flex w-fit bg-emerald-950/70 border border-emerald-500/30 px-2 py-0.5 rounded-md font-mono text-[10px]">
+               <span class="font-bold text-emerald-400">DONE</span>
+             </div>`;
+        } else {
+          timerContainer = `<div class="mt-1 inline-flex w-fit bg-amber-950/70 border border-amber-500/30 px-2 py-0.5 rounded-md font-mono text-[10px]">
+               <span class="font-bold text-amber-300">READY</span>
+             </div>`;
+        }
 
         const docButton = `<button onclick="openDocsModal(${row.id})" class="text-[10px] bg-cyan-950/60 text-cyan-300 border border-cyan-500/40 px-2.5 py-1 rounded-md hover:bg-cyan-800 transition font-mono whitespace-nowrap shadow">
             Check Docs
@@ -1777,7 +2014,7 @@
             <td class="p-2 text-slate-300 text-xs align-top">${row.service || '-'}${timerContainer}</td>
             <td class="p-2 font-mono text-[11px] text-slate-400 space-y-1 align-top">
               <span class="block">${row.customer_phone || '-'}</span>
-              ${buildWaButton(row.customer_phone, row.hp_model, row.service)}
+              ${buildWaButton(row.customer_phone, row.hp_model, row.service, row.eta_iso)}
             </td>
             <td class="p-2 font-mono text-xs align-top">
               <span class="text-cyan-400 font-semibold block">${row.harga || '-'}</span>
@@ -1810,7 +2047,7 @@
             </div>
 
             <div class="pt-2 border-t border-cyan-500/10 text-xs space-y-2">
-              ${row.customer_phone ? `<div class="text-slate-400 font-mono flex items-center gap-2 flex-wrap"><span><span class="text-slate-500">Phone:</span> ${row.customer_phone}</span>${buildWaButton(row.customer_phone, row.hp_model, row.service)}</div>` : ''}
+              ${row.customer_phone ? `<div class="text-slate-400 font-mono flex items-center gap-2 flex-wrap"><span><span class="text-slate-500">Phone:</span> ${row.customer_phone}</span>${buildWaButton(row.customer_phone, row.hp_model, row.service, row.eta_iso)}</div>` : ''}
               ${row.notes ? `<div class="text-slate-400"><span class="text-slate-500">Notes:</span> ${row.notes}</div>` : ''}
               <div class="space-y-1 pt-1">${docButton}</div>
             </div>
@@ -1828,6 +2065,43 @@
       updateLiveTimers();
     }
 
+    // Track status sebelumnya agar bisa deteksi transisi WAITING → READY
+    const prevTimerStatus = new Map();
+
+    function showAdminToast(title, body) {
+      // Toast in-app
+      let toast = document.getElementById('admin-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'admin-toast';
+        toast.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;max-width:340px;padding:14px 18px;border-radius:14px;background:rgba(6,20,40,0.95);border:1px solid rgba(34,211,238,0.45);box-shadow:0 8px 32px rgba(0,0,0,0.45);color:#e0f2fe;font-family:monospace;font-size:12px;opacity:0;transform:translateY(-12px);transition:all 0.3s ease;pointer-events:none;';
+        document.body.appendChild(toast);
+      }
+      toast.innerHTML = `<div style="font-weight:700;color:#22d3ee;margin-bottom:4px;">${title}</div><div style="color:#94a3b8;line-height:1.4;">${body}</div>`;
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+      toast.style.pointerEvents = 'auto';
+      clearTimeout(toast._hideTimer);
+      toast._hideTimer = setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-12px)';
+        toast.style.pointerEvents = 'none';
+      }, 8000);
+
+      // Browser Notification (kalau permission granted)
+      if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        try {
+          new Notification(title, { body, icon: 'logo.png', tag: 'ubl-ready' });
+        } catch (e) {}
+      }
+    }
+
+    function requestNotifPermission() {
+      if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+        Notification.requestPermission().catch(() => {});
+      }
+    }
+
     function updateLiveTimers() {
       const timerElements = document.querySelectorAll('[data-eta]');
       const now = new Date().getTime();
@@ -1836,26 +2110,52 @@
         const etaIso = el.getAttribute('data-eta');
         if (!etaIso) return;
 
+        const isPaid = el.getAttribute('data-paid') === '1';
         const etaTime = new Date(etaIso).getTime();
         const diff = etaTime - now;
+        const key = etaIso; // unique-ish per row
 
         const displayEl = el.querySelector('.timer-display');
+        if (!displayEl) return;
 
-        if (diff <= 0) {
-          displayEl.innerText = "READY / DONE";
-          displayEl.className = "timer-display font-bold text-emerald-400 animate-pulse";
+        let status = '';
+        if (isPaid) {
+          status = 'DONE';
+          displayEl.innerText = "DONE";
+          displayEl.className = "timer-display font-bold text-emerald-400";
+          el.className = "mt-1 inline-flex w-fit bg-emerald-950/70 border border-emerald-500/30 px-2 py-0.5 rounded-md font-mono text-[10px]";
+        } else if (diff <= 0) {
+          status = 'READY';
+          displayEl.innerText = "READY";
+          displayEl.className = "timer-display font-bold text-amber-300 animate-pulse";
+          el.className = "mt-1 inline-flex w-fit bg-amber-950/70 border border-amber-500/30 px-2 py-0.5 rounded-md font-mono text-[10px]";
         } else {
+          status = 'WAITING';
           const days = Math.floor(diff / (1000 * 60 * 60 * 24));
           const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
           const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
           let timeStr = "";
           if (days > 0) timeStr += `${days}d `;
-          timeStr += `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+          timeStr += `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m`;
 
-          displayEl.innerText = `Remaining: ${timeStr}`;
+          displayEl.innerText = `WAITING ${timeStr}`;
+          displayEl.className = "timer-display font-bold text-cyan-300";
+          el.className = "mt-1 inline-flex w-fit bg-cyan-950/70 border border-cyan-500/30 px-2 py-0.5 rounded-md font-mono text-[10px] text-cyan-300";
         }
+
+        // Notif admin saat transisi WAITING → READY
+        const prev = prevTimerStatus.get(key);
+        if (prev === 'WAITING' && status === 'READY') {
+          const row = el.closest('tr') || el.closest('div');
+          let label = 'UBL';
+          try {
+            // Ambil teks service/hp dari baris terdekat
+            const svcCell = row ? row.querySelector('td:nth-child(3), p.text-cyan-300, h3') : null;
+            if (svcCell) label = svcCell.textContent.trim().slice(0, 60) || 'UBL';
+          } catch (e) {}
+          showAdminToast('⏰ Saatnya UBL!', `${label} sudah READY. Segera proses ya.`);
+        }
+        prevTimerStatus.set(key, status);
       });
     }
 
@@ -1889,6 +2189,17 @@
     document.getElementById('form-service').addEventListener('submit', async (e) => {
       if (window.showPageLoader) showPageLoader("Menyimpan...");
       e.preventDefault();
+
+      // Validasi: nomor HP wajib jika UBL dengan estimasi 72/168 jam
+      if (isUBLWithEstimateRequired()) {
+        const phoneVal = document.getElementById('customer_phone').value.trim();
+        if (!phoneVal) {
+          alert("Nomor HP customer WAJIB diisi untuk layanan UBL dengan estimasi 72 jam atau 168 jam.");
+          document.getElementById('customer_phone').focus();
+          if (window.hidePageLoader) hidePageLoader();
+          return;
+        }
+      }
 
       const btnSubmit = document.getElementById('btn-submit');
       btnSubmit.innerText = "Saving...";
@@ -1963,6 +2274,17 @@
     document.getElementById('form-edit-service').addEventListener('submit', async (e) => {
       if (window.showPageLoader) showPageLoader("Menyimpan...");
       e.preventDefault();
+
+      // Validasi: nomor HP wajib jika UBL dengan estimasi 72/168 jam
+      if (isModalUBLWithEstimateRequired()) {
+        const phoneVal = document.getElementById('modal-customer_phone').value.trim();
+        if (!phoneVal) {
+          alert("Nomor HP customer WAJIB diisi untuk layanan UBL dengan estimasi 72 jam atau 168 jam.");
+          document.getElementById('modal-customer_phone').focus();
+          if (window.hidePageLoader) hidePageLoader();
+          return;
+        }
+      }
 
       const btnSubmit = document.getElementById('modal-btn-submit');
       const editId = document.getElementById('modal-edit-id').value;
@@ -2054,10 +2376,27 @@
       }
 
       modalTargetEtaISO = item.eta_iso || null;
+      modalSelectedUBLHours = 0;
+      if (modalTargetEtaISO) {
+        const etaDisplay = document.getElementById('modal-ubl-eta-display');
+        if (etaDisplay) {
+          etaDisplay.innerText = `Siap: ${formatIndonesianDateTime(modalTargetEtaISO)}`;
+        }
+        // Coba deteksi apakah 72 atau 168 jam dari selisih waktu (jika masih relevan)
+        const diffHrs = Math.round((new Date(modalTargetEtaISO).getTime() - Date.now()) / (1000 * 60 * 60));
+        if (diffHrs >= 70 && diffHrs <= 75) modalSelectedUBLHours = 72;
+        else if (diffHrs >= 165 && diffHrs <= 172) modalSelectedUBLHours = 168;
+        // Atau dari notes yang mengandung "72 Jam" / "168 Jam"
+        const notes = (item.notes || '').toUpperCase();
+        if (notes.includes('72 JAM') || notes.includes('72 HOURS')) modalSelectedUBLHours = 72;
+        if (notes.includes('168 JAM') || notes.includes('168 HOURS')) modalSelectedUBLHours = 168;
+      }
 
       document.getElementById('modal-customer_phone').value = item.customer_phone || '';
       document.getElementById('modal-metode').value = item.metode_pembayaran || '';
       document.getElementById('modal-notes').value = item.notes || '';
+      updateModalPhoneRequiredUI();
+      updateAllClearButtons();
 
       try {
         const { data } = await db.from('rekap_jasa').select('dokumentasi').eq('id', id).single();

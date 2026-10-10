@@ -182,6 +182,149 @@
     }
     .cat-module { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
     .cat-tool { background: rgba(59, 158, 255, 0.1); color: var(--cyan); border: 1px solid rgba(59, 158, 255, 0.25); }
+    .cat-rom { background: rgba(245, 197, 66, 0.12); color: #f5c542; border: 1px solid rgba(245, 197, 66, 0.35); }
+
+    .admin-tabs {
+      display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 18px;
+      background: rgba(255,255,255,0.04); padding: 5px; border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .admin-tab {
+      background: transparent; border: none; color: var(--text-muted);
+      padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: var(--font-main); transition: 0.2s;
+    }
+    .admin-tab.active, .admin-tab:hover {
+      background: rgba(59, 158, 255, 0.15); color: var(--cyan);
+    }
+    .flat-file-list { display: flex; flex-direction: column; gap: 8px; }
+    .flat-file-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03); flex-wrap: wrap;
+    }
+    .flat-file-row .ftitle { font-size: 13.5px; font-weight: 600; color: #fff; word-break: break-word; }
+    .flat-file-row .furl {
+      font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);
+      max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .rom-brand-block {
+      margin-bottom: 18px; border: 1px solid rgba(59, 158, 255, 0.25);
+      border-radius: 14px; overflow: hidden; background: rgba(0, 120, 224, 0.06);
+    }
+    .rom-brand-head {
+      padding: 12px 16px; font-weight: 700; font-size: 14px; color: var(--cyan);
+      background: rgba(59, 158, 255, 0.1); border-bottom: 1px solid rgba(59, 158, 255, 0.2);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .rom-device-block { padding: 10px 14px 14px; border-bottom: 1px solid var(--border); }
+    .rom-device-block:last-child { border-bottom: none; }
+    .rom-device-name {
+      font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .rom-type-label {
+      font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.5px; margin: 10px 0 6px; font-family: var(--font-mono);
+    }
+    .btn-kelola {
+      background: rgba(59, 158, 255, 0.12); border: 1px solid rgba(59, 158, 255, 0.35);
+      color: var(--cyan); padding: 4px 10px; border-radius: 8px; font-size: 11px;
+      font-weight: 600; cursor: pointer; font-family: var(--font-main);
+    }
+    .btn-kelola:hover { background: rgba(59, 158, 255, 0.22); }
+    .modal-wide { max-width: 720px !important; width: 100%; }
+    .folder-cols {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;
+    }
+    @media (max-width: 640px) { .folder-cols { grid-template-columns: 1fr; } }
+    .folder-col {
+      border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+      background: rgba(0,0,0,0.2); min-height: 120px;
+    }
+    .folder-col-head {
+      padding: 10px 12px; font-size: 12px; font-weight: 700; color: var(--cyan);
+      background: rgba(59, 158, 255, 0.1); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .folder-col-head span { margin-left: auto; color: var(--text-muted); font-weight: 500; font-family: var(--font-mono); }
+    .folder-col-list { padding: 8px; max-height: 220px; overflow-y: auto; }
+    .folder-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 8px 10px; border-radius: 8px; margin-bottom: 4px;
+      background: rgba(255,255,255,0.03); border: 1px solid transparent;
+    }
+    .folder-item:hover { border-color: rgba(59, 158, 255, 0.25); }
+    .folder-item .fn { font-size: 12px; font-weight: 600; color: #fff; word-break: break-word; flex: 1; min-width: 0; }
+    .folder-empty { font-size: 12px; color: var(--text-muted); padding: 16px 8px; text-align: center; }
+    .folder-quick-add {
+      padding: 14px; border-radius: 12px; border: 1px dashed rgba(59, 158, 255, 0.35);
+      background: rgba(59, 158, 255, 0.05); margin-bottom: 8px;
+    }
+    .folder-preview {
+      margin: 10px 0 4px; padding: 10px 12px; border-radius: 10px;
+      border: 1px solid rgba(59, 158, 255, 0.25); background: rgba(0,0,0,0.25);
+      font-size: 12px; max-height: 180px; overflow-y: auto;
+    }
+    .folder-preview .fp-title { font-weight: 700; color: var(--cyan); margin-bottom: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .folder-preview .fp-item { color: var(--text-muted); padding: 2px 0; word-break: break-word; }
+    .folder-preview .fp-item.current { color: #f5c542; }
+
+    .rom-admin-bc {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+      margin-bottom: 14px; padding: 10px 12px; border-radius: 10px;
+      background: rgba(0,0,0,0.25); border: 1px solid var(--border);
+      font-size: 13px; font-family: var(--font-mono);
+    }
+    .rom-admin-bc .bc-link {
+      background: none; border: none; color: var(--cyan); cursor: pointer;
+      font-family: inherit; font-size: inherit; padding: 2px 4px; border-radius: 4px;
+    }
+    .rom-admin-bc .bc-link:hover { background: rgba(59,158,255,0.15); }
+    .rom-admin-bc .bc-sep { opacity: 0.4; }
+    .rom-admin-bc .bc-current { color: #fff; font-weight: 600; }
+    .rom-hint { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4; }
+    .rom-admin-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 12px; margin-bottom: 18px;
+    }
+    .rom-admin-folder {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 14px 10px 10px; border-radius: 12px; text-align: center;
+      background: rgba(59, 158, 255, 0.06); border: 1px solid rgba(59, 158, 255, 0.2);
+      color: var(--text); font-family: var(--font-main); transition: 0.2s;
+      position: relative;
+    }
+    .rom-admin-folder:hover {
+      background: rgba(59, 158, 255, 0.14); border-color: rgba(59, 158, 255, 0.45);
+    }
+    .rom-admin-folder .raf-open {
+      cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px;
+      width: 100%; background: none; border: none; color: inherit; font-family: inherit; padding: 0;
+    }
+    .raf-name { font-size: 13px; font-weight: 700; word-break: break-word; }
+    .raf-meta { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
+    .raf-actions {
+      display: flex; gap: 4px; margin-top: 4px; justify-content: center;
+    }
+    .raf-actions button {
+      background: rgba(0,0,0,0.25); border: 1px solid var(--border); color: var(--text-muted);
+      width: 28px; height: 28px; border-radius: 7px; cursor: pointer; font-size: 11px;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .raf-actions button:hover { color: var(--cyan); border-color: rgba(59,158,255,0.4); }
+    .raf-actions button.danger:hover { color: #fb7185; border-color: rgba(251,113,133,0.4); }
+    .rom-create-box {
+      padding: 14px; border-radius: 12px; border: 1px dashed rgba(59, 158, 255, 0.4);
+      background: rgba(59, 158, 255, 0.05);
+    }
+    .rom-context-banner {
+      padding: 12px 14px; border-radius: 10px; margin-bottom: 14px;
+      background: rgba(245, 197, 66, 0.1); border: 1px solid rgba(245, 197, 66, 0.35);
+      color: #f5c542; font-size: 13px; font-weight: 600; line-height: 1.4;
+    }
+    .rom-context-banner b { color: #fff; }
+    .rom-context-banner i { margin-right: 6px; }
     .action-btns { display: flex; gap: 6px; }
     .btn-icon {
       background: rgba(8, 47, 73, 0.4); border: 1px solid rgba(0, 120, 224, 0.25);
@@ -392,7 +535,7 @@
     <div class="topbar">
       <h1><i class="fa-solid fa-box-archive" style="color:var(--cyan)"></i> Vault Admin</h1>
       <div class="topbar-actions">
-        <a href="/account" id="linkBackAccount" class="btn-sm"><i class="fa-solid fa-arrow-left"></i> Account</a>
+        <a href="../../account/index.html" id="linkBackAccount" class="btn-sm"><i class="fa-solid fa-arrow-left"></i> Account</a>
         <button class="btn-sm btn-danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
       </div>
     </div>
@@ -406,11 +549,42 @@
             <select id="newCategory" class="neo-input" onchange="onCategoryChange()">
               <option value="module">Module</option>
               <option value="tool">Tool</option>
+              <option value="rom">Rom &amp; Recovery</option>
             </select>
           </div>
-          <div class="form-group">
+          <div class="form-group" id="groupFieldWrap" style="display:none">
             <label>Group Name</label>
-            <input type="text" id="newGroup" class="neo-input" placeholder="Auto for Module" disabled>
+            <input type="text" id="newGroup" class="neo-input" disabled>
+          </div>
+        </div>
+        <!-- Field khusus Rom & Recovery -->
+        <div id="romFields" style="display:none">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Brand</label>
+              <input type="text" id="newBrand" class="neo-input" list="brand-list" placeholder="e.g. Xiaomi, Poco, Samsung">
+              <datalist id="brand-list">
+                <option value="Xiaomi"><option value="Poco"><option value="Redmi">
+                <option value="Samsung"><option value="Realme"><option value="Oppo">
+                <option value="Vivo"><option value="Infinix"><option value="Tecno">
+                <option value="Motorola"><option value="OnePlus"><option value="Google">
+              </datalist>
+            </div>
+            <div class="form-group">
+              <label>Device / Tipe HP</label>
+              <input type="text" id="newDevice" class="neo-input" list="device-list" placeholder="e.g. X3 NFC, F3, Note 12">
+              <datalist id="device-list"></datalist>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tipe Folder</label>
+              <select id="newRomType" class="neo-input">
+                <option value="rom">ROM</option>
+                <option value="recovery">Recovery</option>
+              </select>
+            </div>
+            <div class="form-group"></div>
           </div>
         </div>
         <div class="form-row full">
@@ -421,43 +595,32 @@
         </div>
         <div class="form-row full">
           <div class="form-group">
-            <label>Download URL</label>
+            <label>Download URL (direct link)</label>
             <input type="url" id="newUrl" class="neo-input" placeholder="https://..." required>
           </div>
         </div>
         <button class="neo-btn" onclick="addFile()"><i class="fa-solid fa-plus"></i> Add File</button>
       </div>
 
+      <!-- Tab filter daftar -->
+      <div class="admin-tabs" id="adminTabs">
+        <button type="button" class="admin-tab active" data-filter="module" onclick="setAdminFilter('module', this)">Modules</button>
+        <button type="button" class="admin-tab" data-filter="tool" onclick="setAdminFilter('tool', this)">Tools</button>
+        <button type="button" class="admin-tab" data-filter="rom" onclick="setAdminFilter('rom', this)">Rom &amp; Recovery</button>
+      </div>
+
       <div class="section-title" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px">
-        <span><span class="dot"></span> All Files (<span id="fileCount">0</span>)</span>
-        <input type="search" id="adminSearch" class="neo-input" placeholder="Cari title / group / url..." style="max-width:280px;width:100%;padding:8px 12px;font-size:12px;font-family:var(--font-mono)" oninput="filterAdminFiles()">
+        <span><span class="dot"></span> <span id="listTitle">Modules</span> (<span id="fileCount">0</span>)</span>
+        <input type="search" id="adminSearch" class="neo-input" placeholder="Cari title / brand / url..." style="max-width:280px;width:100%;padding:8px 12px;font-size:12px;font-family:var(--font-mono)" oninput="filterAdminFiles()">
       </div>
 
-      <!-- Desktop table -->
-      <div class="table-desktop">
-        <div class="table-wrap neo-card">
-          <table>
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Group</th>
-                <th>URL</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="fileTable"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Mobile cards -->
-      <div class="cards-mobile" id="fileCards"></div>
+      <!-- List: flat untuk module/tool, grouped untuk rom -->
+      <div id="adminListArea"></div>
     </div>
   </div>
 
   <div class="modal-overlay" id="editModal">
-    <div class="modal neo-card">
+    <div class="modal neo-card" style="max-width:560px">
       <h3>Edit File</h3>
       <input type="hidden" id="editId">
       <div class="form-group">
@@ -465,11 +628,31 @@
         <select id="editCategory" class="neo-input" onchange="onEditCategoryChange()">
           <option value="module">Module</option>
           <option value="tool">Tool</option>
+          <option value="rom">Rom &amp; Recovery</option>
         </select>
       </div>
-      <div class="form-group">
+      <div class="form-group" id="editGroupWrap">
         <label>Group Name</label>
         <input type="text" id="editGroup" class="neo-input">
+      </div>
+      <div id="editRomFields" style="display:none">
+        <div class="form-group">
+          <label>Brand</label>
+          <input type="text" id="editBrand" class="neo-input" placeholder="e.g. Xiaomi, Poco" oninput="refreshEditFolderPreview()">
+        </div>
+        <div class="form-group">
+          <label>Device / Tipe HP</label>
+          <input type="text" id="editDevice" class="neo-input" placeholder="e.g. X3 NFC" oninput="refreshEditFolderPreview()">
+        </div>
+        <div class="form-group">
+          <label>Tipe Folder</label>
+          <select id="editRomType" class="neo-input">
+            <option value="rom">ROM</option>
+            <option value="recovery">Recovery</option>
+          </select>
+        </div>
+        <!-- Preview isi folder ROM & Recovery device ini -->
+        <div id="editFolderPreview" class="folder-preview"></div>
       </div>
       <div class="form-group">
         <label>Title</label>
@@ -482,6 +665,53 @@
       <div class="modal-actions">
         <button class="btn-secondary" onclick="closeEdit()">Cancel</button>
         <button class="neo-btn" onclick="saveEdit()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal kelola folder per device -->
+  <div class="modal-overlay" id="folderModal" onclick="if(event.target===this)closeFolderModal()">
+    <div class="modal neo-card modal-wide" onclick="event.stopPropagation()">
+      <h3><i class="fa-solid fa-folder-open" style="color:var(--cyan)"></i> <span id="folderModalTitle">Kelola Folder</span></h3>
+      <p id="folderModalSub" style="font-size:12px;color:var(--text-muted);margin:-6px 0 14px;font-family:var(--font-mono)"></p>
+      <input type="hidden" id="folderBrand">
+      <input type="hidden" id="folderDevice">
+
+      <div class="folder-cols">
+        <div class="folder-col">
+          <div class="folder-col-head"><i class="fa-solid fa-compact-disc"></i> ROM <span id="folderRomCount"></span></div>
+          <div id="folderRomList" class="folder-col-list"></div>
+        </div>
+        <div class="folder-col">
+          <div class="folder-col-head"><i class="fa-solid fa-screwdriver-wrench"></i> Recovery <span id="folderRecCount"></span></div>
+          <div id="folderRecList" class="folder-col-list"></div>
+        </div>
+      </div>
+
+      <div class="folder-quick-add">
+        <div class="rom-type-label" style="margin-top:0">Tambah file ke folder ini</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Masuk ke</label>
+            <select id="folderAddType" class="neo-input">
+              <option value="rom">ROM</option>
+              <option value="recovery">Recovery</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>File Title</label>
+            <input type="text" id="folderAddTitle" class="neo-input" placeholder="filename.zip">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Download URL</label>
+          <input type="url" id="folderAddUrl" class="neo-input" placeholder="https://...">
+        </div>
+        <button type="button" class="neo-btn" style="width:100%" onclick="addFileToFolder()"><i class="fa-solid fa-plus"></i> Tambah ke Folder</button>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeFolderModal()">Tutup</button>
       </div>
     </div>
   </div>
@@ -504,29 +734,64 @@
       } catch (e) { return null; }
     }
 
+    let adminFilter = "module"; // module | tool | rom
+    // Navigasi folder admin Rom: brand → device → type (rom|recovery)
+    let romAdminNav = { brand: null, device: null, type: null };
+
     function onCategoryChange() {
       const cat = document.getElementById("newCategory").value;
-      const groupInput = document.getElementById("newGroup");
-      if (cat === "module") {
-        groupInput.value = "Modules";
-        groupInput.disabled = true;
+      const groupWrap = document.getElementById("groupFieldWrap");
+      const romFields = document.getElementById("romFields");
+      const addForm = document.querySelector(".add-form");
+      // Module & Tool: form atas. Rom: form atas disembunyikan (pakai navigasi folder)
+      if (cat === "rom") {
+        if (groupWrap) groupWrap.style.display = "none";
+        if (romFields) romFields.style.display = "none";
+        if (addForm) addForm.style.display = "none";
       } else {
-        groupInput.disabled = false;
-        groupInput.value = "";
-        groupInput.placeholder = "e.g. ADB & Developer Utilities";
+        if (groupWrap) groupWrap.style.display = "none";
+        if (romFields) romFields.style.display = "none";
+        if (addForm) addForm.style.display = "";
       }
     }
     function onEditCategoryChange() {
       const cat = document.getElementById("editCategory").value;
-      const groupInput = document.getElementById("editGroup");
-      if (cat === "module") {
-        groupInput.value = "Modules";
-        groupInput.disabled = true;
+      const groupWrap = document.getElementById("editGroupWrap");
+      const romFields = document.getElementById("editRomFields");
+      if (cat === "rom") {
+        if (groupWrap) groupWrap.style.display = "none";
+        if (romFields) romFields.style.display = "";
       } else {
-        groupInput.disabled = false;
+        if (groupWrap) groupWrap.style.display = "none";
+        if (romFields) romFields.style.display = "none";
       }
     }
     onCategoryChange();
+
+    function setAdminFilter(filter, btn) {
+      adminFilter = filter;
+      document.querySelectorAll(".admin-tab").forEach(b => b.classList.remove("active"));
+      if (btn) btn.classList.add("active");
+      const titles = { module: "Modules", tool: "Tools", rom: "Rom & Recovery" };
+      const t = document.getElementById("listTitle");
+      if (t) t.textContent = titles[filter] || filter;
+      if (filter === "rom") {
+        romAdminNav = { brand: null, device: null, type: null };
+      }
+      // Sync add form category
+      const sel = document.getElementById("newCategory");
+      if (sel) { sel.value = filter; onCategoryChange(); }
+      filterAdminFiles();
+    }
+
+    function buildRomGroup(brand, device, type) {
+      return [brand.trim(), device.trim(), (type || "rom").toLowerCase()].join("|||");
+    }
+    function parseRomGroup(groupName) {
+      if (!groupName) return { brand: "", device: "", type: "rom" };
+      const p = String(groupName).split("|||");
+      return { brand: (p[0] || "").trim(), device: (p[1] || "").trim(), type: ((p[2] || "rom").trim().toLowerCase()) };
+    }
 
     async function checkSession() {
       try {
@@ -631,15 +896,35 @@
 
     function filterAdminFiles() {
       const q = ((document.getElementById("adminSearch") || {}).value || "").toLowerCase().trim();
-      const src = files || [];
+      const src = (files || []).filter(f => f.category === adminFilter);
       const filtered = !q ? src.slice() : src.filter(function(f) {
-        const hay = [f.title, f.category, f.group_name || f.group, f.url, f.meta].join(" ").toLowerCase();
+        const hay = [f.title, f.category, f.group_name || "", f.url].join(" ").toLowerCase();
         return hay.indexOf(q) !== -1;
       });
-      renderTable(filtered);
-      renderCards(filtered);
+      renderAdminList(filtered);
       const countEl = document.getElementById("fileCount");
-      if (countEl) countEl.textContent = q ? (filtered.length + " / " + src.length) : String(src.length);
+      if (countEl) {
+        if (adminFilter === "rom" && romAdminNav.type && romAdminNav.brand && romAdminNav.device) {
+          const tree = buildAdminRomTree(files);
+          const d = (tree[romAdminNav.brand] && tree[romAdminNav.brand][romAdminNav.device]) || { rom: [], recovery: [] };
+          countEl.textContent = String(romAdminNav.type === "recovery" ? d.recovery.length : d.rom.length);
+        } else {
+          countEl.textContent = String(filtered.length);
+        }
+      }
+      refreshDeviceDatalist();
+    }
+
+    function refreshDeviceDatalist() {
+      const dl = document.getElementById("device-list");
+      if (!dl) return;
+      const devices = new Set();
+      (files || []).forEach(f => {
+        if (f.category !== "rom") return;
+        const p = parseRomGroup(f.group_name);
+        if (p.device) devices.add(p.device);
+      });
+      dl.innerHTML = Array.from(devices).sort().map(d => '<option value="' + esc(d) + '">').join("");
     }
 
     async function loadFiles() {
@@ -657,44 +942,466 @@
       return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
     }
 
-    function renderTable(list) {
-      const data = list || files;
-      const tbody = document.getElementById("fileTable");
-      if (!data.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-muted);font-family:var(--font-mono);font-size:12px">No files yet</td></tr>';
-        return;
-      }
-      tbody.innerHTML = data.map(f =>
-        '<tr><td><strong style="font-size:13px">' + esc(f.title) + '</strong></td>' +
-        '<td><span class="cat-badge cat-' + f.category + '">' + f.category + '</span></td>' +
-        '<td style="font-size:12px;color:var(--text-muted)">' + esc(f.group_name || "") + '</td>' +
-        '<td class="url-cell" title="' + esc(f.url) + '">' + esc(f.url) + '</td>' +
-        '<td><div class="action-btns">' +
+    function fileRowHTML(f, extraLabel) {
+      return '<div class="flat-file-row">' +
+        '<div style="min-width:0;flex:1">' +
+        '<div class="ftitle">' + esc(f.title) + (extraLabel ? ' <span style="font-size:11px;color:var(--text-muted);font-weight:500">(' + esc(extraLabel) + ')</span>' : '') + '</div>' +
+        '<div class="furl" title="' + esc(f.url) + '">' + esc(f.url) + '</div></div>' +
+        '<div class="action-btns">' +
         '<button class="btn-icon" title="Edit" onclick="openEdit(' + f.id + ')"><i class="fa-solid fa-pen"></i></button>' +
         '<button class="btn-icon delete" title="Delete" onclick="deleteFile(' + f.id + ')"><i class="fa-solid fa-trash"></i></button>' +
-        '</div></td></tr>'
-      ).join("");
+        '</div></div>';
     }
 
-    function renderCards(list) {
-      const data = list || files;
-      const el = document.getElementById("fileCards");
-      if (!data.length) {
-        el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);font-family:var(--font-mono);font-size:12px">No files yet</div>';
+    // Folder virtual (kosong) disimpan di localStorage agar tetap muncul sebelum ada file
+    function loadVirtualFolders() {
+      try { return JSON.parse(localStorage.getItem("vault_rom_folders") || "[]"); } catch (e) { return []; }
+    }
+    function saveVirtualFolders(arr) {
+      localStorage.setItem("vault_rom_folders", JSON.stringify(arr || []));
+    }
+    function addVirtualFolder(brand, device) {
+      const arr = loadVirtualFolders();
+      if (!arr.some(x => x.brand === brand && x.device === device)) {
+        arr.push({ brand: brand, device: device });
+        saveVirtualFolders(arr);
+      }
+    }
+    function removeVirtualFolder(brand, device) {
+      saveVirtualFolders(loadVirtualFolders().filter(x => !(x.brand === brand && (!device || x.device === device))));
+    }
+    function renameVirtualFolder(oldBrand, oldDevice, newBrand, newDevice) {
+      const arr = loadVirtualFolders().map(x => {
+        if (oldDevice) {
+          if (x.brand === oldBrand && x.device === oldDevice) {
+            return { brand: newBrand || x.brand, device: newDevice || x.device };
+          }
+        } else if (x.brand === oldBrand) {
+          return { brand: newBrand || x.brand, device: x.device };
+        }
+        return x;
+      });
+      saveVirtualFolders(arr);
+    }
+
+    // Prompt rapi (ganti window.prompt)
+    function neoPrompt(title, message, defaultVal) {
+      return new Promise(function(resolve) {
+        var overlay = document.getElementById("neoPromptOverlay");
+        if (!overlay) {
+          overlay = document.createElement("div");
+          overlay.id = "neoPromptOverlay";
+          overlay.className = "modal-overlay show";
+          overlay.innerHTML = '<div class="modal neo-card" style="max-width:400px">' +
+            '<h3 id="neoPromptTitle"></h3>' +
+            '<p id="neoPromptMsg" style="font-size:13px;color:var(--text-muted);margin-bottom:12px"></p>' +
+            '<input type="text" id="neoPromptInput" class="neo-input" style="width:100%;margin-bottom:14px">' +
+            '<div class="modal-actions">' +
+            '<button type="button" class="btn-secondary" id="neoPromptCancel">Batal</button>' +
+            '<button type="button" class="neo-btn" id="neoPromptOk">OK</button>' +
+            '</div></div>';
+          document.body.appendChild(overlay);
+        }
+        overlay.classList.add("show");
+        document.getElementById("neoPromptTitle").textContent = title || "Rename";
+        document.getElementById("neoPromptMsg").textContent = message || "";
+        var inp = document.getElementById("neoPromptInput");
+        inp.value = defaultVal || "";
+        setTimeout(function() { inp.focus(); inp.select(); }, 50);
+        function done(val) {
+          overlay.classList.remove("show");
+          resolve(val);
+        }
+        document.getElementById("neoPromptOk").onclick = function() { done(inp.value); };
+        document.getElementById("neoPromptCancel").onclick = function() { done(null); };
+        inp.onkeydown = function(e) {
+          if (e.key === "Enter") done(inp.value);
+          if (e.key === "Escape") done(null);
+        };
+      });
+    }
+
+    function buildAdminRomTree(list) {
+      const tree = {};
+      (list || files || []).forEach(f => {
+        if (f.category !== "rom") return;
+        const p = parseRomGroup(f.group_name);
+        if (!p || !p.brand) return;
+        if (!tree[p.brand]) tree[p.brand] = {};
+        if (!tree[p.brand][p.device]) tree[p.brand][p.device] = { rom: [], recovery: [], note: null };
+        if (p.type === "recovery_note") tree[p.brand][p.device].note = f;
+        else if (p.type === "recovery") tree[p.brand][p.device].recovery.push(f);
+        else tree[p.brand][p.device].rom.push(f);
+      });
+      // merge virtual empty folders
+      loadVirtualFolders().forEach(v => {
+        if (!v.brand || !v.device) return;
+        if (!tree[v.brand]) tree[v.brand] = {};
+        if (!tree[v.brand][v.device]) tree[v.brand][v.device] = { rom: [], recovery: [], note: null };
+      });
+      return tree;
+    }
+
+    function romAdminGo(brand, device, type) {
+      romAdminNav = { brand: brand || null, device: device || null, type: type || null };
+      filterAdminFiles();
+    }
+
+    function romAdminBack() {
+      if (romAdminNav.type) romAdminGo(romAdminNav.brand, romAdminNav.device, null);
+      else if (romAdminNav.device) romAdminGo(romAdminNav.brand, null, null);
+      else if (romAdminNav.brand) romAdminGo(null, null, null);
+    }
+
+    function renderAdminList(list) {
+      const el = document.getElementById("adminListArea");
+      if (!el) return;
+
+      // Module & Tool: flat list
+      if (adminFilter === "module" || adminFilter === "tool") {
+        if (!list.length) {
+          el.innerHTML = '<div class="neo-card" style="text-align:center;padding:36px;color:var(--text-muted);font-size:13px">Belum ada file di tab ini.</div>';
+          return;
+        }
+        el.innerHTML = '<div class="flat-file-list">' + list.map(f => fileRowHTML(f)).join("") + '</div>';
         return;
       }
-      el.innerHTML = data.map(f =>
-        '<div class="file-card neo-card">' +
-        '<div class="file-card-top">' +
-        '<div><div class="file-card-title">' + esc(f.title) + '</div>' +
-        '<div class="file-card-meta"><span class="cat-badge cat-' + f.category + '">' + f.category + '</span> ' + esc(f.group_name || "") + '</div></div>' +
-        '</div>' +
-        '<div class="file-card-url">' + esc(f.url) + '</div>' +
-        '<div class="file-card-actions">' +
-        '<button class="btn-icon" onclick="openEdit(' + f.id + ')"><i class="fa-solid fa-pen"></i></button>' +
-        '<button class="btn-icon delete" onclick="deleteFile(' + f.id + ')"><i class="fa-solid fa-trash"></i></button>' +
-        '</div></div>'
-      ).join("");
+
+      // ===== Rom & Recovery: navigasi folder =====
+      // Brand → Device (otomatis ada ROM + Recovery) → isi link
+      const tree = buildAdminRomTree(files);
+      const q = ((document.getElementById("adminSearch") || {}).value || "").toLowerCase().trim();
+      let html = '<div class="rom-browser-admin neo-card" style="padding:16px">';
+
+      // Breadcrumb + back
+      html += '<div class="rom-admin-bc">';
+      if (romAdminNav.brand) {
+        html += '<button type="button" class="rom-back-btn" onclick="romAdminBack()"><i class="fa-solid fa-arrow-left"></i> Kembali</button>';
+      }
+      html += '<button type="button" class="bc-link" onclick="romAdminGo(null,null,null)">Semua Brand</button>';
+      if (romAdminNav.brand) {
+        html += ' <span class="bc-sep">/</span> ';
+        html += '<button type="button" class="bc-link" onclick="romAdminGo(\'' + jsEsc(romAdminNav.brand) + '\',null,null)">' + esc(romAdminNav.brand) + '</button>';
+      }
+      if (romAdminNav.device) {
+        html += ' <span class="bc-sep">/</span> ';
+        html += '<button type="button" class="bc-link" onclick="romAdminGo(\'' + jsEsc(romAdminNav.brand) + '\',\'' + jsEsc(romAdminNav.device) + '\',null)">' + esc(romAdminNav.device) + '</button>';
+      }
+      if (romAdminNav.type) {
+        html += ' <span class="bc-sep">/</span> ';
+        html += '<span class="bc-current">' + (romAdminNav.type === "recovery" ? "Recovery" : "ROM") + '</span>';
+      }
+      html += '</div>';
+
+      // ----- Level 1: Brand -----
+      if (!romAdminNav.brand) {
+        const brands = Object.keys(tree).filter(b => !q || b.toLowerCase().includes(q)).sort((a,b) => a.localeCompare(b));
+        html += '<p class="rom-hint">Seperti File Explorer: buka folder, rename, atau hapus. Buat brand + tipe HP di bawah.</p>';
+        html += '<div class="rom-admin-grid">';
+        brands.forEach(brand => {
+          const nDev = Object.keys(tree[brand]).length;
+          let nFile = 0;
+          Object.keys(tree[brand]).forEach(d => { nFile += tree[brand][d].rom.length + tree[brand][d].recovery.length; });
+          html += '<div class="rom-admin-folder">' +
+            '<button type="button" class="raf-open" onclick="romAdminGo(\'' + jsEsc(brand) + '\',null,null)">' +
+            '<i class="fa-solid fa-folder fa-2x" style="color:var(--cyan)"></i>' +
+            '<span class="raf-name">' + esc(brand) + '</span>' +
+            '<span class="raf-meta">' + nDev + ' device · ' + nFile + ' file</span></button>' +
+            '<div class="raf-actions">' +
+            '<button type="button" title="Rename brand" onclick="renameFolder(\'brand\',\'' + jsEsc(brand) + '\',null)"><i class="fa-solid fa-pen"></i></button>' +
+            '<button type="button" class="danger" title="Hapus brand + semua isinya" onclick="deleteFolder(\'brand\',\'' + jsEsc(brand) + '\',null)"><i class="fa-solid fa-trash"></i></button>' +
+            '</div></div>';
+        });
+        html += '</div>';
+        html += '<div class="rom-create-box">' +
+          '<div class="rom-type-label">Buat folder baru (Brand + Tipe HP)</div>' +
+          '<div class="form-row">' +
+          '<div class="form-group"><label>Brand</label><input type="text" id="createBrand" class="neo-input" list="brand-list" placeholder="Poco / Xiaomi / Samsung"></div>' +
+          '<div class="form-group"><label>Tipe HP (Device)</label><input type="text" id="createDevice" class="neo-input" placeholder="X3 NFC / F3 / Note 12"></div>' +
+          '</div>' +
+          '<button type="button" class="neo-btn" onclick="createDeviceFolder()"><i class="fa-solid fa-folder-plus"></i> Buat Folder</button>' +
+          '<p style="font-size:11px;color:var(--text-muted);margin-top:8px">Di dalamnya otomatis ada folder <b>ROM</b> dan <b>Recovery</b>.</p>' +
+          '</div>';
+      }
+      // ----- Level 2: Device -----
+      else if (!romAdminNav.device) {
+        const devices = tree[romAdminNav.brand] ? Object.keys(tree[romAdminNav.brand]).sort((a,b) => a.localeCompare(b)) : [];
+        const filtered = devices.filter(d => !q || d.toLowerCase().includes(q));
+        html += '<p class="rom-hint">Tipe HP di brand <b>' + esc(romAdminNav.brand) + '</b>. Buka, rename, atau hapus.</p>';
+        html += '<div class="rom-admin-grid">';
+        filtered.forEach(device => {
+          const d = tree[romAdminNav.brand][device];
+          const n = d.rom.length + d.recovery.length;
+          html += '<div class="rom-admin-folder">' +
+            '<button type="button" class="raf-open" onclick="romAdminGo(\'' + jsEsc(romAdminNav.brand) + '\',\'' + jsEsc(device) + '\',null)">' +
+            '<i class="fa-solid fa-mobile-screen fa-2x" style="color:var(--cyan)"></i>' +
+            '<span class="raf-name">' + esc(device) + '</span>' +
+            '<span class="raf-meta">' + n + ' file</span></button>' +
+            '<div class="raf-actions">' +
+            '<button type="button" title="Rename tipe HP" onclick="renameFolder(\'device\',\'' + jsEsc(romAdminNav.brand) + '\',\'' + jsEsc(device) + '\')"><i class="fa-solid fa-pen"></i></button>' +
+            '<button type="button" class="danger" title="Hapus tipe HP + semua isinya" onclick="deleteFolder(\'device\',\'' + jsEsc(romAdminNav.brand) + '\',\'' + jsEsc(device) + '\')"><i class="fa-solid fa-trash"></i></button>' +
+            '</div></div>';
+        });
+        html += '</div>';
+        html += '<div class="rom-create-box">' +
+          '<div class="rom-type-label">Tambah tipe HP di brand ' + esc(romAdminNav.brand) + '</div>' +
+          '<div class="form-group"><label>Tipe HP (Device)</label><input type="text" id="createDeviceOnly" class="neo-input" placeholder="X3 Pro / F3"></div>' +
+          '<button type="button" class="neo-btn" onclick="createDeviceFolder(\'' + jsEsc(romAdminNav.brand) + '\')"><i class="fa-solid fa-folder-plus"></i> Buat Folder</button>' +
+          '</div>';
+      }
+      // ----- Level 3: ROM + Recovery (selalu 2 folder, tidak bisa rename/hapus) -----
+      else if (!romAdminNav.type) {
+        const d = (tree[romAdminNav.brand] && tree[romAdminNav.brand][romAdminNav.device]) || { rom: [], recovery: [] };
+        html += '<p class="rom-hint">Pilih folder <b>ROM</b> atau <b>Recovery</b> untuk menambah / edit direct link.</p>';
+        html += '<div class="rom-admin-grid">';
+        html += '<div class="rom-admin-folder">' +
+          '<button type="button" class="raf-open" onclick="romAdminGo(\'' + jsEsc(romAdminNav.brand) + '\',\'' + jsEsc(romAdminNav.device) + '\',\'rom\')">' +
+          '<i class="fa-solid fa-compact-disc fa-2x" style="color:var(--cyan)"></i>' +
+          '<span class="raf-name">ROM</span>' +
+          '<span class="raf-meta">' + d.rom.length + ' link</span></button></div>';
+        html += '<div class="rom-admin-folder">' +
+          '<button type="button" class="raf-open" onclick="romAdminGo(\'' + jsEsc(romAdminNav.brand) + '\',\'' + jsEsc(romAdminNav.device) + '\',\'recovery\')">' +
+          '<i class="fa-solid fa-screwdriver-wrench fa-2x" style="color:var(--cyan)"></i>' +
+          '<span class="raf-name">Recovery</span>' +
+          '<span class="raf-meta">' + d.recovery.length + ' link</span></button></div>';
+        html += '</div>';
+      }
+      // ----- Level 4: isi link + form tambah di folder ini -----
+      else {
+        const d = (tree[romAdminNav.brand] && tree[romAdminNav.brand][romAdminNav.device]) || { rom: [], recovery: [], note: null };
+        const items = romAdminNav.type === "recovery" ? d.recovery : d.rom;
+        const folderLabel = romAdminNav.type === "recovery" ? "Recovery" : "ROM";
+        const pathLabel = romAdminNav.brand + " / " + romAdminNav.device + " / " + folderLabel;
+
+        html += '<div class="rom-context-banner">' +
+          '<i class="fa-solid fa-location-dot"></i> Direct link yang kamu tambah akan masuk ke: <b>' + esc(pathLabel) + '</b></div>';
+
+        // Note recovery — bisa diedit di Vault Manager
+        if (romAdminNav.type === "recovery") {
+          const noteText = d.note ? (d.note.url || d.note.title || "") : "";
+          const noteId = d.note ? d.note.id : "";
+          html += '<div class="rom-create-box" style="border-color:rgba(245,197,66,0.4);background:rgba(245,197,66,0.06);margin-bottom:16px">' +
+            '<div class="rom-type-label" style="color:#f5c542"><i class="fa-solid fa-sticky-note"></i> Note Cara Flash Recovery</div>' +
+            '<p style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Hanya terlihat oleh admin. Bisa juga diedit dari halaman Vault → folder Recovery.</p>' +
+            '<input type="hidden" id="adminNoteId" value="' + esc(String(noteId)) + '">' +
+            '<div class="form-group"><textarea id="adminNoteText" class="neo-input" rows="5" style="width:100%;resize:vertical;min-height:100px;font-family:var(--font-main)" placeholder="Contoh:&#10;1. fastboot flash recovery recovery.img&#10;2. fastboot reboot recovery">' + esc(noteText) + '</textarea></div>' +
+            '<button type="button" class="neo-btn" onclick="saveAdminRecoveryNote()"><i class="fa-solid fa-floppy-disk"></i> Simpan Note</button>' +
+            '</div>';
+        }
+
+        if (!items.length) {
+          html += '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Folder masih kosong. Tambah link di bawah.</div>';
+        } else {
+          html += '<div class="flat-file-list" style="margin-bottom:16px">' + items.map(f => fileRowHTML(f)).join("") + '</div>';
+        }
+
+        html += '<div class="rom-create-box">' +
+          '<div class="rom-type-label">Tambah direct link ke folder ini</div>' +
+          '<div class="form-group"><label>Nama file</label><input type="text" id="inlineAddTitle" class="neo-input" placeholder="twrp-x3.img / rom-hyperos.zip"></div>' +
+          '<div class="form-group"><label>Direct link (URL)</label><input type="url" id="inlineAddUrl" class="neo-input" placeholder="https://..."></div>' +
+          '<button type="button" class="neo-btn" onclick="addLinkHere()"><i class="fa-solid fa-plus"></i> Tambah ke ' + esc(folderLabel) + '</button>' +
+          '</div>';
+      }
+
+      html += '</div>';
+      el.innerHTML = html;
+    }
+
+    function jsEsc(s) {
+      return String(s || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+    }
+
+    function createDeviceFolder(fixedBrand) {
+      const brand = (fixedBrand || (document.getElementById("createBrand") || {}).value || "").trim();
+      const device = ((document.getElementById("createDeviceOnly") || document.getElementById("createDevice") || {}).value || "").trim();
+      if (!brand) { showToast("Isi nama Brand"); return; }
+      if (!device) { showToast("Isi tipe HP / Device"); return; }
+      addVirtualFolder(brand, device);
+      romAdminGo(brand, device, null);
+      showToast("Folder " + brand + " / " + device + " dibuat. Ada ROM & Recovery di dalamnya.");
+    }
+
+    async function renameFolder(level, brand, device) {
+      if (level === "brand") {
+        const neu = await neoPrompt("Rename Brand", "Nama brand baru untuk \"" + brand + "\":", brand);
+        if (neu == null) return;
+        const newBrand = neu.trim();
+        if (!newBrand || newBrand === brand) return;
+        if (window.showPageLoader) showPageLoader("Rename brand...");
+        try {
+          const targets = (files || []).filter(f => {
+            if (f.category !== "rom") return false;
+            return parseRomGroup(f.group_name).brand === brand;
+          });
+          for (const f of targets) {
+            const p = parseRomGroup(f.group_name);
+            const newGroup = buildRomGroup(newBrand, p.device, p.type);
+            const { error } = await db.from("vault_files").update({ group_name: newGroup }).eq("id", f.id);
+            if (error) throw error;
+          }
+          renameVirtualFolder(brand, null, newBrand, null);
+          if (romAdminNav.brand === brand) romAdminNav.brand = newBrand;
+          showToast("Brand diganti: " + brand + " → " + newBrand);
+          await loadFiles();
+        } catch (e) {
+          showToast("Gagal rename: " + (e.message || e));
+        }
+        if (window.hidePageLoader) hidePageLoader();
+      } else if (level === "device") {
+        const neu = await neoPrompt("Rename Tipe HP", "Nama tipe HP baru untuk \"" + device + "\":", device);
+        if (neu == null) return;
+        const newDevice = neu.trim();
+        if (!newDevice || newDevice === device) return;
+        if (window.showPageLoader) showPageLoader("Rename device...");
+        try {
+          const targets = (files || []).filter(f => {
+            if (f.category !== "rom") return false;
+            const p = parseRomGroup(f.group_name);
+            return p.brand === brand && p.device === device;
+          });
+          for (const f of targets) {
+            const p = parseRomGroup(f.group_name);
+            const newGroup = buildRomGroup(brand, newDevice, p.type);
+            const { error } = await db.from("vault_files").update({ group_name: newGroup }).eq("id", f.id);
+            if (error) throw error;
+          }
+          renameVirtualFolder(brand, device, brand, newDevice);
+          if (romAdminNav.device === device) romAdminNav.device = newDevice;
+          showToast("Device diganti: " + device + " → " + newDevice);
+          await loadFiles();
+        } catch (e) {
+          showToast("Gagal rename: " + (e.message || e));
+        }
+        if (window.hidePageLoader) hidePageLoader();
+      }
+    }
+
+    async function deleteFolder(level, brand, device) {
+      if (level === "brand") {
+        const ok = await neoConfirm({
+          title: "Hapus folder brand?",
+          message: "Semua tipe HP dan file di dalam brand \"" + brand + "\" akan dihapus. Tidak bisa dibatalkan.",
+          okText: "Hapus semua"
+        });
+        if (!ok) return;
+        if (window.showPageLoader) showPageLoader("Menghapus...");
+        try {
+          const targets = (files || []).filter(f => {
+            if (f.category !== "rom") return false;
+            return parseRomGroup(f.group_name).brand === brand;
+          });
+          for (const f of targets) {
+            const { error } = await db.from("vault_files").delete().eq("id", f.id);
+            if (error) throw error;
+          }
+          removeVirtualFolder(brand, null);
+          if (romAdminNav.brand === brand) romAdminNav = { brand: null, device: null, type: null };
+          showToast("Brand \"" + brand + "\" dihapus");
+          await loadFiles();
+        } catch (e) {
+          showToast("Gagal hapus: " + (e.message || e));
+        }
+        if (window.hidePageLoader) hidePageLoader();
+      } else if (level === "device") {
+        const ok = await neoConfirm({
+          title: "Hapus folder tipe HP?",
+          message: "Semua file ROM & Recovery di \"" + brand + " / " + device + "\" akan dihapus.",
+          okText: "Hapus"
+        });
+        if (!ok) return;
+        if (window.showPageLoader) showPageLoader("Menghapus...");
+        try {
+          const targets = (files || []).filter(f => {
+            if (f.category !== "rom") return false;
+            const p = parseRomGroup(f.group_name);
+            return p.brand === brand && p.device === device;
+          });
+          for (const f of targets) {
+            const { error } = await db.from("vault_files").delete().eq("id", f.id);
+            if (error) throw error;
+          }
+          removeVirtualFolder(brand, device);
+          if (romAdminNav.device === device) romAdminNav = { brand: brand, device: null, type: null };
+          showToast("Folder \"" + device + "\" dihapus");
+          await loadFiles();
+        } catch (e) {
+          showToast("Gagal hapus: " + (e.message || e));
+        }
+        if (window.hidePageLoader) hidePageLoader();
+      }
+    }
+
+    async function addLinkHere() {
+      if (!romAdminNav.brand || !romAdminNav.device || !romAdminNav.type) {
+        showToast("Masuk ke folder ROM atau Recovery dulu");
+        return;
+      }
+      const title = (document.getElementById("inlineAddTitle") || {}).value.trim();
+      const url = (document.getElementById("inlineAddUrl") || {}).value.trim();
+      if (!title || !url) { showToast("Isi nama file dan URL"); return; }
+      if (window.showPageLoader) showPageLoader("Menambah...");
+      const group_name = buildRomGroup(romAdminNav.brand, romAdminNav.device, romAdminNav.type);
+      const maxOrder = files.reduce((m, f) => Math.max(m, f.sort_order || 0), 0);
+      const { error } = await db.from("vault_files").insert({
+        category: "rom", group_name, title, url, sort_order: maxOrder + 1
+      });
+      if (error) {
+        if (window.hidePageLoader) hidePageLoader();
+        showToast("Error: " + error.message);
+        return;
+      }
+      showToast("Link ditambah ke " + romAdminNav.brand + " / " + romAdminNav.device + " / " + (romAdminNav.type === "recovery" ? "Recovery" : "ROM"));
+      await loadFiles();
+      if (window.hidePageLoader) hidePageLoader();
+    }
+
+    async function saveAdminRecoveryNote() {
+      if (!romAdminNav.brand || !romAdminNav.device) {
+        showToast("Masuk ke folder Recovery dulu");
+        return;
+      }
+      const text = (document.getElementById("adminNoteText") || {}).value || "";
+      const noteIdRaw = (document.getElementById("adminNoteId") || {}).value || "";
+      const noteId = noteIdRaw ? Number(noteIdRaw) : null;
+      const group_name = romAdminNav.brand + "|||" + romAdminNav.device + "|||recovery_note";
+      if (window.showPageLoader) showPageLoader("Menyimpan note...");
+      try {
+        if (noteId) {
+          const { error } = await db.from("vault_files").update({
+            title: "Recovery Note",
+            url: text,
+            group_name: group_name,
+            category: "rom",
+            updated_at: new Date().toISOString()
+          }).eq("id", noteId);
+          if (error) throw error;
+        } else {
+          const maxOrder = files.reduce((m, f) => Math.max(m, f.sort_order || 0), 0);
+          const { error } = await db.from("vault_files").insert({
+            category: "rom",
+            group_name: group_name,
+            title: "Recovery Note",
+            url: text,
+            sort_order: maxOrder + 1
+          });
+          if (error) throw error;
+        }
+        showToast("Note recovery disimpan");
+        await loadFiles();
+      } catch (e) {
+        showToast("Gagal simpan note: " + (e.message || e));
+      }
+      if (window.hidePageLoader) hidePageLoader();
+    }
+
+    function formatGroupLabel(f) {
+      if (f.category === "rom") {
+        const p = parseRomGroup(f.group_name);
+        if (p.type === "recovery_note") return (p.brand || "?") + " / " + (p.device || "?") + " / Note";
+        const t = p.type === "recovery" ? "Recovery" : "ROM";
+        return (p.brand || "?") + " / " + (p.device || "?") + " / " + t;
+      }
+      return "";
     }
 
     window.neoConfirm = function(opts) {
@@ -723,18 +1430,33 @@
     async function addFile() {
       if (window.showPageLoader) showPageLoader("Menambah file...");
       const category = document.getElementById("newCategory").value;
-      let group_name = document.getElementById("newGroup").value.trim();
+      let group_name = "";
       const title = document.getElementById("newTitle").value.trim();
       const url = document.getElementById("newUrl").value.trim();
+      // Module & Tool: flat, tanpa sub-kategori
       if (category === "module") group_name = "Modules";
+      else if (category === "tool") group_name = "Tools";
+      else if (category === "rom") {
+        const brand = document.getElementById("newBrand").value.trim();
+        const device = document.getElementById("newDevice").value.trim();
+        const romType = document.getElementById("newRomType").value;
+        if (!brand || !device) {
+          if (window.hidePageLoader) hidePageLoader();
+          showToast("Isi Brand dan Device untuk Rom & Recovery");
+          return;
+        }
+        group_name = buildRomGroup(brand, device, romType);
+      }
       if (!title || !url) { if (window.hidePageLoader) hidePageLoader(); showToast("Please fill title and URL"); return; }
-      if (category === "tool" && !group_name) { if (window.hidePageLoader) hidePageLoader(); showToast("Please fill group name for Tool"); return; }
       const maxOrder = files.reduce((m, f) => Math.max(m, f.sort_order || 0), 0);
       const { error } = await db.from("vault_files").insert({ category, group_name, title, url, sort_order: maxOrder + 1 });
       if (error) { if (window.hidePageLoader) hidePageLoader(); showToast("Error: " + error.message); return; }
       document.getElementById("newTitle").value = "";
       document.getElementById("newUrl").value = "";
       if (category === "tool") document.getElementById("newGroup").value = "";
+      if (category === "rom") {
+        // Keep brand/device for next file (same folder), clear only title/url
+      }
       showToast("File added");
       await loadFiles();
       if (window.hidePageLoader) hidePageLoader();
@@ -748,17 +1470,147 @@
       document.getElementById("editGroup").value = f.group_name || "";
       document.getElementById("editTitle").value = f.title;
       document.getElementById("editUrl").value = f.url;
+      if (f.category === "rom") {
+        const p = parseRomGroup(f.group_name);
+        document.getElementById("editBrand").value = p.brand;
+        document.getElementById("editDevice").value = p.device;
+        document.getElementById("editRomType").value = (p.type === "recovery" || p.type === "recovery_note") ? "recovery" : "rom";
+      }
       onEditCategoryChange();
+      refreshEditFolderPreview();
       document.getElementById("editModal").classList.add("show");
     }
     function closeEdit() { document.getElementById("editModal").classList.remove("show"); }
+
+    function getDeviceFiles(brand, device) {
+      const rom = [], recovery = [];
+      (files || []).forEach(f => {
+        if (f.category !== "rom") return;
+        const p = parseRomGroup(f.group_name);
+        if (p.brand !== brand || p.device !== device) return;
+        if (p.type === "recovery_note") return;
+        if (p.type === "recovery") recovery.push(f);
+        else rom.push(f);
+      });
+      return { rom, recovery };
+    }
+
+    function refreshEditFolderPreview() {
+      const box = document.getElementById("editFolderPreview");
+      if (!box) return;
+      const brand = (document.getElementById("editBrand") || {}).value || "";
+      const device = (document.getElementById("editDevice") || {}).value || "";
+      const editId = document.getElementById("editId").value;
+      if (!brand.trim() || !device.trim()) {
+        box.innerHTML = '<div class="fp-title">Isi folder</div><div class="fp-item">Isi Brand & Device untuk melihat isi folder ROM / Recovery</div>';
+        return;
+      }
+      const { rom, recovery } = getDeviceFiles(brand.trim(), device.trim());
+      let html = '<div class="fp-title">Isi folder — ' + esc(brand) + ' / ' + esc(device) + '</div>';
+      html += '<div style="margin-bottom:6px"><strong style="color:#3b9eff">ROM (' + rom.length + ')</strong></div>';
+      if (!rom.length) html += '<div class="fp-item">— kosong</div>';
+      else rom.forEach(f => {
+        const cur = String(f.id) === String(editId) ? ' current' : '';
+        html += '<div class="fp-item' + cur + '">• ' + esc(f.title) + (cur ? ' ← file ini' : '') + '</div>';
+      });
+      html += '<div style="margin:8px 0 6px"><strong style="color:#3b9eff">Recovery (' + recovery.length + ')</strong></div>';
+      if (!recovery.length) html += '<div class="fp-item">— kosong</div>';
+      else recovery.forEach(f => {
+        const cur = String(f.id) === String(editId) ? ' current' : '';
+        html += '<div class="fp-item' + cur + '">• ' + esc(f.title) + (cur ? ' ← file ini' : '') + '</div>';
+      });
+      box.innerHTML = html;
+    }
+
+    function openFolderModal(brand, device) {
+      document.getElementById("folderBrand").value = brand;
+      document.getElementById("folderDevice").value = device;
+      document.getElementById("folderModalTitle").textContent = "Kelola Folder";
+      document.getElementById("folderModalSub").textContent = brand + " / " + device;
+      document.getElementById("folderAddTitle").value = "";
+      document.getElementById("folderAddUrl").value = "";
+      renderFolderModalLists();
+      document.getElementById("folderModal").classList.add("show");
+    }
+
+    function closeFolderModal() {
+      document.getElementById("folderModal").classList.remove("show");
+    }
+
+    function renderFolderModalLists() {
+      const brand = document.getElementById("folderBrand").value;
+      const device = document.getElementById("folderDevice").value;
+      const { rom, recovery } = getDeviceFiles(brand, device);
+
+      document.getElementById("folderRomCount").textContent = "(" + rom.length + ")";
+      document.getElementById("folderRecCount").textContent = "(" + recovery.length + ")";
+
+      const romList = document.getElementById("folderRomList");
+      const recList = document.getElementById("folderRecList");
+
+      romList.innerHTML = rom.length
+        ? rom.map(f => folderItemHTML(f)).join("")
+        : '<div class="folder-empty">Belum ada file ROM</div>';
+      recList.innerHTML = recovery.length
+        ? recovery.map(f => folderItemHTML(f)).join("")
+        : '<div class="folder-empty">Belum ada file Recovery</div>';
+    }
+
+    function folderItemHTML(f) {
+      return '<div class="folder-item">' +
+        '<div class="fn" title="' + esc(f.url) + '">' + esc(f.title) + '</div>' +
+        '<div class="action-btns">' +
+        '<button class="btn-icon" title="Edit" onclick="closeFolderModal();openEdit(' + f.id + ')"><i class="fa-solid fa-pen"></i></button>' +
+        '<button class="btn-icon delete" title="Delete" onclick="deleteFile(' + f.id + ')"><i class="fa-solid fa-trash"></i></button>' +
+        '</div></div>';
+    }
+
+    async function addFileToFolder() {
+      const brand = document.getElementById("folderBrand").value.trim();
+      const device = document.getElementById("folderDevice").value.trim();
+      const romType = document.getElementById("folderAddType").value;
+      const title = document.getElementById("folderAddTitle").value.trim();
+      const url = document.getElementById("folderAddUrl").value.trim();
+      if (!brand || !device) { showToast("Brand/Device kosong"); return; }
+      if (!title || !url) { showToast("Isi title dan URL"); return; }
+      if (window.showPageLoader) showPageLoader("Menambah...");
+      const group_name = buildRomGroup(brand, device, romType);
+      const maxOrder = files.reduce((m, f) => Math.max(m, f.sort_order || 0), 0);
+      const { error } = await db.from("vault_files").insert({
+        category: "rom", group_name, title, url, sort_order: maxOrder + 1
+      });
+      if (error) {
+        if (window.hidePageLoader) hidePageLoader();
+        showToast("Error: " + error.message);
+        return;
+      }
+      document.getElementById("folderAddTitle").value = "";
+      document.getElementById("folderAddUrl").value = "";
+      showToast("File ditambah ke " + (romType === "recovery" ? "Recovery" : "ROM"));
+      await loadFiles();
+      // Refresh folder modal lists (modal masih terbuka)
+      renderFolderModalLists();
+      if (window.hidePageLoader) hidePageLoader();
+    }
 
     async function saveEdit() {
       if (window.showPageLoader) showPageLoader("Menyimpan...");
       const id = document.getElementById("editId").value;
       const category = document.getElementById("editCategory").value;
-      let group_name = document.getElementById("editGroup").value.trim();
+      let group_name = "";
       if (category === "module") group_name = "Modules";
+      else if (category === "tool") group_name = "Tools";
+      else if (category === "rom") {
+        const brand = document.getElementById("editBrand").value.trim();
+        const device = document.getElementById("editDevice").value.trim();
+        const romType = document.getElementById("editRomType").value;
+        if (!brand || !device) {
+          if (window.hidePageLoader) hidePageLoader();
+          showToast("Isi Brand dan Device");
+          return;
+        }
+        group_name = buildRomGroup(brand, device, romType);
+      }
       const payload = {
         category, group_name,
         title: document.getElementById("editTitle").value.trim(),
@@ -778,6 +1630,9 @@
       const { error } = await db.from("vault_files").delete().eq("id", id);
       if (error) { if (window.hidePageLoader) hidePageLoader(); showToast("Error: " + error.message); return; }
       showToast("Deleted"); await loadFiles();
+      // Refresh folder modal if open
+      const fm = document.getElementById("folderModal");
+      if (fm && fm.classList.contains("show")) renderFolderModalLists();
       if (window.hidePageLoader) hidePageLoader();
     }
 
@@ -810,12 +1665,30 @@
             const params = new URLSearchParams();
             params.set("access_token", access_token);
             if (refresh_token) params.set("refresh_token", refresh_token);
-            window.location.href = "/account#" + params.toString();
+            window.location.href = getAccountHref() + "#" + params.toString();
             return;
           }
         } catch (err) {}
-        window.location.href = "/account";
+        window.location.href = getAccountHref();
       });
+    })();
+
+    // Path Account yang aman untuk file:// dan hosting
+    function getAccountHref() {
+      var p = (window.location.pathname || window.location.href || "").replace(/\\/g, "/");
+      // vault/admin/index.html → ../../account/index.html
+      // vault/admin.html → ../account/index.html
+      if (p.indexOf("/vault/admin/") !== -1 || /\/admin\/index\.html$/i.test(p)) {
+        return "../../account/index.html";
+      }
+      if (p.indexOf("/vault/") !== -1 || /admin\.html$/i.test(p)) {
+        return "../account/index.html";
+      }
+      return "../account/index.html";
+    }
+    (function fixAccountLink() {
+      var a = document.getElementById("linkBackAccount");
+      if (a) a.setAttribute("href", getAccountHref());
     })();
 
     checkSession();

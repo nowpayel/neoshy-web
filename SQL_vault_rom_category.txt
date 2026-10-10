@@ -1,0 +1,24 @@
+-- ============================================
+-- Izinkan category "rom" di tabel vault_files
+-- Jalankan di Supabase → SQL Editor
+-- ============================================
+-- Error yang muncul:
+--   new row for relation "vault_files" violates check constraint "vault_files_category_check"
+--
+-- Penyebab: constraint lama hanya izinkan 'module' dan 'tool'.
+-- Solusi: drop constraint lama, buat ulang dengan 'rom' ikut diizinkan.
+
+-- 1) Hapus check constraint lama
+alter table public.vault_files
+  drop constraint if exists vault_files_category_check;
+
+-- 2) Buat constraint baru (module, tool, rom)
+alter table public.vault_files
+  add constraint vault_files_category_check
+  check (category in ('module', 'tool', 'rom'));
+
+-- 3) (Opsional) cek constraint sudah terpasang
+select conname, pg_get_constraintdef(oid)
+from pg_constraint
+where conrelid = 'public.vault_files'::regclass
+  and contype = 'c';
