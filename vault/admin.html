@@ -8,6 +8,58 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+
+    /* Sembunyikan semua scrollbar (tetap bisa scroll) */
+    html, body, * {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar,
+    *::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      background: transparent !important;
+    }
+
+    /* ── Micro-interactions (hover only, no continuous animation) ── */
+    a, button, .btn, .btn-primary, .btn-ghost, .tab-btn, .dl-btn, .dl-link,
+    .service-card, .feature-card, .shot-card, .file-item, .rom-folder, .rom-file,
+    .account-btn, .tool-bridge a, .social-link, .chip-btn, .nav-links a {
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease !important;
+    }
+    .btn-primary:hover, .btn.btn-primary:hover,
+    a.btn-primary:hover, button.btn-primary:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 8px 28px rgba(59, 158, 255, 0.35) !important;
+    }
+    .btn-ghost:hover, a.btn-ghost:hover, button.btn-ghost:hover {
+      transform: translateY(-1px) !important;
+      border-color: rgba(59, 158, 255, 0.55) !important;
+    }
+    .service-card:hover, .feature-card:hover, .shot-card:hover,
+    .rom-folder:hover, .file-item:hover, .rom-file:hover {
+      transform: translateY(-3px) !important;
+      border-color: rgba(59, 158, 255, 0.4) !important;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(59, 158, 255, 0.12) !important;
+    }
+    .tab-btn:hover, .dl-btn:hover, .dl-link:hover {
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 16px rgba(59, 158, 255, 0.2) !important;
+    }
+    .nav-links a:hover {
+      color: #3b9eff !important;
+    }
+    /* Hormati preferensi user yang tidak suka motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
+
     :root {
       --bg: #0a0e17;
       --panel: rgba(16, 22, 36, 0.55);
@@ -73,7 +125,7 @@
     .hero-logo-wrapper::before {
       content: ''; position: absolute; width: 120px; height: 120px;
       background: radial-gradient(circle, rgba(59, 158, 255, 0.3) 0%, rgba(0, 120, 224, 0.1) 50%, transparent 70%);
-      filter: blur(28px); z-index: 0; animation: pulseGlow 3.5s ease-in-out infinite alternate;
+      filter: blur(28px); z-index: 0; /* pulseGlow off */
     }
     .logo-card {
       background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
@@ -82,7 +134,7 @@
       border-radius: 20px; padding: 12px;
       display: inline-flex; position: relative; z-index: 1;
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.18);
-      animation: floatLogo 4s ease-in-out infinite;
+      /* floatLogo off */
     }
     .logo-img {
       width: 64px; height: 64px; object-fit: contain; border-radius: 10px;
@@ -325,6 +377,46 @@
     }
     .rom-context-banner b { color: #fff; }
     .rom-context-banner i { margin-right: 6px; }
+    .drop-zone {
+      border: 2px dashed rgba(59, 158, 255, 0.4);
+      border-radius: 14px;
+      padding: 28px 16px;
+      text-align: center;
+      background: rgba(59, 158, 255, 0.05);
+      cursor: pointer;
+      transition: 0.2s;
+      color: var(--text);
+      font-family: var(--font-main);
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--cyan);
+      background: rgba(59, 158, 255, 0.12);
+    }
+    .drop-zone.drag-over {
+      box-shadow: 0 0 0 3px rgba(59, 158, 255, 0.2);
+    }
+    .vault-upload-progress {
+      margin-top: 12px; text-align: left; padding: 0 8px;
+    }
+    .vault-upload-progress .vup-text {
+      font-size: 12px; color: var(--cyan); margin-bottom: 6px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .vault-upload-progress .vup-bar {
+      height: 6px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden;
+    }
+    .vault-upload-progress .vup-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #0078e0, #3b9eff, #67e8f9);
+      background-size: 200% 100%;
+      border-radius: 99px;
+      transition: width 0.25s ease;
+      animation: vupShine 1.2s linear infinite;
+    }
+    @keyframes vupShine {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
     .action-btns { display: flex; gap: 6px; }
     .btn-icon {
       background: rgba(8, 47, 73, 0.4); border: 1px solid rgba(0, 120, 224, 0.25);
@@ -582,6 +674,7 @@
               <select id="newRomType" class="neo-input">
                 <option value="rom">ROM</option>
                 <option value="recovery">Recovery</option>
+                <option value="addon">Addon</option>
               </select>
             </div>
             <div class="form-group"></div>
@@ -649,6 +742,7 @@
           <select id="editRomType" class="neo-input">
             <option value="rom">ROM</option>
             <option value="recovery">Recovery</option>
+            <option value="addon">Addon</option>
           </select>
         </div>
         <!-- Preview isi folder ROM & Recovery device ini -->
@@ -906,8 +1000,9 @@
       if (countEl) {
         if (adminFilter === "rom" && romAdminNav.type && romAdminNav.brand && romAdminNav.device) {
           const tree = buildAdminRomTree(files);
-          const d = (tree[romAdminNav.brand] && tree[romAdminNav.brand][romAdminNav.device]) || { rom: [], recovery: [] };
-          countEl.textContent = String(romAdminNav.type === "recovery" ? d.recovery.length : d.rom.length);
+          const d = (tree[romAdminNav.brand] && tree[romAdminNav.brand][romAdminNav.device]) || { rom: [], recovery: [], addon: [] };
+          const t = romAdminNav.type;
+          countEl.textContent = String(t === "recovery" ? d.recovery.length : t === "addon" ? d.addon.length : d.rom.length);
         } else {
           countEl.textContent = String(filtered.length);
         }
@@ -1028,16 +1123,17 @@
         const p = parseRomGroup(f.group_name);
         if (!p || !p.brand) return;
         if (!tree[p.brand]) tree[p.brand] = {};
-        if (!tree[p.brand][p.device]) tree[p.brand][p.device] = { rom: [], recovery: [], note: null };
+        if (!tree[p.brand][p.device]) tree[p.brand][p.device] = { rom: [], recovery: [], addon: [], note: null };
         if (p.type === "recovery_note") tree[p.brand][p.device].note = f;
         else if (p.type === "recovery") tree[p.brand][p.device].recovery.push(f);
+        else if (p.type === "addon") tree[p.brand][p.device].addon.push(f);
         else tree[p.brand][p.device].rom.push(f);
       });
       // merge virtual empty folders
       loadVirtualFolders().forEach(v => {
         if (!v.brand || !v.device) return;
         if (!tree[v.brand]) tree[v.brand] = {};
-        if (!tree[v.brand][v.device]) tree[v.brand][v.device] = { rom: [], recovery: [], note: null };
+        if (!tree[v.brand][v.device]) tree[v.brand][v.device] = { rom: [], recovery: [], addon: [], note: null };
       });
       return tree;
     }
@@ -1089,19 +1185,21 @@
       }
       if (romAdminNav.type) {
         html += ' <span class="bc-sep">/</span> ';
-        html += '<span class="bc-current">' + (romAdminNav.type === "recovery" ? "Recovery" : "ROM") + '</span>';
+        html += '<span class="bc-current">' + (romAdminNav.type === "recovery" ? "Recovery" : romAdminNav.type === "addon" ? "Addon" : "ROM") + '</span>';
       }
       html += '</div>';
 
       // ----- Level 1: Brand -----
       if (!romAdminNav.brand) {
         const brands = Object.keys(tree).filter(b => !q || b.toLowerCase().includes(q)).sort((a,b) => a.localeCompare(b));
-        html += '<p class="rom-hint">Seperti File Explorer: buka folder, rename, atau hapus. Buat brand + tipe HP di bawah.</p>';
         html += '<div class="rom-admin-grid">';
         brands.forEach(brand => {
           const nDev = Object.keys(tree[brand]).length;
           let nFile = 0;
-          Object.keys(tree[brand]).forEach(d => { nFile += tree[brand][d].rom.length + tree[brand][d].recovery.length; });
+          Object.keys(tree[brand]).forEach(d => {
+            const x = tree[brand][d];
+            nFile += x.rom.length + x.recovery.length + (x.addon ? x.addon.length : 0);
+          });
           html += '<div class="rom-admin-folder">' +
             '<button type="button" class="raf-open" onclick="romAdminGo(\'' + jsEsc(brand) + '\',null,null)">' +
             '<i class="fa-solid fa-folder fa-2x" style="color:var(--cyan)"></i>' +
@@ -1109,50 +1207,47 @@
             '<span class="raf-meta">' + nDev + ' device · ' + nFile + ' file</span></button>' +
             '<div class="raf-actions">' +
             '<button type="button" title="Rename brand" onclick="renameFolder(\'brand\',\'' + jsEsc(brand) + '\',null)"><i class="fa-solid fa-pen"></i></button>' +
-            '<button type="button" class="danger" title="Hapus brand + semua isinya" onclick="deleteFolder(\'brand\',\'' + jsEsc(brand) + '\',null)"><i class="fa-solid fa-trash"></i></button>' +
+            '<button type="button" class="danger" title="Hapus brand" onclick="deleteFolder(\'brand\',\'' + jsEsc(brand) + '\',null)"><i class="fa-solid fa-trash"></i></button>' +
             '</div></div>';
         });
         html += '</div>';
         html += '<div class="rom-create-box">' +
-          '<div class="rom-type-label">Buat folder baru (Brand + Tipe HP)</div>' +
+          '<div class="rom-type-label">Buat folder baru</div>' +
           '<div class="form-row">' +
           '<div class="form-group"><label>Brand</label><input type="text" id="createBrand" class="neo-input" list="brand-list" placeholder="Poco / Xiaomi / Samsung"></div>' +
-          '<div class="form-group"><label>Tipe HP (Device)</label><input type="text" id="createDevice" class="neo-input" placeholder="X3 NFC / F3 / Note 12"></div>' +
+          '<div class="form-group"><label>Tipe HP</label><input type="text" id="createDevice" class="neo-input" placeholder="X3 NFC / F3 / Note 12"></div>' +
           '</div>' +
           '<button type="button" class="neo-btn" onclick="createDeviceFolder()"><i class="fa-solid fa-folder-plus"></i> Buat Folder</button>' +
-          '<p style="font-size:11px;color:var(--text-muted);margin-top:8px">Di dalamnya otomatis ada folder <b>ROM</b> dan <b>Recovery</b>.</p>' +
           '</div>';
       }
       // ----- Level 2: Device -----
       else if (!romAdminNav.device) {
         const devices = tree[romAdminNav.brand] ? Object.keys(tree[romAdminNav.brand]).sort((a,b) => a.localeCompare(b)) : [];
         const filtered = devices.filter(d => !q || d.toLowerCase().includes(q));
-        html += '<p class="rom-hint">Tipe HP di brand <b>' + esc(romAdminNav.brand) + '</b>. Buka, rename, atau hapus.</p>';
         html += '<div class="rom-admin-grid">';
         filtered.forEach(device => {
           const d = tree[romAdminNav.brand][device];
-          const n = d.rom.length + d.recovery.length;
+          const n = d.rom.length + d.recovery.length + (d.addon ? d.addon.length : 0);
           html += '<div class="rom-admin-folder">' +
             '<button type="button" class="raf-open" onclick="romAdminGo(\'' + jsEsc(romAdminNav.brand) + '\',\'' + jsEsc(device) + '\',null)">' +
             '<i class="fa-solid fa-mobile-screen fa-2x" style="color:var(--cyan)"></i>' +
             '<span class="raf-name">' + esc(device) + '</span>' +
             '<span class="raf-meta">' + n + ' file</span></button>' +
             '<div class="raf-actions">' +
-            '<button type="button" title="Rename tipe HP" onclick="renameFolder(\'device\',\'' + jsEsc(romAdminNav.brand) + '\',\'' + jsEsc(device) + '\')"><i class="fa-solid fa-pen"></i></button>' +
-            '<button type="button" class="danger" title="Hapus tipe HP + semua isinya" onclick="deleteFolder(\'device\',\'' + jsEsc(romAdminNav.brand) + '\',\'' + jsEsc(device) + '\')"><i class="fa-solid fa-trash"></i></button>' +
+            '<button type="button" title="Rename" onclick="renameFolder(\'device\',\'' + jsEsc(romAdminNav.brand) + '\',\'' + jsEsc(device) + '\')"><i class="fa-solid fa-pen"></i></button>' +
+            '<button type="button" class="danger" title="Hapus" onclick="deleteFolder(\'device\',\'' + jsEsc(romAdminNav.brand) + '\',\'' + jsEsc(device) + '\')"><i class="fa-solid fa-trash"></i></button>' +
             '</div></div>';
         });
         html += '</div>';
         html += '<div class="rom-create-box">' +
-          '<div class="rom-type-label">Tambah tipe HP di brand ' + esc(romAdminNav.brand) + '</div>' +
-          '<div class="form-group"><label>Tipe HP (Device)</label><input type="text" id="createDeviceOnly" class="neo-input" placeholder="X3 Pro / F3"></div>' +
+          '<div class="rom-type-label">Tambah tipe HP</div>' +
+          '<div class="form-group"><label>Tipe HP</label><input type="text" id="createDeviceOnly" class="neo-input" placeholder="X3 Pro / F3"></div>' +
           '<button type="button" class="neo-btn" onclick="createDeviceFolder(\'' + jsEsc(romAdminNav.brand) + '\')"><i class="fa-solid fa-folder-plus"></i> Buat Folder</button>' +
           '</div>';
       }
-      // ----- Level 3: ROM + Recovery (selalu 2 folder, tidak bisa rename/hapus) -----
+      // ----- Level 3: ROM + Recovery + Addon -----
       else if (!romAdminNav.type) {
-        const d = (tree[romAdminNav.brand] && tree[romAdminNav.brand][romAdminNav.device]) || { rom: [], recovery: [] };
-        html += '<p class="rom-hint">Pilih folder <b>ROM</b> atau <b>Recovery</b> untuk menambah / edit direct link.</p>';
+        const d = (tree[romAdminNav.brand] && tree[romAdminNav.brand][romAdminNav.device]) || { rom: [], recovery: [], addon: [] };
         html += '<div class="rom-admin-grid">';
         html += '<div class="rom-admin-folder">' +
           '<button type="button" class="raf-open" onclick="romAdminGo(\'' + jsEsc(romAdminNav.brand) + '\',\'' + jsEsc(romAdminNav.device) + '\',\'rom\')">' +
@@ -1164,47 +1259,179 @@
           '<i class="fa-solid fa-screwdriver-wrench fa-2x" style="color:var(--cyan)"></i>' +
           '<span class="raf-name">Recovery</span>' +
           '<span class="raf-meta">' + d.recovery.length + ' link</span></button></div>';
+        html += '<div class="rom-admin-folder">' +
+          '<button type="button" class="raf-open" onclick="romAdminGo(\'' + jsEsc(romAdminNav.brand) + '\',\'' + jsEsc(romAdminNav.device) + '\',\'addon\')">' +
+          '<i class="fa-solid fa-puzzle-piece fa-2x" style="color:var(--cyan)"></i>' +
+          '<span class="raf-name">Addon</span>' +
+          '<span class="raf-meta">' + (d.addon ? d.addon.length : 0) + ' link</span></button></div>';
         html += '</div>';
       }
-      // ----- Level 4: isi link + form tambah di folder ini -----
+      // ----- Level 4: isi link + form tambah -----
       else {
-        const d = (tree[romAdminNav.brand] && tree[romAdminNav.brand][romAdminNav.device]) || { rom: [], recovery: [], note: null };
-        const items = romAdminNav.type === "recovery" ? d.recovery : d.rom;
-        const folderLabel = romAdminNav.type === "recovery" ? "Recovery" : "ROM";
-        const pathLabel = romAdminNav.brand + " / " + romAdminNav.device + " / " + folderLabel;
+        const d = (tree[romAdminNav.brand] && tree[romAdminNav.brand][romAdminNav.device]) || { rom: [], recovery: [], addon: [], note: null };
+        const items = romAdminNav.type === "recovery" ? d.recovery : romAdminNav.type === "addon" ? (d.addon || []) : d.rom;
+        const folderLabel = romAdminNav.type === "recovery" ? "Recovery" : romAdminNav.type === "addon" ? "Addon" : "ROM";
 
-        html += '<div class="rom-context-banner">' +
-          '<i class="fa-solid fa-location-dot"></i> Direct link yang kamu tambah akan masuk ke: <b>' + esc(pathLabel) + '</b></div>';
-
-        // Note recovery — bisa diedit di Vault Manager
+        // Note recovery
         if (romAdminNav.type === "recovery") {
           const noteText = d.note ? (d.note.url || d.note.title || "") : "";
           const noteId = d.note ? d.note.id : "";
           html += '<div class="rom-create-box" style="border-color:rgba(245,197,66,0.4);background:rgba(245,197,66,0.06);margin-bottom:16px">' +
             '<div class="rom-type-label" style="color:#f5c542"><i class="fa-solid fa-sticky-note"></i> Note Cara Flash Recovery</div>' +
-            '<p style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Hanya terlihat oleh admin. Bisa juga diedit dari halaman Vault → folder Recovery.</p>' +
             '<input type="hidden" id="adminNoteId" value="' + esc(String(noteId)) + '">' +
-            '<div class="form-group"><textarea id="adminNoteText" class="neo-input" rows="5" style="width:100%;resize:vertical;min-height:100px;font-family:var(--font-main)" placeholder="Contoh:&#10;1. fastboot flash recovery recovery.img&#10;2. fastboot reboot recovery">' + esc(noteText) + '</textarea></div>' +
+            '<div class="form-group"><textarea id="adminNoteText" class="neo-input" rows="5" style="width:100%;resize:vertical;min-height:100px;font-family:var(--font-main)" placeholder="Cara flash recovery...">' + esc(noteText) + '</textarea></div>' +
             '<button type="button" class="neo-btn" onclick="saveAdminRecoveryNote()"><i class="fa-solid fa-floppy-disk"></i> Simpan Note</button>' +
             '</div>';
         }
 
-        if (!items.length) {
-          html += '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Folder masih kosong. Tambah link di bawah.</div>';
-        } else {
+        if (items.length) {
           html += '<div class="flat-file-list" style="margin-bottom:16px">' + items.map(f => fileRowHTML(f)).join("") + '</div>';
         }
 
-        html += '<div class="rom-create-box">' +
-          '<div class="rom-type-label">Tambah direct link ke folder ini</div>' +
-          '<div class="form-group"><label>Nama file</label><input type="text" id="inlineAddTitle" class="neo-input" placeholder="twrp-x3.img / rom-hyperos.zip"></div>' +
-          '<div class="form-group"><label>Direct link (URL)</label><input type="url" id="inlineAddUrl" class="neo-input" placeholder="https://..."></div>' +
-          '<button type="button" class="neo-btn" onclick="addLinkHere()"><i class="fa-solid fa-plus"></i> Tambah ke ' + esc(folderLabel) + '</button>' +
+        // Drop zone + upload file
+        html += '<div class="drop-zone" id="vaultDropZone">' +
+          '<i class="fa-solid fa-cloud-arrow-up" style="font-size:28px;color:var(--cyan);margin-bottom:8px"></i>' +
+          '<div style="font-weight:700;font-size:13px;margin-bottom:4px">Drop file ke sini</div>' +
+          '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">atau klik untuk pilih file</div>' +
+          '<input type="file" id="vaultFileInput" multiple style="display:none">' +
+          '<div id="vaultUploadProgress" class="vault-upload-progress" style="display:none">' +
+          '<div class="vup-text">Mengupload...</div>' +
+          '<div class="vup-bar"><div class="vup-fill" id="vaultAdminFill" style="width:0%"></div></div>' +
+          '</div></div>';
+
+        // Atau pakai direct link
+        html += '<div class="rom-create-box" style="margin-top:12px">' +
+          '<div class="rom-type-label">Atau tambah via direct link</div>' +
+          '<div class="form-group"><label>Nama file</label><input type="text" id="inlineAddTitle" class="neo-input" placeholder="filename.zip"></div>' +
+          '<div class="form-group"><label>Direct link</label><input type="url" id="inlineAddUrl" class="neo-input" placeholder="https://..."></div>' +
+          '<button type="button" class="neo-btn" onclick="addLinkHere()"><i class="fa-solid fa-plus"></i> Tambah Link</button>' +
           '</div>';
       }
 
       html += '</div>';
       el.innerHTML = html;
+      bindDropZone();
+    }
+
+    function bindDropZone() {
+      const zone = document.getElementById("vaultDropZone");
+      const input = document.getElementById("vaultFileInput");
+      if (!zone || !input) return;
+
+      zone.addEventListener("click", function(e) {
+        if (e.target === input) return;
+        input.click();
+      });
+      input.addEventListener("change", function() {
+        if (input.files && input.files.length) handleVaultFiles(input.files);
+        input.value = "";
+      });
+      zone.addEventListener("dragover", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.classList.add("drag-over");
+      });
+      zone.addEventListener("dragleave", function(e) {
+        e.preventDefault();
+        zone.classList.remove("drag-over");
+      });
+      zone.addEventListener("drop", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.classList.remove("drag-over");
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+          handleVaultFiles(e.dataTransfer.files);
+        }
+      });
+    }
+
+    function sanitizePathPart(s) {
+      return String(s || "").replace(/[^a-zA-Z0-9._\-\s]/g, "").replace(/\s+/g, "_").slice(0, 80) || "x";
+    }
+
+    var VAULT_ADDON_MAX_BYTES = 25 * 1024 * 1024; // 25 MB
+
+    async function handleVaultFiles(fileList) {
+      if (!romAdminNav.brand || !romAdminNav.device || !romAdminNav.type) {
+        showToast("Masuk ke folder dulu");
+        return;
+      }
+      const filesArr = Array.from(fileList);
+      if (!filesArr.length) return;
+
+      // Batas 25 MB khusus folder Addon
+      let toUpload = filesArr;
+      if (romAdminNav.type === "addon") {
+        const tooBig = filesArr.filter(f => f.size > VAULT_ADDON_MAX_BYTES);
+        if (tooBig.length) {
+          const names = tooBig.map(f => f.name + " (" + (f.size / 1024 / 1024).toFixed(1) + " MB)").join("\n");
+          await neoConfirm({
+            title: "File terlalu besar",
+            message: "Folder Addon maksimal 25 MB per file.\n\nDitolak:\n" + names + "\n\nPakai direct link untuk file besar.",
+            okText: "Oke"
+          });
+        }
+        toUpload = filesArr.filter(f => f.size <= VAULT_ADDON_MAX_BYTES);
+        if (!toUpload.length) return;
+      }
+
+      const prog = document.getElementById("vaultUploadProgress");
+      const fill = document.getElementById("vaultAdminFill");
+      const textEl = prog ? prog.querySelector(".vup-text") : null;
+      if (prog) prog.style.display = "block";
+      if (fill) fill.style.width = "0%";
+      if (window.showPageLoader) showPageLoader("Upload file...");
+
+      let ok = 0, fail = 0;
+      for (let i = 0; i < toUpload.length; i++) {
+        const file = toUpload[i];
+        if (textEl) textEl.textContent = "Upload " + (i + 1) + " / " + toUpload.length + " — " + file.name;
+        if (fill) fill.style.width = Math.round((i / toUpload.length) * 100) + "%";
+        try {
+          await uploadVaultFile(file);
+          ok++;
+        } catch (err) {
+          fail++;
+          console.error(err);
+          showToast("Gagal: " + file.name + " — " + (err.message || err));
+        }
+        if (fill) fill.style.width = Math.round(((i + 1) / toUpload.length) * 100) + "%";
+      }
+      if (window.hidePageLoader) hidePageLoader();
+      if (textEl) textEl.textContent = ok ? "Selesai — " + ok + " file" : "Gagal upload";
+      setTimeout(function() { if (prog) prog.style.display = "none"; }, 800);
+      if (ok) showToast(ok + " file berhasil diupload" + (fail ? " (" + fail + " gagal)" : ""));
+      await loadFiles();
+    }
+
+    async function uploadVaultFile(file) {
+      const brand = sanitizePathPart(romAdminNav.brand);
+      const device = sanitizePathPart(romAdminNav.device);
+      const type = romAdminNav.type;
+      const safeName = file.name.replace(/[^a-zA-Z0-9._\-]/g, "_");
+      const path = brand + "/" + device + "/" + type + "/" + Date.now() + "_" + safeName;
+
+      const { error: upErr } = await db.storage.from("vault").upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type || "application/octet-stream"
+      });
+      if (upErr) throw upErr;
+
+      const { data: urlData } = db.storage.from("vault").getPublicUrl(path);
+      const publicUrl = urlData && urlData.publicUrl;
+      if (!publicUrl) throw new Error("Gagal dapat public URL");
+
+      const group_name = buildRomGroup(romAdminNav.brand, romAdminNav.device, romAdminNav.type);
+      const maxOrder = files.reduce((m, f) => Math.max(m, f.sort_order || 0), 0);
+      const { error: dbErr } = await db.from("vault_files").insert({
+        category: "rom",
+        group_name: group_name,
+        title: file.name,
+        url: publicUrl,
+        sort_order: maxOrder + 1
+      });
+      if (dbErr) throw dbErr;
     }
 
     function jsEsc(s) {
@@ -1218,7 +1445,7 @@
       if (!device) { showToast("Isi tipe HP / Device"); return; }
       addVirtualFolder(brand, device);
       romAdminGo(brand, device, null);
-      showToast("Folder " + brand + " / " + device + " dibuat. Ada ROM & Recovery di dalamnya.");
+      showToast("Folder " + brand + " / " + device + " dibuat");
     }
 
     async function renameFolder(level, brand, device) {
@@ -1398,7 +1625,7 @@
       if (f.category === "rom") {
         const p = parseRomGroup(f.group_name);
         if (p.type === "recovery_note") return (p.brand || "?") + " / " + (p.device || "?") + " / Note";
-        const t = p.type === "recovery" ? "Recovery" : "ROM";
+        const t = p.type === "recovery" ? "Recovery" : p.type === "addon" ? "Addon" : "ROM";
         return (p.brand || "?") + " / " + (p.device || "?") + " / " + t;
       }
       return "";
@@ -1474,7 +1701,7 @@
         const p = parseRomGroup(f.group_name);
         document.getElementById("editBrand").value = p.brand;
         document.getElementById("editDevice").value = p.device;
-        document.getElementById("editRomType").value = (p.type === "recovery" || p.type === "recovery_note") ? "recovery" : "rom";
+        document.getElementById("editRomType").value = (p.type === "recovery" || p.type === "recovery_note") ? "recovery" : (p.type === "addon" ? "addon" : "rom");
       }
       onEditCategoryChange();
       refreshEditFolderPreview();

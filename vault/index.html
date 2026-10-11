@@ -8,6 +8,43 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+
+    /* ── Micro-interactions (hover only, no continuous animation) ── */
+    a, button, .btn, .btn-primary, .btn-ghost, .tab-btn, .dl-btn, .dl-link,
+    .service-card, .feature-card, .shot-card, .file-item, .rom-folder, .rom-file,
+    .account-btn, .tool-bridge a, .social-link, .chip-btn, .nav-links a {
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease !important;
+    }
+    .btn-primary:hover, .btn.btn-primary:hover,
+    a.btn-primary:hover, button.btn-primary:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 8px 28px rgba(59, 158, 255, 0.35) !important;
+    }
+    .btn-ghost:hover, a.btn-ghost:hover, button.btn-ghost:hover {
+      transform: translateY(-1px) !important;
+      border-color: rgba(59, 158, 255, 0.55) !important;
+    }
+    .service-card:hover, .feature-card:hover, .shot-card:hover,
+    .rom-folder:hover, .file-item:hover, .rom-file:hover {
+      transform: translateY(-3px) !important;
+      border-color: rgba(59, 158, 255, 0.4) !important;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(59, 158, 255, 0.12) !important;
+    }
+    .tab-btn:hover, .dl-btn:hover, .dl-link:hover {
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 16px rgba(59, 158, 255, 0.2) !important;
+    }
+    .nav-links a:hover {
+      color: #3b9eff !important;
+    }
+    /* Hormati preferensi user yang tidak suka motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
     :root {
       --bg: #0a0e17;
       --panel: rgba(16, 22, 36, 0.55);
@@ -50,7 +87,7 @@
     .hero-logo-wrapper::before {
       content: ''; position: absolute; width: 200px; height: 200px;
       background: radial-gradient(circle, rgba(59, 158, 255, 0.3) 0%, rgba(0, 120, 224, 0.1) 50%, transparent 70%);
-      filter: blur(40px); z-index: -1; animation: pulseGlow 3.5s ease-in-out infinite alternate;
+      filter: blur(40px); z-index: -1; /* animation disabled for low CPU / Ultra Viewer */
     }
     .logo-card {
       background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
@@ -60,7 +97,7 @@
       padding: 18px; border-radius: 28px;
       display: inline-flex; align-items: center; justify-content: center;
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.18), inset 0 -1px 1px rgba(0, 0, 0, 0.1);
-      position: relative; overflow: hidden; animation: floatLogo 4s ease-in-out infinite;
+      position: relative; overflow: hidden; /* floatLogo disabled for low CPU / Ultra Viewer */
       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .logo-card:hover {
@@ -358,6 +395,86 @@
     .neo-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     .neo-toast.ok { border-color: rgba(52, 211, 153, 0.5); }
     .neo-toast.err { border-color: rgba(251, 113, 133, 0.5); }
+    .neo-confirm-overlay {
+      position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.7);
+      display: none; align-items: center; justify-content: center; padding: 20px;
+      backdrop-filter: blur(6px);
+    }
+    .neo-confirm-overlay.show { display: flex; }
+    .neo-confirm-box {
+      background: #0f1624; border: 1px solid rgba(59, 158, 255, 0.35);
+      border-radius: 16px; max-width: 400px; width: 100%; padding: 22px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .neo-confirm-box h3 {
+      font-size: 16px; color: #fff; margin: 0 0 8px; font-family: var(--font-main);
+    }
+    .neo-confirm-box p {
+      font-size: 13px; color: var(--text-muted); margin: 0 0 18px; line-height: 1.45;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .neo-confirm-actions {
+      display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;
+    }
+    .neo-confirm-actions button {
+      padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: var(--font-main); border: 1px solid transparent;
+    }
+    .neo-btn-cancel {
+      background: rgba(255,255,255,0.06); border-color: var(--glass-border) !important;
+      color: var(--text-muted);
+    }
+    .neo-btn-ok {
+      background: linear-gradient(135deg, #0078e0, #3b9eff); color: #fff; border: none !important;
+    }
+    .neo-btn-danger {
+      background: linear-gradient(135deg, #be123c, #fb7185); color: #fff; border: none !important;
+    }
+    .vault-upload-progress {
+      margin-top: 12px; text-align: left; padding: 0 8px;
+    }
+    .vault-upload-progress .vup-text {
+      font-size: 12px; color: var(--cyan); margin-bottom: 6px;
+      font-family: var(--font-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .vault-upload-progress .vup-bar {
+      height: 6px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden;
+    }
+    .vault-upload-progress .vup-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #0078e0, #3b9eff, #67e8f9);
+      background-size: 200% 100%;
+      border-radius: 99px;
+      transition: width 0.25s ease;
+      animation: vupShine 1.2s linear infinite;
+    }
+    @keyframes vupShine {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+    .vault-drop-zone {
+      grid-column: 1 / -1;
+      border: 2px dashed rgba(59, 158, 255, 0.4);
+      border-radius: 14px;
+      padding: 24px 16px;
+      text-align: center;
+      background: rgba(59, 158, 255, 0.05);
+      cursor: pointer;
+      transition: 0.2s;
+      margin-bottom: 8px;
+    }
+    .vault-drop-zone:hover, .vault-drop-zone.drag-over {
+      border-color: var(--cyan);
+      background: rgba(59, 158, 255, 0.12);
+    }
+    .vault-drop-zone .dz-title { font-weight: 700; font-size: 13px; color: var(--text); margin-bottom: 4px; }
+    .vault-drop-zone .dz-sub { font-size: 11px; color: var(--text-muted); }
+    .rom-file .admin-del {
+      background: rgba(251, 113, 133, 0.12); border: 1px solid rgba(251, 113, 133, 0.35);
+      color: #fb7185; padding: 4px 8px; border-radius: 8px; font-size: 11px;
+      cursor: pointer; margin-left: 6px;
+    }
+    .rom-file .admin-del:hover { background: rgba(251, 113, 133, 0.22); }
     .loading, .empty { text-align: center; padding: 50px 20px; color: var(--text-muted); }
     .loading i { font-size: 26px; margin-bottom: 10px; color: var(--cyan); display: block; }
     .back-home {
@@ -469,6 +586,18 @@
   <a href="../account/index.html" class="admin-btn" id="adminBtn" style="display:none">
     <i class="fa-solid fa-user-shield"></i> <span id="adminBtnText">Account Center</span>
   </a>
+
+  <!-- Confirm popup custom -->
+  <div class="neo-confirm-overlay" id="neoConfirmOverlay">
+    <div class="neo-confirm-box" onclick="event.stopPropagation()">
+      <h3 id="neoConfirmTitle">Konfirmasi</h3>
+      <p id="neoConfirmMsg"></p>
+      <div class="neo-confirm-actions">
+        <button type="button" class="neo-btn-cancel" id="neoConfirmCancel">Batal</button>
+        <button type="button" class="neo-btn-ok" id="neoConfirmOk">Oke</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal Note Recovery (admin only) -->
   <div class="note-modal-overlay" id="noteModal" onclick="if(event.target===this)closeNoteModal()">
@@ -593,7 +722,7 @@
           '<div class="group-card cat-group" data-cat="rom" style="cursor:pointer" onclick="document.querySelector(\'.tab-btn[data-cat=rom]\').click()">' +
           '<div class="group-header"><div class="group-name"><i class="fa-solid fa-folder"></i> Rom &amp; Recovery</div>' +
           '<span class="group-badge">' + brands.size + ' Brand · ' + romItems.length + ' File</span></div>' +
-          '<div class="file-list" style="padding:14px 20px;font-size:13px;color:var(--text-muted)">Klik untuk buka folder brand → device → ROM / Recovery</div></div>';
+          '<div class="file-list" style="padding:14px 20px;font-size:13px;color:var(--text-muted)">Buka folder</div></div>';
       }
 
       // Tools: flat list, tanpa sub-kategori/group
@@ -646,11 +775,13 @@
         const p = parseRomGroup(item.group_name);
         if (!p) return;
         if (!tree[p.brand]) tree[p.brand] = {};
-        if (!tree[p.brand][p.device]) tree[p.brand][p.device] = { rom: [], recovery: [], note: null };
+        if (!tree[p.brand][p.device]) tree[p.brand][p.device] = { rom: [], recovery: [], addon: [], note: null };
         if (p.type === "recovery_note") {
           tree[p.brand][p.device].note = item;
         } else if (p.type === "recovery") {
           tree[p.brand][p.device].recovery.push(item);
+        } else if (p.type === "addon") {
+          tree[p.brand][p.device].addon.push(item);
         } else {
           tree[p.brand][p.device].rom.push(item);
         }
@@ -678,19 +809,18 @@
         filteredTree = {};
         Object.keys(tree).forEach(brand => {
           Object.keys(tree[brand]).forEach(device => {
-            ["rom", "recovery"].forEach(type => {
-              tree[brand][device][type].forEach(f => {
+            ["rom", "recovery", "addon"].forEach(type => {
+              (tree[brand][device][type] || []).forEach(f => {
                 const hay = (brand + " " + device + " " + type + " " + (f.title || "")).toLowerCase();
                 if (!hay.includes(query)) return;
                 if (!filteredTree[brand]) filteredTree[brand] = {};
-                if (!filteredTree[brand][device]) filteredTree[brand][device] = { rom: [], recovery: [], note: tree[brand][device].note };
+                if (!filteredTree[brand][device]) filteredTree[brand][device] = { rom: [], recovery: [], addon: [], note: tree[brand][device].note };
                 filteredTree[brand][device][type].push(f);
               });
             });
-            // Keep note if device matches search
             if ((brand + " " + device).toLowerCase().includes(query)) {
               if (!filteredTree[brand]) filteredTree[brand] = {};
-              if (!filteredTree[brand][device]) filteredTree[brand][device] = { rom: [], recovery: [], note: tree[brand][device].note };
+              if (!filteredTree[brand][device]) filteredTree[brand][device] = { rom: [], recovery: [], addon: [], note: tree[brand][device].note };
               else filteredTree[brand][device].note = tree[brand][device].note;
             }
           });
@@ -715,7 +845,7 @@
       }
       if (romNav.type) {
         html += '<span class="sep">/</span>';
-        html += '<span class="current">' + (romNav.type === "recovery" ? "Recovery" : "ROM") + '</span>';
+        html += '<span class="current">' + (romNav.type === "recovery" ? "Recovery" : romNav.type === "addon" ? "Addon" : "ROM") + '</span>';
       }
       html += '</div>';
 
@@ -724,14 +854,15 @@
       if (!romNav.brand) {
         const brands = Object.keys(filteredTree).sort((a, b) => a.localeCompare(b));
         if (!brands.length) {
-          html += '</div><div class="rom-empty"><i class="fa-solid fa-folder-open"></i>Belum ada file ROM / Recovery.<br>Tambahkan lewat Vault Manager.</div></div>';
+          html += '</div><div class="rom-empty"><i class="fa-solid fa-folder-open"></i>Kosong</div></div>';
           container.innerHTML = html;
           return;
         }
         brands.forEach(brand => {
           let count = 0;
           Object.keys(filteredTree[brand]).forEach(d => {
-            count += filteredTree[brand][d].rom.length + filteredTree[brand][d].recovery.length;
+            const x = filteredTree[brand][d];
+            count += x.rom.length + x.recovery.length + (x.addon ? x.addon.length : 0);
           });
           const devices = Object.keys(filteredTree[brand]).length;
           html += '<button type="button" class="rom-folder" onclick="romGo(\'' + jsStr(brand) + '\',null,null)">' +
@@ -742,20 +873,20 @@
       } else if (!romNav.device) {
         const devices = filteredTree[romNav.brand] ? Object.keys(filteredTree[romNav.brand]).sort((a, b) => a.localeCompare(b)) : [];
         if (!devices.length) {
-          html += '</div><div class="rom-empty"><i class="fa-solid fa-folder-open"></i>Tidak ada device di brand ini.</div></div>';
+          html += '</div><div class="rom-empty"><i class="fa-solid fa-folder-open"></i>Kosong</div></div>';
           container.innerHTML = html;
           return;
         }
         devices.forEach(device => {
           const d = filteredTree[romNav.brand][device];
-          const count = d.rom.length + d.recovery.length;
+          const count = d.rom.length + d.recovery.length + (d.addon ? d.addon.length : 0);
           html += '<button type="button" class="rom-folder" onclick="romGo(\'' + jsStr(romNav.brand) + '\',\'' + jsStr(device) + '\',null)">' +
             folderIconSVG() +
             '<span class="rom-folder-name">' + esc(device) + '</span>' +
             '<span class="rom-folder-count">' + count + ' file</span></button>';
         });
       } else if (!romNav.type) {
-        const d = (filteredTree[romNav.brand] && filteredTree[romNav.brand][romNav.device]) || { rom: [], recovery: [], note: null };
+        const d = (filteredTree[romNav.brand] && filteredTree[romNav.brand][romNav.device]) || { rom: [], recovery: [], addon: [], note: null };
         html += '<button type="button" class="rom-folder" onclick="romGo(\'' + jsStr(romNav.brand) + '\',\'' + jsStr(romNav.device) + '\',\'rom\')">' +
           folderIconSVG() +
           '<span class="rom-folder-name">ROM</span>' +
@@ -764,35 +895,44 @@
           folderIconSVG() +
           '<span class="rom-folder-name">Recovery</span>' +
           '<span class="rom-folder-count">' + d.recovery.length + ' file</span></button>';
+        html += '<button type="button" class="rom-folder" onclick="romGo(\'' + jsStr(romNav.brand) + '\',\'' + jsStr(romNav.device) + '\',\'addon\')">' +
+          folderIconSVG() +
+          '<span class="rom-folder-name">Addon</span>' +
+          '<span class="rom-folder-count">' + (d.addon ? d.addon.length : 0) + ' file</span></button>';
       } else {
-        // Full tree (unfiltered notes) for this device
         const fullTree = buildRomTree(romItems);
-        const d = (fullTree[romNav.brand] && fullTree[romNav.brand][romNav.device]) || { rom: [], recovery: [], note: null };
-        const files = romNav.type === "recovery" ? d.recovery : d.rom;
+        const d = (fullTree[romNav.brand] && fullTree[romNav.brand][romNav.device]) || { rom: [], recovery: [], addon: [], note: null };
+        const files = romNav.type === "recovery" ? d.recovery : romNav.type === "addon" ? (d.addon || []) : d.rom;
 
-        // Note recovery — HANYA untuk admin yang login
         if (romNav.type === "recovery" && isAdminLoggedIn) {
           const noteText = d.note ? (d.note.url || d.note.title || "") : "";
           const noteId = d.note ? d.note.id : null;
-          const hasNote = !!(noteText && String(noteText).trim());
-          html += '<button type="button" class="rom-note-card" id="btnRecoveryNote" data-note-id="' + (noteId != null ? noteId : '') + '">' +
+          html += '<button type="button" class="rom-note-card" id="btnRecoveryNote">' +
             '<i class="fa-solid fa-sticky-note"></i>' +
-            '<div><div class="note-title">📌 Note Cara Flash Recovery</div>' +
-            '<div class="note-hint">' + (hasNote ? 'Klik untuk lihat / edit note' : 'Belum ada note — klik di sini untuk buat') + '</div></div></button>';
-          // simpan sementara di window biar handler bisa baca
+            '<div><div class="note-title">📌 Note Cara Flash Recovery</div></div></button>';
           window.__pendingNote = {
             brand: romNav.brand,
             device: romNav.device,
             id: noteId,
             text: noteText || ""
           };
-        } else if (romNav.type === "recovery" && !isAdminLoggedIn) {
-          html += '<div class="rom-empty" style="grid-column:1/-1;padding:12px 16px;font-size:12px;opacity:0.7">' +
-            '<i class="fa-solid fa-lock" style="font-size:16px;margin-bottom:6px"></i>Note recovery hanya untuk admin yang login.</div>';
         }
 
-        if (!files.length && !(romNav.type === "recovery" && isAdminLoggedIn)) {
-          html += '</div><div class="rom-empty"><i class="fa-solid fa-file"></i>Folder kosong.</div></div>';
+        // Admin: drop zone upload di halaman Vault
+        if (isAdminLoggedIn) {
+          html += '<div class="vault-drop-zone" id="vaultPublicDrop">' +
+            '<i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;color:var(--cyan);margin-bottom:6px;display:block"></i>' +
+            '<div class="dz-title">Drop file ke sini</div>' +
+            '<div class="dz-sub">atau klik untuk pilih · langsung masuk folder ini</div>' +
+            '<input type="file" id="vaultPublicFileInput" multiple style="display:none">' +
+            '<div id="vaultPublicProgress" class="vault-upload-progress" style="display:none">' +
+            '<div class="vup-text">Mengupload...</div>' +
+            '<div class="vup-bar"><div class="vup-fill" id="vaultPublicFill" style="width:0%"></div></div>' +
+            '</div></div>';
+        }
+
+        if (!files.length && !(isAdminLoggedIn)) {
+          html += '</div><div class="rom-empty"><i class="fa-solid fa-file"></i>Kosong</div></div>';
           container.innerHTML = html;
           bindNoteButton();
           return;
@@ -801,17 +941,19 @@
           html += '<div class="rom-file">' +
             '<div class="rom-file-icon"><i class="fa-solid fa-file-zipper"></i></div>' +
             '<span class="rom-file-name">' + esc(f.title) + '</span>' +
+            '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:center">' +
             '<a class="dl-link" href="' + esc(f.url) + '" target="_blank" rel="noopener"><i class="fa-solid fa-download"></i> Download</a>' +
-            '</div>';
+            (isAdminLoggedIn
+              ? '<button type="button" class="admin-del" onclick="deleteVaultFile(' + f.id + ')" title="Hapus"><i class="fa-solid fa-trash"></i></button>'
+              : '') +
+            '</div></div>';
         });
-        if (!files.length && romNav.type === "recovery" && isAdminLoggedIn) {
-          html += '<div class="rom-empty" style="grid-column:1/-1;padding:20px"><i class="fa-solid fa-file"></i>Belum ada file recovery. Note tetap bisa diisi lewat kartu di atas.</div>';
-        }
       }
 
       html += '</div></div>';
       container.innerHTML = html;
       bindNoteButton();
+      bindPublicDropZone();
     }
 
     function bindNoteButton() {
@@ -825,12 +967,182 @@
       });
     }
 
+    function bindPublicDropZone() {
+      const zone = document.getElementById("vaultPublicDrop");
+      const input = document.getElementById("vaultPublicFileInput");
+      if (!zone || !input || !isAdminLoggedIn) return;
+      zone.addEventListener("click", function(e) {
+        if (e.target === input) return;
+        input.click();
+      });
+      input.addEventListener("change", function() {
+        if (input.files && input.files.length) handlePublicVaultFiles(input.files);
+        input.value = "";
+      });
+      zone.addEventListener("dragover", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.classList.add("drag-over");
+      });
+      zone.addEventListener("dragleave", function(e) {
+        e.preventDefault();
+        zone.classList.remove("drag-over");
+      });
+      zone.addEventListener("drop", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.classList.remove("drag-over");
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+          handlePublicVaultFiles(e.dataTransfer.files);
+        }
+      });
+    }
+
+    function sanitizePathPart(s) {
+      return String(s || "").replace(/[^a-zA-Z0-9._\-\s]/g, "").replace(/\s+/g, "_").slice(0, 80) || "x";
+    }
+
+    function buildRomGroup(brand, device, type) {
+      return [brand.trim(), device.trim(), (type || "rom").toLowerCase()].join("|||");
+    }
+
+    var VAULT_ADDON_MAX_BYTES = 25 * 1024 * 1024; // 25 MB
+
+    async function handlePublicVaultFiles(fileList) {
+      if (!isAdminLoggedIn) {
+        showNeoToast("Login admin dulu", "err");
+        return;
+      }
+      if (!romNav.brand || !romNav.device || !romNav.type) {
+        showNeoToast("Masuk ke folder dulu", "err");
+        return;
+      }
+      let arr = Array.from(fileList);
+      if (!arr.length) return;
+
+      // Batas 25 MB khusus folder Addon
+      if (romNav.type === "addon") {
+        const tooBig = arr.filter(f => f.size > VAULT_ADDON_MAX_BYTES);
+        if (tooBig.length) {
+          const names = tooBig.map(f => f.name + " (" + (f.size / 1024 / 1024).toFixed(1) + " MB)").join(", ");
+          showNeoToast("Addon max 25 MB. Ditolak: " + names, "err");
+          await neoAlert("File terlalu besar", "Folder Addon maksimal 25 MB per file.\n\nDitolak: " + names + "\n\nPakai direct link untuk file besar.");
+          arr = arr.filter(f => f.size <= VAULT_ADDON_MAX_BYTES);
+          if (!arr.length) return;
+        }
+      }
+
+      const prog = document.getElementById("vaultPublicProgress");
+      const fill = document.getElementById("vaultPublicFill");
+      const textEl = prog ? prog.querySelector(".vup-text") : null;
+      if (prog) prog.style.display = "block";
+      if (fill) fill.style.width = "0%";
+
+      let ok = 0, fail = 0;
+      for (let i = 0; i < arr.length; i++) {
+        const pct = Math.round(((i) / arr.length) * 100);
+        if (textEl) textEl.textContent = "Upload " + (i + 1) + " / " + arr.length + " — " + arr[i].name;
+        if (fill) fill.style.width = pct + "%";
+        try {
+          await uploadPublicVaultFile(arr[i]);
+          ok++;
+        } catch (err) {
+          fail++;
+          showNeoToast("Gagal " + arr[i].name + ": " + (err.message || err), "err");
+        }
+        if (fill) fill.style.width = Math.round(((i + 1) / arr.length) * 100) + "%";
+      }
+      if (textEl) textEl.textContent = ok ? "Selesai — " + ok + " file" : "Gagal upload";
+      setTimeout(function() { if (prog) prog.style.display = "none"; }, 800);
+      if (ok) showNeoToast(ok + " file diupload" + (fail ? " (" + fail + " gagal)" : ""), "ok");
+      await loadFiles();
+      if (currentCategory === "rom") {
+        renderRomBrowser(globalData.filter(i => i.category === "rom"));
+      }
+    }
+
+    async function uploadPublicVaultFile(file) {
+      const brand = sanitizePathPart(romNav.brand);
+      const device = sanitizePathPart(romNav.device);
+      const type = romNav.type;
+      const safeName = file.name.replace(/[^a-zA-Z0-9._\-]/g, "_");
+      const path = brand + "/" + device + "/" + type + "/" + Date.now() + "_" + safeName;
+
+      const { error: upErr } = await db.storage.from("vault").upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: file.type || "application/octet-stream"
+      });
+      if (upErr) throw upErr;
+
+      const { data: urlData } = db.storage.from("vault").getPublicUrl(path);
+      const publicUrl = urlData && urlData.publicUrl;
+      if (!publicUrl) throw new Error("Gagal dapat URL");
+
+      const maxOrder = globalData.reduce((m, f) => Math.max(m, f.sort_order || 0), 0);
+      const { error: dbErr } = await db.from("vault_files").insert({
+        category: "rom",
+        group_name: buildRomGroup(romNav.brand, romNav.device, romNav.type),
+        title: file.name,
+        url: publicUrl,
+        sort_order: maxOrder + 1
+      });
+      if (dbErr) throw dbErr;
+    }
+
+    function neoConfirm(opts) {
+      opts = opts || {};
+      return new Promise(function(resolve) {
+        var el = document.getElementById("neoConfirmOverlay");
+        if (!el) { resolve(window.confirm(opts.message || "Yakin?")); return; }
+        document.getElementById("neoConfirmTitle").textContent = opts.title || "Konfirmasi";
+        document.getElementById("neoConfirmMsg").textContent = opts.message || "Yakin lanjut?";
+        var okBtn = document.getElementById("neoConfirmOk");
+        var cancelBtn = document.getElementById("neoConfirmCancel");
+        okBtn.textContent = opts.okText || "Oke";
+        cancelBtn.textContent = opts.cancelText || "Batal";
+        cancelBtn.style.display = opts.hideCancel ? "none" : "";
+        okBtn.className = opts.danger ? "neo-btn-danger" : "neo-btn-ok";
+        el.classList.add("show");
+        function done(val) {
+          el.classList.remove("show");
+          okBtn.onclick = null;
+          cancelBtn.onclick = null;
+          resolve(val);
+        }
+        okBtn.onclick = function() { done(true); };
+        cancelBtn.onclick = function() { done(false); };
+        el.onclick = function(e) { if (e.target === el) done(false); };
+      });
+    }
+    function neoAlert(title, message) {
+      return neoConfirm({ title: title || "Info", message: message || "", okText: "Oke", hideCancel: true });
+    }
+
+    async function deleteVaultFile(id) {
+      if (!isAdminLoggedIn) return;
+      var ok = await neoConfirm({
+        title: "Hapus file?",
+        message: "File ini akan dihapus dari Vault. Tidak bisa dibatalkan.",
+        okText: "Hapus",
+        danger: true
+      });
+      if (!ok) return;
+      const { error } = await db.from("vault_files").delete().eq("id", id);
+      if (error) {
+        showNeoToast("Gagal hapus: " + error.message, "err");
+        return;
+      }
+      showNeoToast("File dihapus", "ok");
+      await loadFiles();
+      if (currentCategory === "rom") {
+        renderRomBrowser(globalData.filter(i => i.category === "rom"));
+      }
+    }
+
     async function romGo(brand, device, type) {
       romNav = { brand: brand || null, device: device || null, type: type || null };
-      // Pastikan status login fresh sebelum render (biar note card muncul)
-      if (type === "recovery") {
-        await checkSession();
-      }
+      if (type) await checkSession();
       renderRomBrowser(globalData.filter(i => i.category === "rom"));
     }
 
@@ -993,61 +1305,47 @@
       });
     }
 
-    const canvas = document.getElementById("particleCanvas");
-    const ctx = canvas.getContext("2d");
-    let particles = [];
-    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-    window.addEventListener("resize", resizeCanvas); resizeCanvas();
-    class Particle {
-      constructor() {
-        this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 1.6 + 0.4;
-        this.speedX = (Math.random() - 0.5) * 0.45; this.speedY = (Math.random() - 0.5) * 0.45;
+    // Particle OFF by default — hemat CPU biar Ultra Viewer tidak putus.
+    // Aktifkan: localStorage.setItem("neoshy_particles","1") lalu refresh
+    (function() {
+      var canvas = document.getElementById("particleCanvas");
+      if (!canvas) return;
+      if (localStorage.getItem("neoshy_particles") !== "1") {
+        canvas.style.display = "none";
+        return;
       }
-      update() {
-        this.x += this.speedX; this.y += this.speedY;
-        if (this.x > canvas.width) this.x = 0; if (this.x < 0) this.x = canvas.width;
-        if (this.y > canvas.height) this.y = 0; if (this.y < 0) this.y = canvas.height;
+      var ctx = canvas.getContext("2d");
+      var particles = [], animId = null, isVisible = true;
+      function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+      window.addEventListener("resize", resize); resize();
+      var n = Math.min(16, Math.max(6, Math.floor((canvas.width * canvas.height) / 60000)));
+      for (var i = 0; i < n; i++) {
+        particles.push({
+          x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+          size: Math.random() * 1.2 + 0.3,
+          sx: (Math.random() - 0.5) * 0.25, sy: (Math.random() - 0.5) * 0.25
+        });
       }
-      draw() {
-        ctx.fillStyle = "rgba(59, 158, 255, 0.5)";
-        ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
-      }
-    }
-    function initParticles() {
-      particles = [];
-      const area = canvas.width * canvas.height;
-      const count = Math.min(45, Math.max(18, Math.floor(area / 28000)));
-      for (let i = 0; i < count; i++) particles.push(new Particle());
-    }
-    let animId = null;
-    let isVisible = true;
-    function animateParticles() {
-      if (!isVisible) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const len = particles.length;
-      for (let i = 0; i < len; i++) {
-        particles[i].update(); particles[i].draw();
-        for (let j = i + 2; j < len; j += 2) {
-          const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 70) {
-            ctx.beginPath();
-            ctx.strokeStyle = "rgba(59, 158, 255, " + (0.55 - dist / 70) + ")";
-            ctx.lineWidth = 0.4;
-            ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
-          }
+      function tick() {
+        if (!isVisible) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (var i = 0; i < particles.length; i++) {
+          var p = particles[i];
+          p.x += p.sx; p.y += p.sy;
+          if (p.x > canvas.width) p.x = 0; if (p.x < 0) p.x = canvas.width;
+          if (p.y > canvas.height) p.y = 0; if (p.y < 0) p.y = canvas.height;
+          ctx.fillStyle = "rgba(59,158,255,0.4)";
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
         }
+        animId = requestAnimationFrame(tick);
       }
-      animId = requestAnimationFrame(animateParticles);
-    }
-    document.addEventListener("visibilitychange", () => {
-      isVisible = !document.hidden;
-      if (isVisible && !animId) animateParticles();
-      if (!isVisible && animId) { cancelAnimationFrame(animId); animId = null; }
-    });
-    initParticles();
-    animateParticles();
+      document.addEventListener("visibilitychange", function() {
+        isVisible = !document.hidden;
+        if (isVisible && !animId) tick();
+        if (!isVisible && animId) { cancelAnimationFrame(animId); animId = null; }
+      });
+      tick();
+    })();
 
     // Session dulu, baru load files — supaya isAdminLoggedIn sudah benar
     (async function initVault() {

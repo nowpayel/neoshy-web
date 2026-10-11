@@ -162,6 +162,43 @@
       height: 0 !important;
       background: transparent !important;
     }
+
+    /* ── Micro-interactions (hover only, no continuous animation) ── */
+    a, button, .btn, .btn-primary, .btn-ghost, .tab-btn, .dl-btn, .dl-link,
+    .service-card, .feature-card, .shot-card, .file-item, .rom-folder, .rom-file,
+    .account-btn, .tool-bridge a, .social-link, .chip-btn, .nav-links a {
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease !important;
+    }
+    .btn-primary:hover, .btn.btn-primary:hover,
+    a.btn-primary:hover, button.btn-primary:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 8px 28px rgba(59, 158, 255, 0.35) !important;
+    }
+    .btn-ghost:hover, a.btn-ghost:hover, button.btn-ghost:hover {
+      transform: translateY(-1px) !important;
+      border-color: rgba(59, 158, 255, 0.55) !important;
+    }
+    .service-card:hover, .feature-card:hover, .shot-card:hover,
+    .rom-folder:hover, .file-item:hover, .rom-file:hover {
+      transform: translateY(-3px) !important;
+      border-color: rgba(59, 158, 255, 0.4) !important;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(59, 158, 255, 0.12) !important;
+    }
+    .tab-btn:hover, .dl-btn:hover, .dl-link:hover {
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 16px rgba(59, 158, 255, 0.2) !important;
+    }
+    .nav-links a:hover {
+      color: #3b9eff !important;
+    }
+    /* Hormati preferensi user yang tidak suka motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
     * {
       scrollbar-width: none !important;
       -ms-overflow-style: none !important;
@@ -391,7 +428,7 @@
     </div>
 
     <!-- Add Service Form -->
-    <div class="neo-card p-4 md:p-6 rounded-2xl">
+    <div class="neo-card p-4 md:p-6 rounded-2xl max-w-5xl mx-auto w-full">
       <div class="flex justify-between items-center mb-5">
         <h2 class="text-xs md:text-sm font-bold tracking-wider text-cyan-400 uppercase font-mono flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
@@ -596,11 +633,12 @@
     </div>
 
     <!-- History Logs -->
-    <div class="neo-card p-4 md:p-6 rounded-2xl">
+    <div class="neo-card p-4 md:p-6 rounded-2xl max-w-5xl mx-auto w-full">
       <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
-        <h2 class="text-xs md:text-sm font-bold tracking-wider text-cyan-400 uppercase font-mono flex items-center gap-2">
+        <h2 class="text-xs md:text-sm font-bold tracking-wider text-cyan-400 uppercase font-mono flex items-center gap-2 flex-wrap">
           <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
           Service History Logs
+          <span id="history-total-count" class="text-[10px] font-mono font-semibold normal-case tracking-normal text-slate-300 bg-slate-900/80 border border-cyan-500/25 px-2 py-0.5 rounded-md">0 total</span>
         </h2>
         
         <div class="relative w-full md:w-64">
@@ -612,19 +650,15 @@
 
       <div id="mobile-cards" class="space-y-3 md:hidden"></div>
 
-      <div class="hidden md:block overflow-x-auto docs-scroll pb-2 -mx-1">
-        <table class="w-full min-w-[1000px] text-left text-sm text-slate-300">
-          <thead class="text-xs font-mono text-cyan-400/70 uppercase bg-slate-950/50 border-b border-cyan-500/20">
+      <div class="hidden md:block overflow-x-auto docs-scroll pb-2">
+        <table class="w-full text-left text-sm text-slate-300">
+          <thead class="text-[10px] font-mono text-cyan-400/70 uppercase bg-slate-950/50 border-b border-cyan-500/20">
             <tr>
-              <th class="p-2 text-xs w-[100px]">DATE</th>
-              <th class="p-2 text-xs w-[140px]">DEVICE</th>
-              <th class="p-2 text-xs w-[160px]">SERVICE</th>
-              <th class="p-2 text-xs w-[130px]">CUSTOMER</th>
-              <th class="p-2 text-xs w-[140px]">PRICE</th>
-              <th class="p-2 text-xs w-[110px]">METHOD</th>
-              <th class="p-2 text-xs w-[90px]">DOCS</th>
-              <th class="p-2 text-xs">NOTES</th>
-              <th class="p-2 text-xs text-center w-[120px]">ACTION</th>
+              <th class="p-2 text-[10px] w-[80px]">DATE</th>
+              <th class="p-2 text-[10px] w-[22%]">DEVICE</th>
+              <th class="p-2 text-[10px]">SERVICE</th>
+              <th class="p-2 text-[10px] w-[130px]">PRICE</th>
+              <th class="p-2 text-[10px] text-center w-[110px]">ACTION</th>
             </tr>
           </thead>
           <tbody id="tabel-data"></tbody>
@@ -846,9 +880,21 @@
       const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
       const dateObj = new Date(dateStr + 'T00:00:00');
       if (isNaN(dateObj.getTime())) return dateStr;
-      
       const dayName = days[dateObj.getDay()];
       return `${dayName}, ${dateStr}`;
+    }
+
+    /** Format ringkas angka: DD/MM/YY */
+    function formatDateCompact(dateStr) {
+      if (!dateStr) return '-';
+      const m = String(dateStr).match(/(\d{4})-(\d{2})-(\d{2})/);
+      if (m) return m[3] + '/' + m[2] + '/' + m[1].slice(2);
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yy = String(d.getFullYear()).slice(2);
+      return dd + '/' + mm + '/' + yy;
     }
 
     function toggleClearBtn(input) {
@@ -1420,21 +1466,34 @@
     }
 
     function parseRawPrice(val) {
-      if (!val) return 0;
-      let str = val.toString();
-      if (str.includes(',')) str = str.split(',')[0];
-      if (str.includes('.')) {
-        const parts = str.split('.');
-        if (parts[parts.length - 1].length === 2) {
-          parts.pop();
-          str = parts.join('');
-        }
+      if (val == null || val === "") return 0;
+      if (typeof val === "number" && isFinite(val)) return Math.round(val);
+      let str = String(val).trim().replace(/[Rr][Pp]\.?\s*/g, "").trim();
+      // Format ID: 50.000,00 atau 120.000,00 → buang desimal, hapus titik ribuan
+      if (str.indexOf(",") >= 0 && str.indexOf(".") >= 0) {
+        str = str.split(",")[0].replace(/\./g, "");
+      } else if (str.indexOf(",") >= 0) {
+        var cp = str.split(",");
+        if (cp[cp.length - 1].length <= 2) str = cp.slice(0, -1).join("");
+        else str = cp.join("");
+      } else if (str.indexOf(".") >= 0) {
+        var dp = str.split(".");
+        // 50.000 (ribuan) vs 50.00 (desimal)
+        if (dp[dp.length - 1].length === 2 && dp.length === 2) str = dp[0];
+        else str = dp.join("");
       }
-      let clean = str.replace(/[^0-9]/g, '');
-      let num = parseInt(clean, 10);
+      var num = parseInt(str.replace(/[^0-9]/g, ""), 10);
       if (isNaN(num)) return 0;
-      if (num > 0 && num < 1000) num = num * 1000;
+      // Input cepat: angka < 1000 dianggap ribuan (50 → 50000) — HANYA saat ketik di form, bukan parse ulang dari DB yang sudah benar
+      // Jangan kalikan lagi jika string asli sudah punya pemisah ribuan
       return num;
+    }
+
+    function parsePriceInput(val) {
+      // Untuk input form: izinkan singkatan 50 = 50000
+      var n = parseRawPrice(val);
+      if (n > 0 && n < 1000) n = n * 1000;
+      return n;
     }
 
     function formatRupiahWithDecimals(amount) {
@@ -1447,7 +1506,7 @@
     }
 
     function handlePriceInput(val) {
-      const num = parseRawPrice(val);
+      const num = parsePriceInput(val);
       document.getElementById('price-preview').innerText = formatRupiahWithDecimals(num);
       calculateRemainingDP();
     }
@@ -1466,7 +1525,7 @@
     }
 
     function handleModalPriceInput(val) {
-      const num = parseRawPrice(val);
+      const num = parsePriceInput(val);
       document.getElementById('modal-price-preview').innerText = formatRupiahWithDecimals(num);
       calculateModalRemainingDP();
     }
@@ -1501,8 +1560,8 @@
     }
 
     function calculateRemainingDP() {
-      const total = parseRawPrice(document.getElementById('harga').value);
-      const dp = parseRawPrice(document.getElementById('dp_harga').value);
+      const total = parsePriceInput(document.getElementById('harga').value);
+      const dp = parsePriceInput(document.getElementById('dp_harga').value);
       const remaining = Math.max(0, total - dp);
       document.getElementById('remaining-amount-display').innerText = formatRupiahWithDecimals(remaining);
     }
@@ -1524,14 +1583,14 @@
     }
 
     function calculateModalRemainingDP() {
-      const total = parseRawPrice(document.getElementById('modal-harga').value);
-      const dp = parseRawPrice(document.getElementById('modal-dp_harga').value);
+      const total = parsePriceInput(document.getElementById('modal-harga').value);
+      const dp = parsePriceInput(document.getElementById('modal-dp_harga').value);
       const remaining = Math.max(0, total - dp);
       document.getElementById('modal-remaining-amount-display').innerText = formatRupiahWithDecimals(remaining);
     }
 
-    /** Compress & resize image before storing (max 1280px, JPEG ~0.72) → returns dataURL for preview */
-    function compressImage(file, maxSize = 1280, quality = 0.72) {
+    /** Compress & resize — foto dokumentasi ke Storage (bukan DB). Target kecil biar hemat storage. */
+    function compressImage(file, maxSize = 1200, quality = 0.68) {
       return new Promise((resolve, reject) => {
         if (!file.type || !file.type.startsWith("image/")) {
           reject(new Error("Not an image"));
@@ -1550,8 +1609,13 @@
             canvas.width = w; canvas.height = h;
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, w, h);
-            const mime = "image/jpeg";
-            resolve(canvas.toDataURL(mime, quality));
+            let q = quality;
+            let dataUrl = canvas.toDataURL("image/jpeg", q);
+            while (dataUrl.length > 400 * 1024 * 1.37 && q > 0.4) {
+              q -= 0.08;
+              dataUrl = canvas.toDataURL("image/jpeg", q);
+            }
+            resolve(dataUrl);
           };
           img.onerror = () => reject(new Error("Image load failed"));
           img.src = e.target.result;
@@ -1805,7 +1869,7 @@
         currentPage = 0;
         cacheData = [];
         hasMoreData = true;
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center p-6 font-mono text-cyan-400 animate-pulse">Loading data...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center p-6 font-mono text-cyan-400 animate-pulse">Loading data...</td></tr>`;
         mobileCards.innerHTML = `<div class="text-center p-6 font-mono text-cyan-400 animate-pulse">Loading data...</div>`;
       }
 
@@ -1842,7 +1906,7 @@
 
       } catch (err) {
         console.error("Failed to load data:", err.message);
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center p-4 text-xs font-mono text-rose-400">Failed to load data: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-xs font-mono text-rose-400">Failed to load data: ${err.message}</td></tr>`;
       }
     }
 
@@ -1885,15 +1949,35 @@
         }
         allRevenueData = all;
         updateRevenueDisplays();
+        updateHistoryTotalCount();
       } catch (err) {
         console.error('Failed to load full revenue data:', err.message);
+      }
+    }
+
+    
+    function updateHistoryTotalCount(shown) {
+      var el = document.getElementById("history-total-count");
+      if (!el) return;
+      var total = (allRevenueData && allRevenueData.length) ? allRevenueData.length : (cacheData ? cacheData.length : 0);
+      if (typeof shown === "number" && shown !== total) {
+        el.textContent = shown + " / " + total + " total";
+      } else {
+        el.textContent = total + " total";
       }
     }
 
     function getEffectiveIncome(row) {
       const totalHargaNum = parseRawPrice(row.harga);
       const dpHargaNum = parseRawPrice(row.dp_harga);
-      return row.status_bayar === 'DP' ? dpHargaNum : totalHargaNum;
+      const status = String(row.status_bayar || "").trim().toUpperCase();
+      // DP → hanya uang muka. Paid → harga penuh.
+      if (status === "DP" || status.indexOf("DOWN") >= 0) {
+        if (dpHargaNum > 0) return dpHargaNum;
+        // fallback salah input: jangan pakai total
+        return 0;
+      }
+      return totalHargaNum > 0 ? totalHargaNum : 0;
     }
 
     function updateRevenueDisplays() {
@@ -1957,111 +2041,68 @@
       mobileCards.innerHTML = '';
 
       if (dataList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center p-4 text-xs font-mono text-slate-500">No data found</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-xs font-mono text-slate-500">No data found</td></tr>`;
         mobileCards.innerHTML = `<div class="text-center p-4 text-xs font-mono text-slate-500">No data found</div>`;
-        // Do NOT zero the revenue displays here — they come from allRevenueData
         return;
       }
 
       dataList.forEach(row => {
-        const totalHargaNum = parseRawPrice(row.harga);
-        const dpHargaNum = parseRawPrice(row.dp_harga);
-        // effectiveIncome only used for display badge logic below, not for total
-
-        const remainingDP = Math.max(0, totalHargaNum - dpHargaNum);
-        const isDP = row.status_bayar === 'DP';
-
-        const payStatusBadge = isDP 
-          ? `<span class="bg-amber-950/80 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded text-[10px] font-mono block mt-1">
-               DP: ${formatRupiahWithDecimals(dpHargaNum)}
-             </span>
-             <span class="text-[10px] text-rose-400 font-mono block mt-0.5 font-bold">
-               Unpaid: ${formatRupiahWithDecimals(remainingDP)}
-             </span>
-             <button onclick="markAsPaid(${row.id})" class="mt-1 text-[9px] bg-amber-950 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded hover:bg-amber-800/60 transition font-mono">
-               Mark Paid
-             </button>`
-          : `<span class="bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded text-[10px] font-mono inline-block mt-1">Paid</span>`;
-
-        // Status badge: Waiting (masih countdown) / Ready (ETA lewat tapi belum lunas) / Done (sudah Paid)
-        // Pakai inline-flex + w-fit biar badge tidak memanjang penuh di mobile
         const isPaid = row.status_bayar !== 'DP';
-        let timerContainer = '';
+        let statusBadge = '';
         if (row.eta_iso) {
-          timerContainer = `<div class="mt-1 inline-flex w-fit bg-cyan-950/70 border border-cyan-500/30 px-2 py-0.5 rounded-md font-mono text-[10px] text-cyan-300" data-eta="${row.eta_iso}" data-paid="${isPaid ? '1' : '0'}">
-               <span class="timer-display font-bold">...</span>
-             </div>`;
+          statusBadge = `<span class="mt-1 inline-flex w-fit bg-cyan-950/70 border border-cyan-500/30 px-1.5 py-0.5 rounded font-mono text-[9px] text-cyan-300" data-eta="${row.eta_iso}" data-paid="${isPaid ? '1' : '0'}"><span class="timer-display font-bold">...</span></span>`;
         } else if (isPaid) {
-          timerContainer = `<div class="mt-1 inline-flex w-fit bg-emerald-950/70 border border-emerald-500/30 px-2 py-0.5 rounded-md font-mono text-[10px]">
-               <span class="font-bold text-emerald-400">DONE</span>
-             </div>`;
+          statusBadge = `<span class="mt-1 inline-flex w-fit bg-emerald-950/70 border border-emerald-500/30 px-1.5 py-0.5 rounded font-mono text-[9px] font-bold text-emerald-400">DONE</span>`;
         } else {
-          timerContainer = `<div class="mt-1 inline-flex w-fit bg-amber-950/70 border border-amber-500/30 px-2 py-0.5 rounded-md font-mono text-[10px]">
-               <span class="font-bold text-amber-300">READY</span>
-             </div>`;
+          statusBadge = `<span class="mt-1 inline-flex w-fit bg-amber-950/70 border border-amber-500/30 px-1.5 py-0.5 rounded font-mono text-[9px] font-bold text-amber-300">READY</span>`;
         }
 
-        const docButton = `<button onclick="openDocsModal(${row.id})" class="text-[10px] bg-cyan-950/60 text-cyan-300 border border-cyan-500/40 px-2.5 py-1 rounded-md hover:bg-cyan-800 transition font-mono whitespace-nowrap shadow">
-            Check Docs
-          </button>`;
+        const payDot = isPaid
+          ? `<span class="text-[9px] text-emerald-400/80 font-mono ml-1">●</span>`
+          : `<span class="text-[9px] text-amber-400/80 font-mono ml-1">DP</span>`;
 
-        const formattedDate = formatDateWithDay(row.tanggal);
+        const dateCompact = formatDateCompact(row.tanggal);
 
         tbody.innerHTML += `
-          <tr class="border-b border-cyan-500/10 hover:bg-cyan-500/5 transition">
-            <td class="p-2 font-mono text-[11px] text-slate-400 align-top">${formattedDate}</td>
-            <td class="p-2 font-semibold text-white text-xs align-top break-words">${row.hp_model || '-'}</td>
-            <td class="p-2 text-slate-300 text-xs align-top">${row.service || '-'}${timerContainer}</td>
-            <td class="p-2 font-mono text-[11px] text-slate-400 space-y-1 align-top">
-              <span class="block">${row.customer_phone || '-'}</span>
-              ${buildWaButton(row.customer_phone, row.hp_model, row.service, row.eta_iso)}
+          <tr class="border-b border-cyan-500/10 hover:bg-cyan-500/5 transition cursor-pointer" onclick="if(!event.target.closest('button'))editData(${row.id})">
+            <td class="p-2 font-mono text-[11px] text-slate-400 whitespace-nowrap align-top">${dateCompact}</td>
+            <td class="p-2 font-semibold text-white text-xs break-words align-top">${row.hp_model || '-'}</td>
+            <td class="p-2 text-slate-300 text-xs align-top">
+              <div class="leading-snug">${row.service || '-'}</div>
+              <div class="mt-1">${statusBadge}</div>
             </td>
-            <td class="p-2 font-mono text-xs align-top">
-              <span class="text-cyan-400 font-semibold block">${row.harga || '-'}</span>
-              ${payStatusBadge}
+            <td class="p-2 font-mono text-xs whitespace-nowrap align-top">
+              <span class="text-cyan-400 font-semibold">${row.harga || '-'}</span>${payDot}
             </td>
-            <td class="p-2 align-top"><span class="bg-cyan-950/60 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded text-[10px] font-mono">${row.metode_pembayaran || '-'}</span></td>
-            <td class="p-2 align-top">${docButton}</td>
-            <td class="p-2 text-[11px] text-slate-400 align-top break-words">${row.notes || '-'}</td>
-            <td class="p-2 text-center space-x-1 whitespace-nowrap align-top">
-              <button id="btn-edit-${row.id}" onclick="editData(${row.id})" class="text-xs text-sky-400 hover:text-sky-300 font-mono bg-sky-950/40 border border-sky-500/30 px-2 py-1 rounded">Edit</button>
-              <button onclick="deleteData(${row.id})" class="text-xs text-rose-400 hover:text-rose-300 font-mono bg-rose-950/40 border border-rose-500/30 px-2 py-1 rounded">Delete</button>
+            <td class="p-2 text-center whitespace-nowrap align-top" onclick="event.stopPropagation()">
+              <button id="btn-edit-${row.id}" onclick="editData(${row.id})" class="text-[11px] text-sky-400 hover:text-sky-300 font-mono bg-sky-950/40 border border-sky-500/30 px-2 py-1 rounded">Edit</button>
+              <button onclick="deleteData(${row.id})" class="text-[11px] text-rose-400 hover:text-rose-300 font-mono bg-rose-950/40 border border-rose-500/30 px-2 py-1 rounded ml-1">Hapus</button>
             </td>
           </tr>
         `;
 
         mobileCards.innerHTML += `
-          <div class="bg-slate-950/60 border border-cyan-500/20 rounded-xl p-3.5 space-y-2.5">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[10px] font-mono text-slate-400 block">${formattedDate}</span>
-                <h3 class="text-base font-bold text-white leading-tight">${row.hp_model || '-'}</h3>
-                <p class="text-xs text-cyan-300 mt-0.5">${row.service || '-'}</p>
-                ${timerContainer}
+          <div class="bg-slate-950/60 border border-cyan-500/20 rounded-xl p-3 cursor-pointer hover:border-cyan-500/40 transition" onclick="editData(${row.id})">
+            <div class="flex justify-between items-start gap-2">
+              <div class="min-w-0 flex-1">
+                <span class="text-[10px] font-mono text-slate-500">${dateCompact}</span>
+                <h3 class="text-sm font-bold text-white leading-tight mt-0.5">${row.hp_model || '-'}</h3>
+                <p class="text-xs text-slate-400 mt-1 leading-snug">${row.service || '-'}</p>
+                <div class="mt-1.5">${statusBadge}</div>
               </div>
-              <div class="text-right">
-                <span class="text-sm font-bold font-mono text-cyan-400 block">${row.harga || '-'}</span>
-                ${payStatusBadge}
-                <span class="inline-block mt-1 bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded text-[10px] font-mono">${row.metode_pembayaran || '-'}</span>
+              <div class="text-right shrink-0 pl-2">
+                <span class="text-sm font-bold font-mono text-cyan-400">${row.harga || '-'}</span>${payDot}
+                <div class="mt-2 flex flex-col gap-1 items-end" onclick="event.stopPropagation()">
+                  <button onclick="editData(${row.id})" class="text-[10px] text-sky-400 font-mono bg-sky-950/40 border border-sky-500/30 px-2 py-0.5 rounded">Edit</button>
+                  <button onclick="deleteData(${row.id})" class="text-[10px] text-rose-400 font-mono bg-rose-950/40 border border-rose-500/30 px-2 py-0.5 rounded">Hapus</button>
+                </div>
               </div>
-            </div>
-
-            <div class="pt-2 border-t border-cyan-500/10 text-xs space-y-2">
-              ${row.customer_phone ? `<div class="text-slate-400 font-mono flex items-center gap-2 flex-wrap"><span><span class="text-slate-500">Phone:</span> ${row.customer_phone}</span>${buildWaButton(row.customer_phone, row.hp_model, row.service, row.eta_iso)}</div>` : ''}
-              ${row.notes ? `<div class="text-slate-400"><span class="text-slate-500">Notes:</span> ${row.notes}</div>` : ''}
-              <div class="space-y-1 pt-1">${docButton}</div>
-            </div>
-
-            <div class="flex justify-end gap-2 pt-1">
-              <button id="btn-edit-m-${row.id}" onclick="editData(${row.id})" class="text-xs text-sky-400 hover:text-sky-300 font-mono bg-sky-950/40 border border-sky-500/30 px-3 py-1 rounded-lg">Edit</button>
-              <button onclick="deleteData(${row.id})" class="text-xs text-rose-400 hover:text-rose-300 font-mono bg-rose-950/40 border border-rose-500/30 px-3 py-1 rounded-lg">Delete</button>
             </div>
           </div>
         `;
       });
 
-      // Revenue totals are handled by allRevenueData + updateRevenueDisplays()
-      // Do not recalculate from paginated dataList here
+      updateHistoryTotalCount(dataList.length);
       updateLiveTimers();
     }
 
@@ -2206,14 +2247,14 @@
       btnSubmit.disabled = true;
 
       const hargaInput = document.getElementById('harga').value;
-      const parsedTotal = parseRawPrice(hargaInput);
+      const parsedTotal = parsePriceInput(hargaInput);
       const hargaFormatted = formatRupiahWithDecimals(parsedTotal);
 
       const statusBayar = document.getElementById('status_bayar').value;
       let dpFormatted = null;
 
       if (statusBayar === 'DP') {
-        const parsedDP = parseRawPrice(document.getElementById('dp_harga').value);
+        const parsedDP = parsePriceInput(document.getElementById('dp_harga').value);
         dpFormatted = formatRupiahWithDecimals(parsedDP);
       }
 
@@ -2292,14 +2333,14 @@
       btnSubmit.disabled = true;
 
       const hargaInput = document.getElementById('modal-harga').value;
-      const parsedTotal = parseRawPrice(hargaInput);
+      const parsedTotal = parsePriceInput(hargaInput);
       const hargaFormatted = formatRupiahWithDecimals(parsedTotal);
 
       const statusBayar = document.getElementById('modal-status_bayar').value;
       let dpFormatted = null;
 
       if (statusBayar === 'DP') {
-        const parsedDP = parseRawPrice(document.getElementById('modal-dp_harga').value);
+        const parsedDP = parsePriceInput(document.getElementById('modal-dp_harga').value);
         dpFormatted = formatRupiahWithDecimals(parsedDP);
       }
 

@@ -1,0 +1,36 @@
+-- ============================================
+-- Storage bucket untuk file Vault (ROM / Recovery / Addon)
+-- Jalankan di Supabase → SQL Editor
+-- ============================================
+
+-- 1) Buat bucket public
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('vault', 'vault', true, 524288000)  -- max 500MB per file
+on conflict (id) do update set public = true, file_size_limit = 524288000;
+
+-- 2) Hapus policy lama (jika ada)
+drop policy if exists "vault public read" on storage.objects;
+drop policy if exists "vault auth upload" on storage.objects;
+drop policy if exists "vault auth update" on storage.objects;
+drop policy if exists "vault auth delete" on storage.objects;
+
+-- 3) Baca: siapa saja (public download)
+create policy "vault public read"
+  on storage.objects for select
+  using (bucket_id = 'vault');
+
+-- 4) Upload / update / hapus: hanya user login (admin)
+create policy "vault auth upload"
+  on storage.objects for insert to authenticated
+  with check (bucket_id = 'vault');
+
+create policy "vault auth update"
+  on storage.objects for update to authenticated
+  using (bucket_id = 'vault');
+
+create policy "vault auth delete"
+  on storage.objects for delete to authenticated
+  using (bucket_id = 'vault');
+
+-- Cek
+select id, name, public, file_size_limit from storage.buckets where id = 'vault';
