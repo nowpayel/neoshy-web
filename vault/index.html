@@ -602,7 +602,7 @@
   <!-- Modal Note Recovery (admin only) -->
   <div class="note-modal-overlay" id="noteModal" onclick="if(event.target===this)closeNoteModal()">
     <div class="note-modal" onclick="event.stopPropagation()">
-      <h3><i class="fa-solid fa-sticky-note"></i> Note Cara Flash Recovery</h3>
+      <h3><i class="fa-solid fa-sticky-note"></i> Note Device</h3>
       <div class="note-sub" id="noteModalSub">—</div>
       <div id="noteViewMode">
         <div class="note-body" id="noteViewBody"></div>
@@ -612,7 +612,7 @@
         </div>
       </div>
       <div id="noteEditMode" style="display:none">
-        <textarea id="noteEditArea" placeholder="Tulis cara flash recovery untuk device ini..."></textarea>
+        <textarea id="noteEditArea" placeholder="Tulis catatan untuk tipe HP ini (cara flash, tips, dll)..."></textarea>
         <div class="note-modal-actions">
           <button type="button" class="btn-note-close" onclick="noteCancelEdit()">Batal</button>
           <button type="button" class="btn-note-save" onclick="noteSave()"><i class="fa-solid fa-floppy-disk"></i> Simpan</button>
@@ -886,7 +886,24 @@
             '<span class="rom-folder-count">' + count + ' file</span></button>';
         });
       } else if (!romNav.type) {
+        const fullTreeForNote = buildRomTree(romItems);
         const d = (filteredTree[romNav.brand] && filteredTree[romNav.brand][romNav.device]) || { rom: [], recovery: [], addon: [], note: null };
+        const dNote = (fullTreeForNote[romNav.brand] && fullTreeForNote[romNav.brand][romNav.device]) || d;
+        // Note di level tipe HP (bukan di dalam Recovery) — data tetap recovery_note
+        if (isAdminLoggedIn) {
+          const noteText = dNote.note ? (dNote.note.url || dNote.note.title || "") : "";
+          const noteId = dNote.note ? dNote.note.id : null;
+          html += '<button type="button" class="rom-note-card" id="btnRecoveryNote">' +
+            '<i class="fa-solid fa-sticky-note"></i>' +
+            '<div><div class="note-title">📌 Note Device</div>' +
+            '<div class="note-hint">Cara flash / catatan untuk ' + esc(romNav.device) + '</div></div></button>';
+          window.__pendingNote = {
+            brand: romNav.brand,
+            device: romNav.device,
+            id: noteId,
+            text: noteText || ""
+          };
+        }
         html += '<button type="button" class="rom-folder" onclick="romGo(\'' + jsStr(romNav.brand) + '\',\'' + jsStr(romNav.device) + '\',\'rom\')">' +
           folderIconSVG() +
           '<span class="rom-folder-name">ROM</span>' +
@@ -904,19 +921,6 @@
         const d = (fullTree[romNav.brand] && fullTree[romNav.brand][romNav.device]) || { rom: [], recovery: [], addon: [], note: null };
         const files = romNav.type === "recovery" ? d.recovery : romNav.type === "addon" ? (d.addon || []) : d.rom;
 
-        if (romNav.type === "recovery" && isAdminLoggedIn) {
-          const noteText = d.note ? (d.note.url || d.note.title || "") : "";
-          const noteId = d.note ? d.note.id : null;
-          html += '<button type="button" class="rom-note-card" id="btnRecoveryNote">' +
-            '<i class="fa-solid fa-sticky-note"></i>' +
-            '<div><div class="note-title">📌 Note Cara Flash Recovery</div></div></button>';
-          window.__pendingNote = {
-            brand: romNav.brand,
-            device: romNav.device,
-            id: noteId,
-            text: noteText || ""
-          };
-        }
 
         // Admin: drop zone upload di halaman Vault
         if (isAdminLoggedIn) {
@@ -1158,10 +1162,10 @@
         showNeoToast("Modal note tidak ditemukan. Update file vault/index.html.", "err");
         return;
       }
-      document.getElementById("noteModalSub").textContent = brand + " / " + device + " / Recovery";
+      document.getElementById("noteModalSub").textContent = brand + " / " + device;
       document.getElementById("noteViewBody").textContent = noteText && String(noteText).trim()
         ? noteText
-        : "(Belum ada note. Klik Edit untuk menulis cara flash recovery.)";
+        : "(Belum ada note. Klik Edit untuk menulis catatan device ini.)";
       document.getElementById("noteEditArea").value = noteText || "";
       document.getElementById("noteViewMode").style.display = "";
       document.getElementById("noteEditMode").style.display = "none";

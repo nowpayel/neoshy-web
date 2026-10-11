@@ -1247,7 +1247,16 @@
       }
       // ----- Level 3: ROM + Recovery + Addon -----
       else if (!romAdminNav.type) {
-        const d = (tree[romAdminNav.brand] && tree[romAdminNav.brand][romAdminNav.device]) || { rom: [], recovery: [], addon: [] };
+        const d = (tree[romAdminNav.brand] && tree[romAdminNav.brand][romAdminNav.device]) || { rom: [], recovery: [], addon: [], note: null };
+        // Note di level tipe HP (data tetap group recovery_note — note lama tidak hilang)
+        const noteText = d.note ? (d.note.url || d.note.title || "") : "";
+        const noteId = d.note ? d.note.id : "";
+        html += '<div class="rom-create-box" style="border-color:rgba(245,197,66,0.4);background:rgba(245,197,66,0.06);margin-bottom:16px">' +
+          '<div class="rom-type-label" style="color:#f5c542"><i class="fa-solid fa-sticky-note"></i> Note Device — ' + esc(romAdminNav.device) + '</div>' +
+          '<input type="hidden" id="adminNoteId" value="' + esc(String(noteId)) + '">' +
+          '<div class="form-group"><textarea id="adminNoteText" class="neo-input" rows="5" style="width:100%;resize:vertical;min-height:100px;font-family:var(--font-main)" placeholder="Catatan untuk tipe HP ini (cara flash, tips, dll)...">' + esc(noteText) + '</textarea></div>' +
+          '<button type="button" class="neo-btn" onclick="saveAdminRecoveryNote()"><i class="fa-solid fa-floppy-disk"></i> Simpan Note</button>' +
+          '</div>';
         html += '<div class="rom-admin-grid">';
         html += '<div class="rom-admin-folder">' +
           '<button type="button" class="raf-open" onclick="romAdminGo(\'' + jsEsc(romAdminNav.brand) + '\',\'' + jsEsc(romAdminNav.device) + '\',\'rom\')">' +
@@ -1272,17 +1281,6 @@
         const items = romAdminNav.type === "recovery" ? d.recovery : romAdminNav.type === "addon" ? (d.addon || []) : d.rom;
         const folderLabel = romAdminNav.type === "recovery" ? "Recovery" : romAdminNav.type === "addon" ? "Addon" : "ROM";
 
-        // Note recovery
-        if (romAdminNav.type === "recovery") {
-          const noteText = d.note ? (d.note.url || d.note.title || "") : "";
-          const noteId = d.note ? d.note.id : "";
-          html += '<div class="rom-create-box" style="border-color:rgba(245,197,66,0.4);background:rgba(245,197,66,0.06);margin-bottom:16px">' +
-            '<div class="rom-type-label" style="color:#f5c542"><i class="fa-solid fa-sticky-note"></i> Note Cara Flash Recovery</div>' +
-            '<input type="hidden" id="adminNoteId" value="' + esc(String(noteId)) + '">' +
-            '<div class="form-group"><textarea id="adminNoteText" class="neo-input" rows="5" style="width:100%;resize:vertical;min-height:100px;font-family:var(--font-main)" placeholder="Cara flash recovery...">' + esc(noteText) + '</textarea></div>' +
-            '<button type="button" class="neo-btn" onclick="saveAdminRecoveryNote()"><i class="fa-solid fa-floppy-disk"></i> Simpan Note</button>' +
-            '</div>';
-        }
 
         if (items.length) {
           html += '<div class="flat-file-list" style="margin-bottom:16px">' + items.map(f => fileRowHTML(f)).join("") + '</div>';
