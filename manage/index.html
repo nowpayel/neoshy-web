@@ -848,11 +848,28 @@
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storage: window.localStorage }
     });
-    // Read client without user JWT — avoids RLS policies that return 0 rows for authenticated
-    // while anon SELECT is allowed (65+ rows). Writes still use `db` (authenticated).
+    // Read client: FORCE pure anon (no JWT). Dummy storage so it never picks up
+    // the logged-in session from localStorage. RLS for authenticated returns 0 rows;
+    // anon SELECT returns all 65+. Writes still use `db` (authenticated).
     const dbRead = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+        storage: {
+          getItem: function () { return null; },
+          setItem: function () {},
+          removeItem: function () {}
+        }
+      }
     });
+
+    // Clear token hash from address bar immediately (cosmetic)
+    try {
+      if (location.hash && location.hash.indexOf("access_token") !== -1) {
+        history.replaceState(null, "", location.href.split("#")[0]);
+      }
+    } catch (e) {}
 
     function decodeJwtPayload(token) {
       try {
@@ -1281,10 +1298,13 @@
       document.getElementById('main-body').classList.remove('items-center', 'justify-center');
       
       const todayIso = new Date().toISOString().split('T')[0];
-      try { document.getElementById('tanggal').value = todayIso; } catch (e) {}
-      try { document.getElementById('income-date-filter').value = todayIso; } catch (e) {}
-      
+      var tEl = document.getElementById('tanggal');
+      if (tEl) { tEl.value = todayIso; tEl.setAttribute('value', todayIso); }
+      var iEl = document.getElementById('income-date-filter');
+      if (iEl) iEl.value = todayIso;
+
       try { await loadData(true); } catch (e) { console.warn("loadData", e); }
+      try { await loadAllRevenueData(); } catch (e) { console.warn("loadAllRevenueData", e); }
       if (window.hidePageLoader) hidePageLoader();
       // Update timer tiap 5 detik (bukan 1 detik) agar lebih ringan di remote desktop / Ultra Viewer
       try { setInterval(updateLiveTimers, 5000); } catch (e) {}
