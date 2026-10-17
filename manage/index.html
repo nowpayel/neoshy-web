@@ -1080,7 +1080,45 @@
       window.location.href = '../dashboard/index.html';
     }
 
-    // Cek session Supabase saat halaman dibuka (+ recover dari hash untuk file://)
+    // Apply tokens carefully — never pass access_token as refresh_token (breaks client)
+    async function applySessionFromTokens(access_token, refresh_token) {
+      if (!access_token) return false;
+      if (refresh_token) {
+        try {
+          const { data, error } = await db.auth.setSession({ access_token, refresh_token });
+          if (!error && data && data.session) {
+            try {
+              localStorage.setItem(
+                "sb-vsednhqbszdiwpazcoii-auth-token",
+                JSON.stringify(data.session)
+              );
+            } catch (e) {}
+            return true;
+          }
+          if (error) console.warn("setSession error:", error.message);
+        } catch (e) {
+          console.warn("setSession failed", e);
+        }
+      }
+      try {
+        const payload = decodeJwtPayload(access_token) || {};
+        const expiresAt = payload.exp || (Math.floor(Date.now() / 1000) + 3600);
+        localStorage.setItem(
+          "sb-vsednhqbszdiwpazcoii-auth-token",
+          JSON.stringify({
+            access_token,
+            refresh_token: refresh_token || "",
+            expires_in: Math.max(0, expiresAt - Math.floor(Date.now() / 1000)),
+            expires_at: expiresAt,
+            token_type: "bearer",
+            user: { id: payload.sub || "", email: payload.email || "", role: "authenticated" }
+          })
+        );
+      } catch (e) {}
+      return false;
+    }
+
+    // Cek session Supabase saat halaman dibuka (+ recover dari hash)
     async function checkSession() {
       try {
         let access_token = null, refresh_token = null;
@@ -1092,41 +1130,11 @@
             if (m1) access_token = decodeURIComponent(m1[1]);
             if (m2) refresh_token = decodeURIComponent(m2[1]);
           } catch (e) {}
-          try { history.replaceState(null, "", window.location.href.split("#")[0]); } catch (e) {}
+          try { history.replaceState(null, "", window.location.pathname + window.location.search); } catch (e) {}
         }
 
         if (access_token) {
-          // Always try setSession so the client attaches Authorization header on queries
-          let ok = false;
-          try {
-            const { data, error } = await db.auth.setSession({
-              access_token,
-              refresh_token: refresh_token || access_token // fallback if refresh missing
-            });
-            if (!error && data && data.session) ok = true;
-          } catch (e) {
-            console.warn("setSession failed", e);
-          }
-          // Persist to localStorage as backup (helps file:// reloads)
-          try {
-            const payload = decodeJwtPayload(access_token) || {};
-            const expiresAt = payload.exp || (Math.floor(Date.now() / 1000) + 3600);
-            const sessionObj = {
-              access_token,
-              refresh_token: refresh_token || "",
-              expires_in: Math.max(0, expiresAt - Math.floor(Date.now() / 1000)),
-              expires_at: expiresAt,
-              token_type: "bearer",
-              user: { id: payload.sub || "", email: payload.email || "", role: "authenticated" }
-            };
-            localStorage.setItem("sb-vsednhqbszdiwpazcoii-auth-token", JSON.stringify(sessionObj));
-          } catch (e) {}
-          if (!ok) {
-            // Last resort: manually set auth header so SELECT still works under RLS
-            try {
-              db.rest.headers["Authorization"] = "Bearer " + access_token;
-            } catch (e) {}
-          }
+          await applySessionFromTokens(access_token, refresh_token);
           showDashboard();
           return;
         }
@@ -1136,26 +1144,20 @@
           const res = await db.auth.getSession();
           session = res && res.data && res.data.session;
         } catch (e) {}
+
         if (!session) {
           try {
             const raw = localStorage.getItem("sb-vsednhqbszdiwpazcoii-auth-token");
             if (raw) {
               const parsed = JSON.parse(raw);
               if (parsed && parsed.access_token) {
+                await applySessionFromTokens(parsed.access_token, parsed.refresh_token || null);
                 session = parsed;
-                // Re-apply token to client
-                try {
-                  await db.auth.setSession({
-                    access_token: parsed.access_token,
-                    refresh_token: parsed.refresh_token || parsed.access_token
-                  });
-                } catch (e) {
-                  try { db.rest.headers["Authorization"] = "Bearer " + parsed.access_token; } catch (e2) {}
-                }
               }
             }
           } catch (e) {}
         }
+
         if (session) showDashboard();
       } catch (e) {
         console.warn("checkSession", e);
@@ -1899,27 +1901,6 @@
       const to = from + PAGE_SIZE - 1;
 
       try {
-        // Ensure we have an auth session before querying (RLS requires authenticated user)
-        try {
-          const { data: sessData } = await db.auth.getSession();
-          if (!sessData || !sessData.session) {
-            const raw = localStorage.getItem("sb-vsednhqbszdiwpazcoii-auth-token");
-            if (raw) {
-              const parsed = JSON.parse(raw);
-              if (parsed && parsed.access_token) {
-                try {
-                  await db.auth.setSession({
-                    access_token: parsed.access_token,
-                    refresh_token: parsed.refresh_token || parsed.access_token
-                  });
-                } catch (e) {
-                  try { db.rest.headers["Authorization"] = "Bearer " + parsed.access_token; } catch (e2) {}
-                }
-              }
-            }
-          }
-        } catch (e) {}
-
         const { data, error } = await db
           .from('rekap_jasa')
           .select('id, tanggal, hp_model, service, customer_phone, harga, status_bayar, dp_harga, metode_pembayaran, notes, eta_iso')

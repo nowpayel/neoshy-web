@@ -307,7 +307,7 @@
         <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Admin Portals
       </h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <a href="../manage/index.html" id="linkServiceManager" class="portal-card neo-card p-5 rounded-2xl flex items-start gap-4 no-underline">
+        <a href="/manage/" id="linkServiceManager" class="portal-card neo-card p-5 rounded-2xl flex items-start gap-4 no-underline">
           <div class="w-11 h-11 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-lg flex-shrink-0">
             <i class="fa-solid fa-clipboard-list"></i>
           </div>
@@ -317,7 +317,7 @@
             <span class="inline-flex items-center gap-1 text-[10px] text-cyan-400 font-mono mt-2">Open <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
           </div>
         </a>
-        <a href="../vault/admin/index.html" id="linkVaultManager" class="portal-card neo-card p-5 rounded-2xl flex items-start gap-4 no-underline">
+        <a href="/vault/admin/" id="linkVaultManager" class="portal-card neo-card p-5 rounded-2xl flex items-start gap-4 no-underline">
           <div class="w-11 h-11 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-300 text-lg flex-shrink-0">
             <i class="fa-solid fa-box-archive"></i>
           </div>
@@ -1570,8 +1570,8 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
     (function () {
       const sm = document.getElementById("linkServiceManager");
       const vm = document.getElementById("linkVaultManager");
-      if (sm) sm.addEventListener("click", function (e) { e.preventDefault(); goWithSession("../manage/index.html"); });
-      if (vm) vm.addEventListener("click", function (e) { e.preventDefault(); goWithSession("../vault/admin/index.html"); });
+      if (sm) sm.addEventListener("click", function (e) { e.preventDefault(); goWithSession("/manage/"); });
+      if (vm) vm.addEventListener("click", function (e) { e.preventDefault(); goWithSession("/vault/admin/"); });
     })();
 
     checkSession();
