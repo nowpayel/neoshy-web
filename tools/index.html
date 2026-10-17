@@ -852,18 +852,6 @@
     @keyframes plSpin { to { transform: rotate(360deg); } }
 
   </style>
-  <script>
-    // Fix image paths when opened via file:// (local) so /tools/... still resolves
-    (function () {
-      if (location.protocol !== 'file:') return;
-      document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('img[src^="/tools/"]').forEach(function (img) {
-          var rel = img.getAttribute('src').replace(/^\/tools\//, '');
-          img.src = rel;
-        });
-      });
-    })();
-  </script>
 </head>
 <body>
 

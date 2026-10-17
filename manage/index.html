@@ -848,28 +848,6 @@
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storage: window.localStorage }
     });
-    // Read client: FORCE pure anon (no JWT). Dummy storage so it never picks up
-    // the logged-in session from localStorage. RLS for authenticated returns 0 rows;
-    // anon SELECT returns all 65+. Writes still use `db` (authenticated).
-    const dbRead = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false,
-        storage: {
-          getItem: function () { return null; },
-          setItem: function () {},
-          removeItem: function () {}
-        }
-      }
-    });
-
-    // Clear token hash from address bar immediately (cosmetic)
-    try {
-      if (location.hash && location.hash.indexOf("access_token") !== -1) {
-        history.replaceState(null, "", location.href.split("#")[0]);
-      }
-    } catch (e) {}
 
     function decodeJwtPayload(token) {
       try {
@@ -1102,61 +1080,7 @@
       window.location.href = '../dashboard/index.html';
     }
 
-    // Apply tokens carefully — never pass access_token as refresh_token (breaks client)
-    async function applySessionFromTokens(access_token, refresh_token) {
-      if (!access_token) return false;
-      if (refresh_token) {
-        try {
-          const { data, error } = await db.auth.setSession({ access_token, refresh_token });
-          if (!error && data && data.session) {
-            try {
-              localStorage.setItem(
-                "sb-vsednhqbszdiwpazcoii-auth-token",
-                JSON.stringify(data.session)
-              );
-            } catch (e) {}
-            return true;
-          }
-          if (error) console.warn("setSession error:", error.message);
-        } catch (e) {
-          console.warn("setSession failed", e);
-        }
-      }
-      try {
-        const payload = decodeJwtPayload(access_token) || {};
-        const expiresAt = payload.exp || (Math.floor(Date.now() / 1000) + 3600);
-        localStorage.setItem(
-          "sb-vsednhqbszdiwpazcoii-auth-token",
-          JSON.stringify({
-            access_token,
-            refresh_token: refresh_token || "",
-            expires_in: Math.max(0, expiresAt - Math.floor(Date.now() / 1000)),
-            expires_at: expiresAt,
-            token_type: "bearer",
-            user: { id: payload.sub || "", email: payload.email || "", role: "authenticated" }
-          })
-        );
-        // Still open dashboard — reads use dbRead (anon); writes need full setSession
-        return true;
-      } catch (e) {}
-      return false;
-    }
-
-    // Cek session Supabase saat halaman dibuka (+ recover dari hash)
-    function extractTokensFromStorage(parsed) {
-      if (!parsed) return null;
-      if (parsed.access_token) {
-        return { access_token: parsed.access_token, refresh_token: parsed.refresh_token || null };
-      }
-      if (parsed.currentSession && parsed.currentSession.access_token) {
-        return { access_token: parsed.currentSession.access_token, refresh_token: parsed.currentSession.refresh_token || null };
-      }
-      if (parsed.session && parsed.session.access_token) {
-        return { access_token: parsed.session.access_token, refresh_token: parsed.session.refresh_token || null };
-      }
-      return null;
-    }
-
+    // Cek session Supabase saat halaman dibuka (+ recover dari hash untuk file://)
     async function checkSession() {
       try {
         let access_token = null, refresh_token = null;
@@ -1168,15 +1092,32 @@
             if (m1) access_token = decodeURIComponent(m1[1]);
             if (m2) refresh_token = decodeURIComponent(m2[1]);
           } catch (e) {}
+          try { history.replaceState(null, "", window.location.href.split("#")[0]); } catch (e) {}
         }
 
         if (access_token) {
-          const ok = await applySessionFromTokens(access_token, refresh_token);
-          try { history.replaceState(null, "", window.location.href.split("#")[0]); } catch (e) {}
-          if (ok !== false) {
-            showDashboard();
-            return;
+          let ok = false;
+          if (refresh_token) {
+            try {
+              const { data, error } = await db.auth.setSession({ access_token, refresh_token });
+              if (!error && data && data.session) ok = true;
+            } catch (e) {}
           }
+          if (!ok) {
+            try {
+              const payload = decodeJwtPayload(access_token) || {};
+              const expiresAt = payload.exp || (Math.floor(Date.now() / 1000) + 3600);
+              const sessionObj = {
+                access_token, refresh_token: refresh_token || "",
+                expires_in: Math.max(0, expiresAt - Math.floor(Date.now() / 1000)),
+                expires_at: expiresAt, token_type: "bearer",
+                user: { id: payload.sub || "", email: payload.email || "", role: "authenticated" }
+              };
+              localStorage.setItem("sb-vsednhqbszdiwpazcoii-auth-token", JSON.stringify(sessionObj));
+            } catch (e) {}
+          }
+          showDashboard();
+          return;
         }
 
         let session = null;
@@ -1184,25 +1125,16 @@
           const res = await db.auth.getSession();
           session = res && res.data && res.data.session;
         } catch (e) {}
-
         if (!session) {
           try {
             const raw = localStorage.getItem("sb-vsednhqbszdiwpazcoii-auth-token");
             if (raw) {
-              const tokens = extractTokensFromStorage(JSON.parse(raw));
-              if (tokens && tokens.access_token) {
-                await applySessionFromTokens(tokens.access_token, tokens.refresh_token);
-                const res2 = await db.auth.getSession();
-                session = res2 && res2.data && res2.data.session;
-                if (!session) session = tokens; // still allow dashboard; reads use dbRead
-              }
+              const parsed = JSON.parse(raw);
+              if (parsed && parsed.access_token) session = parsed;
             }
           } catch (e) {}
         }
-
-        if (session) {
-          showDashboard();
-        }
+        if (session) showDashboard();
       } catch (e) {
         console.warn("checkSession", e);
       }
@@ -1298,13 +1230,10 @@
       document.getElementById('main-body').classList.remove('items-center', 'justify-center');
       
       const todayIso = new Date().toISOString().split('T')[0];
-      var tEl = document.getElementById('tanggal');
-      if (tEl) { tEl.value = todayIso; tEl.setAttribute('value', todayIso); }
-      var iEl = document.getElementById('income-date-filter');
-      if (iEl) iEl.value = todayIso;
-
+      try { document.getElementById('tanggal').value = todayIso; } catch (e) {}
+      try { document.getElementById('income-date-filter').value = todayIso; } catch (e) {}
+      
       try { await loadData(true); } catch (e) { console.warn("loadData", e); }
-      try { await loadAllRevenueData(); } catch (e) { console.warn("loadAllRevenueData", e); }
       if (window.hidePageLoader) hidePageLoader();
       // Update timer tiap 5 detik (bukan 1 detik) agar lebih ringan di remote desktop / Ultra Viewer
       try { setInterval(updateLiveTimers, 5000); } catch (e) {}
@@ -1948,19 +1877,13 @@
       const to = from + PAGE_SIZE - 1;
 
       try {
-        const { data, error } = await dbRead
+        const { data, error } = await db
           .from('rekap_jasa')
           .select('id, tanggal, hp_model, service, customer_phone, harga, status_bayar, dp_harga, metode_pembayaran, notes, eta_iso')
           .order('id', { ascending: false })
           .range(from, to);
 
-        if (error) {
-          console.error("loadData supabase error:", error);
-          throw error;
-        }
-        if (location.protocol === "file:" && (!data || data.length === 0) && reset && from === 0) {
-          console.warn("file:// origin: browser may block Supabase API (CORS). Use https://neoshy.vercel.app/manage/");
-        }
+        if (error) throw error;
 
         if (data.length < PAGE_SIZE) {
           hasMoreData = false;
@@ -1983,8 +1906,7 @@
 
       } catch (err) {
         console.error("Failed to load data:", err.message);
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-xs font-mono text-rose-400">Failed to load data: ${err.message}<br><span class="text-slate-500">Coba login ulang dari Account Center.</span></td></tr>`;
-        mobileCards.innerHTML = `<div class="text-center p-4 text-xs font-mono text-rose-400">Failed to load data: ${err.message}</div>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-xs font-mono text-rose-400">Failed to load data: ${err.message}</td></tr>`;
       }
     }
 
@@ -2014,7 +1936,7 @@
         while (true) {
           const from = page * size;
           const to = from + size - 1;
-          const { data, error } = await dbRead
+          const { data, error } = await db
             .from('rekap_jasa')
             .select('harga, status_bayar, dp_harga, tanggal')
             .order('id', { ascending: false })
@@ -2327,7 +2249,7 @@
         tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 font-mono text-cyan-400 text-xs animate-pulse">Searching...</td></tr>`;
         mobileCards.innerHTML = `<div class="text-center p-4 font-mono text-cyan-400 text-xs animate-pulse">Searching...</div>`;
 
-        const { data, error } = await dbRead
+        const { data, error } = await db
           .from('rekap_jasa')
           .select('id, tanggal, hp_model, service, customer_phone, harga, status_bayar, dp_harga, metode_pembayaran, notes, eta_iso')
           .or(`hp_model.ilike.%${safe}%,service.ilike.%${safe}%,customer_phone.ilike.%${safe}%,notes.ilike.%${safe}%,metode_pembayaran.ilike.%${safe}%`)

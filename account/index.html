@@ -1538,23 +1538,10 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
 
     // Transfer session to Service Manager / Vault Manager (file:// localStorage is isolated per path)
     async function goWithSession(url) {
-      function resolvePortal(target) {
-        var path = target || "";
-        if (location.protocol === "file:") {
-          if (path.indexOf("manage") !== -1) return "../manage/index.html";
-          if (path.indexOf("vault") !== -1) return "../vault/admin/index.html";
-          return path;
-        }
-        if (path.indexOf("manage") !== -1) return "/manage/";
-        if (path.indexOf("vault") !== -1) return "/vault/admin/";
-        return path;
-      }
-      var dest = resolvePortal(url);
       try {
-        var access_token = null, refresh_token = null;
+        let access_token = null, refresh_token = null;
         try {
-          var sessRes = await db.auth.getSession();
-          var session = sessRes && sessRes.data && sessRes.data.session;
+          const { data: { session } } = await db.auth.getSession();
           if (session) {
             access_token = session.access_token;
             refresh_token = session.refresh_token;
@@ -1562,38 +1549,29 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
         } catch (e) {}
         if (!access_token) {
           try {
-            var raw = localStorage.getItem("sb-vsednhqbszdiwpazcoii-auth-token");
+            const raw = localStorage.getItem("sb-vsednhqbszdiwpazcoii-auth-token");
             if (raw) {
-              var parsed = JSON.parse(raw);
-              // support both flat and nested supabase storage shapes
-              if (parsed.access_token) {
-                access_token = parsed.access_token;
-                refresh_token = parsed.refresh_token;
-              } else if (parsed.currentSession && parsed.currentSession.access_token) {
-                access_token = parsed.currentSession.access_token;
-                refresh_token = parsed.currentSession.refresh_token;
-              } else if (parsed.session && parsed.session.access_token) {
-                access_token = parsed.session.access_token;
-                refresh_token = parsed.session.refresh_token;
-              }
+              const p = JSON.parse(raw);
+              access_token = p.access_token;
+              refresh_token = p.refresh_token;
             }
           } catch (e) {}
         }
         if (access_token) {
-          var params = new URLSearchParams();
+          const params = new URLSearchParams();
           params.set("access_token", access_token);
           if (refresh_token) params.set("refresh_token", refresh_token);
-          window.location.href = dest + "#" + params.toString();
+          window.location.href = url + "#" + params.toString();
           return;
         }
       } catch (e) {}
-      window.location.href = dest;
+      window.location.href = url;
     }
     (function () {
       const sm = document.getElementById("linkServiceManager");
       const vm = document.getElementById("linkVaultManager");
-      if (sm) sm.addEventListener("click", function (e) { e.preventDefault(); goWithSession("manage"); });
-      if (vm) vm.addEventListener("click", function (e) { e.preventDefault(); goWithSession("vault"); });
+      if (sm) sm.addEventListener("click", function (e) { e.preventDefault(); goWithSession("../manage/index.html"); });
+      if (vm) vm.addEventListener("click", function (e) { e.preventDefault(); goWithSession("../vault/admin/index.html"); });
     })();
 
     checkSession();
