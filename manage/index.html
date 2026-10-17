@@ -2076,7 +2076,6 @@
             </td>
             <td class="p-2 text-center whitespace-nowrap align-top" onclick="event.stopPropagation()">
               <button id="btn-edit-${row.id}" onclick="editData(${row.id})" class="text-[11px] text-sky-400 hover:text-sky-300 font-mono bg-sky-950/40 border border-sky-500/30 px-2 py-1 rounded">Edit</button>
-              ${!isPaid ? `<button onclick="markAsPaid(${row.id})" class="text-[11px] text-emerald-400 hover:text-emerald-300 font-mono bg-emerald-950/40 border border-emerald-500/30 px-2 py-1 rounded ml-1" title="Tandai sudah lunas">Lunas</button>` : ''}
               <button onclick="deleteData(${row.id})" class="text-[11px] text-rose-400 hover:text-rose-300 font-mono bg-rose-950/40 border border-rose-500/30 px-2 py-1 rounded ml-1">Hapus</button>
             </td>
           </tr>
@@ -2095,7 +2094,6 @@
                 <span class="text-sm font-bold font-mono text-cyan-400">${row.harga || '-'}</span>${payDot}
                 <div class="mt-2 flex flex-col gap-1 items-end" onclick="event.stopPropagation()">
                   <button onclick="editData(${row.id})" class="text-[10px] text-sky-400 font-mono bg-sky-950/40 border border-sky-500/30 px-2 py-0.5 rounded">Edit</button>
-                  ${!isPaid ? `<button onclick="markAsPaid(${row.id})" class="text-[10px] text-emerald-400 font-mono bg-emerald-950/40 border border-emerald-500/30 px-2 py-0.5 rounded">Lunas</button>` : ''}
                   <button onclick="deleteData(${row.id})" class="text-[10px] text-rose-400 font-mono bg-rose-950/40 border border-rose-500/30 px-2 py-0.5 rounded">Hapus</button>
                 </div>
               </div>
@@ -2203,77 +2201,29 @@
     }
 
     async function markAsPaid(id) {
-      if (!confirm('Tandai transaksi ini sebagai sudah LUNAS / Fully Paid?')) return;
       try {
-        if (window.showPageLoader) showPageLoader("Updating...");
         const { error } = await db
           .from('rekap_jasa')
           .update({ status_bayar: 'Paid', dp_harga: null })
           .eq('id', id);
 
         if (error) throw error;
-        await loadData(true);
-        if (window.hidePageLoader) hidePageLoader();
+        await loadData(true); if (window.hidePageLoader) hidePageLoader();
       } catch (err) {
-        if (window.hidePageLoader) hidePageLoader();
         alert("Failed to mark as paid: " + err.message);
       }
     }
 
-    async function filterHistory() {
-      const raw = document.getElementById('search-input').value.trim();
-      const query = raw.toLowerCase();
-
-      // Empty search → show currently loaded pages
-      if (!query) {
-        renderTable(cacheData);
-        const loadMoreBtn = document.getElementById('load-more-container');
-        if (loadMoreBtn) {
-          if (hasMoreData) loadMoreBtn.classList.remove('hidden');
-          else loadMoreBtn.classList.add('hidden');
-        }
-        return;
-      }
-
-      // Sanitize for PostgREST .or() / ilike (strip chars that break filter syntax)
-      const safe = raw.replace(/[%_,.()]/]/g, ' ').replace(/\s+/g, ' ').trim();
-      if (!safe) {
-        renderTable(cacheData);
-        return;
-      }
-
-      // Search full dataset from DB (so results not limited to loaded pages)
-      try {
-        const tbody = document.getElementById('tabel-data');
-        const mobileCards = document.getElementById('mobile-cards');
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 font-mono text-cyan-400 text-xs animate-pulse">Searching...</td></tr>`;
-        mobileCards.innerHTML = `<div class="text-center p-4 font-mono text-cyan-400 text-xs animate-pulse">Searching...</div>`;
-
-        const { data, error } = await db
-          .from('rekap_jasa')
-          .select('id, tanggal, hp_model, service, customer_phone, harga, status_bayar, dp_harga, metode_pembayaran, notes, eta_iso')
-          .or(`hp_model.ilike.%${safe}%,service.ilike.%${safe}%,customer_phone.ilike.%${safe}%,notes.ilike.%${safe}%,metode_pembayaran.ilike.%${safe}%`)
-          .order('id', { ascending: false })
-          .limit(200);
-
-        if (error) throw error;
-        renderTable(data || []);
-        const loadMoreBtn = document.getElementById('load-more-container');
-        if (loadMoreBtn) loadMoreBtn.classList.add('hidden');
-      } catch (err) {
-        console.error('Search failed:', err.message);
-        // Fallback to client-side filter on loaded data
-        const filtered = cacheData.filter(item => {
-          return (item.hp_model && item.hp_model.toLowerCase().includes(query)) ||
-                 (item.service && item.service.toLowerCase().includes(query)) ||
-                 (item.customer_phone && item.customer_phone.toLowerCase().includes(query)) ||
-                 (item.notes && item.notes.toLowerCase().includes(query)) ||
-                 (item.metode_pembayaran && item.metode_pembayaran.toLowerCase().includes(query));
-        });
-        renderTable(filtered);
-        const loadMoreBtn = document.getElementById('load-more-container');
-        if (loadMoreBtn) loadMoreBtn.classList.add('hidden');
-      }
+    function filterHistory() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const filtered = cacheData.filter(item => {
+        return (item.hp_model && item.hp_model.toLowerCase().includes(query)) ||
+               (item.service && item.service.toLowerCase().includes(query)) ||
+               (item.customer_phone && item.customer_phone.toLowerCase().includes(query)) ||
+               (item.notes && item.notes.toLowerCase().includes(query)) ||
+               (item.metode_pembayaran && item.metode_pembayaran.toLowerCase().includes(query));
+      });
+      renderTable(filtered);
     }
 
     // Form Add Submit Handler
