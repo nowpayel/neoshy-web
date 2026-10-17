@@ -1538,31 +1538,35 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
 
     // Transfer session to Service Manager / Vault Manager (file:// localStorage is isolated per path)
     async function goWithSession(url) {
+      // On https (Vercel) localStorage is shared — no need to put tokens in the URL.
+      // Hash tokens only needed for file:// where each path has isolated storage.
       try {
-        let access_token = null, refresh_token = null;
-        try {
-          const { data: { session } } = await db.auth.getSession();
-          if (session) {
-            access_token = session.access_token;
-            refresh_token = session.refresh_token;
-          }
-        } catch (e) {}
-        if (!access_token) {
+        if (location.protocol === "file:") {
+          let access_token = null, refresh_token = null;
           try {
-            const raw = localStorage.getItem("sb-vsednhqbszdiwpazcoii-auth-token");
-            if (raw) {
-              const p = JSON.parse(raw);
-              access_token = p.access_token;
-              refresh_token = p.refresh_token;
+            const { data: { session } } = await db.auth.getSession();
+            if (session) {
+              access_token = session.access_token;
+              refresh_token = session.refresh_token;
             }
           } catch (e) {}
-        }
-        if (access_token) {
-          const params = new URLSearchParams();
-          params.set("access_token", access_token);
-          if (refresh_token) params.set("refresh_token", refresh_token);
-          window.location.href = url + "#" + params.toString();
-          return;
+          if (!access_token) {
+            try {
+              const raw = localStorage.getItem("sb-vsednhqbszdiwpazcoii-auth-token");
+              if (raw) {
+                const p = JSON.parse(raw);
+                access_token = p.access_token;
+                refresh_token = p.refresh_token;
+              }
+            } catch (e) {}
+          }
+          if (access_token) {
+            const params = new URLSearchParams();
+            params.set("access_token", access_token);
+            if (refresh_token) params.set("refresh_token", refresh_token);
+            window.location.href = url + "#" + params.toString();
+            return;
+          }
         }
       } catch (e) {}
       window.location.href = url;

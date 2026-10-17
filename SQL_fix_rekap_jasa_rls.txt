@@ -1,0 +1,19 @@
+-- Fix: authenticated users see 0 rows on rekap_jasa while anon sees all.
+-- Run this in Supabase SQL Editor (Dashboard → SQL).
+
+-- Allow authenticated role full access (admin tool)
+DROP POLICY IF EXISTS "rekap_jasa_authenticated_all" ON public.rekap_jasa;
+CREATE POLICY "rekap_jasa_authenticated_all"
+  ON public.rekap_jasa
+  FOR ALL
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Keep anon read if you still need public/anon SELECT (optional)
+-- DROP POLICY IF EXISTS "rekap_jasa_anon_select" ON public.rekap_jasa;
+-- CREATE POLICY "rekap_jasa_anon_select"
+--   ON public.rekap_jasa
+--   FOR SELECT
+--   TO anon
+--   USING (true);

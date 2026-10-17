@@ -848,6 +848,11 @@
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storage: window.localStorage }
     });
+    // Read client without user JWT — avoids RLS policies that return 0 rows for authenticated
+    // while anon SELECT is allowed (65+ rows). Writes still use `db` (authenticated).
+    const dbRead = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+    });
 
     function decodeJwtPayload(token) {
       try {
@@ -1901,7 +1906,7 @@
       const to = from + PAGE_SIZE - 1;
 
       try {
-        const { data, error } = await db
+        const { data, error } = await dbRead
           .from('rekap_jasa')
           .select('id, tanggal, hp_model, service, customer_phone, harga, status_bayar, dp_harga, metode_pembayaran, notes, eta_iso')
           .order('id', { ascending: false })
@@ -1961,7 +1966,7 @@
         while (true) {
           const from = page * size;
           const to = from + size - 1;
-          const { data, error } = await db
+          const { data, error } = await dbRead
             .from('rekap_jasa')
             .select('harga, status_bayar, dp_harga, tanggal')
             .order('id', { ascending: false })
@@ -2274,7 +2279,7 @@
         tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 font-mono text-cyan-400 text-xs animate-pulse">Searching...</td></tr>`;
         mobileCards.innerHTML = `<div class="text-center p-4 font-mono text-cyan-400 text-xs animate-pulse">Searching...</div>`;
 
-        const { data, error } = await db
+        const { data, error } = await dbRead
           .from('rekap_jasa')
           .select('id, tanggal, hp_model, service, customer_phone, harga, status_bayar, dp_harga, metode_pembayaran, notes, eta_iso')
           .or(`hp_model.ilike.%${safe}%,service.ilike.%${safe}%,customer_phone.ilike.%${safe}%,notes.ilike.%${safe}%,metode_pembayaran.ilike.%${safe}%`)
