@@ -1119,11 +1119,27 @@
             user: { id: payload.sub || "", email: payload.email || "", role: "authenticated" }
           })
         );
+        // Still open dashboard — reads use dbRead (anon); writes need full setSession
+        return true;
       } catch (e) {}
       return false;
     }
 
     // Cek session Supabase saat halaman dibuka (+ recover dari hash)
+    function extractTokensFromStorage(parsed) {
+      if (!parsed) return null;
+      if (parsed.access_token) {
+        return { access_token: parsed.access_token, refresh_token: parsed.refresh_token || null };
+      }
+      if (parsed.currentSession && parsed.currentSession.access_token) {
+        return { access_token: parsed.currentSession.access_token, refresh_token: parsed.currentSession.refresh_token || null };
+      }
+      if (parsed.session && parsed.session.access_token) {
+        return { access_token: parsed.session.access_token, refresh_token: parsed.session.refresh_token || null };
+      }
+      return null;
+    }
+
     async function checkSession() {
       try {
         let access_token = null, refresh_token = null;
@@ -1135,13 +1151,15 @@
             if (m1) access_token = decodeURIComponent(m1[1]);
             if (m2) refresh_token = decodeURIComponent(m2[1]);
           } catch (e) {}
-          try { history.replaceState(null, "", window.location.href.split("#")[0]); } catch (e) {}
         }
 
         if (access_token) {
-          await applySessionFromTokens(access_token, refresh_token);
-          showDashboard();
-          return;
+          const ok = await applySessionFromTokens(access_token, refresh_token);
+          try { history.replaceState(null, "", window.location.href.split("#")[0]); } catch (e) {}
+          if (ok !== false) {
+            showDashboard();
+            return;
+          }
         }
 
         let session = null;
@@ -1154,16 +1172,20 @@
           try {
             const raw = localStorage.getItem("sb-vsednhqbszdiwpazcoii-auth-token");
             if (raw) {
-              const parsed = JSON.parse(raw);
-              if (parsed && parsed.access_token) {
-                await applySessionFromTokens(parsed.access_token, parsed.refresh_token || null);
-                session = parsed;
+              const tokens = extractTokensFromStorage(JSON.parse(raw));
+              if (tokens && tokens.access_token) {
+                await applySessionFromTokens(tokens.access_token, tokens.refresh_token);
+                const res2 = await db.auth.getSession();
+                session = res2 && res2.data && res2.data.session;
+                if (!session) session = tokens; // still allow dashboard; reads use dbRead
               }
             }
           } catch (e) {}
         }
 
-        if (session) showDashboard();
+        if (session) {
+          showDashboard();
+        }
       } catch (e) {
         console.warn("checkSession", e);
       }

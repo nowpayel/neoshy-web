@@ -1538,51 +1538,53 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
 
     // Transfer session to Service Manager / Vault Manager (file:// localStorage is isolated per path)
     async function goWithSession(url) {
-      // Resolve path for file:// (local) vs https (Vercel)
       function resolvePortal(target) {
-        // Accept absolute "/manage/" or relative "../manage/index.html"
-        var path = target;
+        var path = target || "";
         if (location.protocol === "file:") {
-          // Always use relative path to sibling folder index.html
           if (path.indexOf("manage") !== -1) return "../manage/index.html";
           if (path.indexOf("vault") !== -1) return "../vault/admin/index.html";
           return path;
         }
-        // https: clean absolute paths
         if (path.indexOf("manage") !== -1) return "/manage/";
         if (path.indexOf("vault") !== -1) return "/vault/admin/";
         return path;
       }
       var dest = resolvePortal(url);
       try {
-        // On file:// localStorage is isolated per path — pass tokens in hash
-        if (location.protocol === "file:") {
-          var access_token = null, refresh_token = null;
+        var access_token = null, refresh_token = null;
+        try {
+          var sessRes = await db.auth.getSession();
+          var session = sessRes && sessRes.data && sessRes.data.session;
+          if (session) {
+            access_token = session.access_token;
+            refresh_token = session.refresh_token;
+          }
+        } catch (e) {}
+        if (!access_token) {
           try {
-            var sessRes = await db.auth.getSession();
-            var session = sessRes && sessRes.data && sessRes.data.session;
-            if (session) {
-              access_token = session.access_token;
-              refresh_token = session.refresh_token;
-            }
-          } catch (e) {}
-          if (!access_token) {
-            try {
-              var raw = localStorage.getItem("sb-vsednhqbszdiwpazcoii-auth-token");
-              if (raw) {
-                var parsed = JSON.parse(raw);
+            var raw = localStorage.getItem("sb-vsednhqbszdiwpazcoii-auth-token");
+            if (raw) {
+              var parsed = JSON.parse(raw);
+              // support both flat and nested supabase storage shapes
+              if (parsed.access_token) {
                 access_token = parsed.access_token;
                 refresh_token = parsed.refresh_token;
+              } else if (parsed.currentSession && parsed.currentSession.access_token) {
+                access_token = parsed.currentSession.access_token;
+                refresh_token = parsed.currentSession.refresh_token;
+              } else if (parsed.session && parsed.session.access_token) {
+                access_token = parsed.session.access_token;
+                refresh_token = parsed.session.refresh_token;
               }
-            } catch (e) {}
-          }
-          if (access_token) {
-            var params = new URLSearchParams();
-            params.set("access_token", access_token);
-            if (refresh_token) params.set("refresh_token", refresh_token);
-            window.location.href = dest + "#" + params.toString();
-            return;
-          }
+            }
+          } catch (e) {}
+        }
+        if (access_token) {
+          var params = new URLSearchParams();
+          params.set("access_token", access_token);
+          if (refresh_token) params.set("refresh_token", refresh_token);
+          window.location.href = dest + "#" + params.toString();
+          return;
         }
       } catch (e) {}
       window.location.href = dest;
