@@ -307,7 +307,7 @@
         <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Admin Portals
       </h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <a href="/manage/" id="linkServiceManager" class="portal-card neo-card p-5 rounded-2xl flex items-start gap-4 no-underline">
+        <a href="../manage/index.html" id="linkServiceManager" class="portal-card neo-card p-5 rounded-2xl flex items-start gap-4 no-underline">
           <div class="w-11 h-11 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-lg flex-shrink-0">
             <i class="fa-solid fa-clipboard-list"></i>
           </div>
@@ -317,7 +317,7 @@
             <span class="inline-flex items-center gap-1 text-[10px] text-cyan-400 font-mono mt-2">Open <i class="fa-solid fa-arrow-right text-[9px]"></i></span>
           </div>
         </a>
-        <a href="/vault/admin/" id="linkVaultManager" class="portal-card neo-card p-5 rounded-2xl flex items-start gap-4 no-underline">
+        <a href="../vault/admin/index.html" id="linkVaultManager" class="portal-card neo-card p-5 rounded-2xl flex items-start gap-4 no-underline">
           <div class="w-11 h-11 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-300 text-lg flex-shrink-0">
             <i class="fa-solid fa-box-archive"></i>
           </div>
@@ -1538,13 +1538,29 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
 
     // Transfer session to Service Manager / Vault Manager (file:// localStorage is isolated per path)
     async function goWithSession(url) {
-      // On https (Vercel) localStorage is shared — no need to put tokens in the URL.
-      // Hash tokens only needed for file:// where each path has isolated storage.
-      try {
+      // Resolve path for file:// (local) vs https (Vercel)
+      function resolvePortal(target) {
+        // Accept absolute "/manage/" or relative "../manage/index.html"
+        var path = target;
         if (location.protocol === "file:") {
-          let access_token = null, refresh_token = null;
+          // Always use relative path to sibling folder index.html
+          if (path.indexOf("manage") !== -1) return "../manage/index.html";
+          if (path.indexOf("vault") !== -1) return "../vault/admin/index.html";
+          return path;
+        }
+        // https: clean absolute paths
+        if (path.indexOf("manage") !== -1) return "/manage/";
+        if (path.indexOf("vault") !== -1) return "/vault/admin/";
+        return path;
+      }
+      var dest = resolvePortal(url);
+      try {
+        // On file:// localStorage is isolated per path — pass tokens in hash
+        if (location.protocol === "file:") {
+          var access_token = null, refresh_token = null;
           try {
-            const { data: { session } } = await db.auth.getSession();
+            var sessRes = await db.auth.getSession();
+            var session = sessRes && sessRes.data && sessRes.data.session;
             if (session) {
               access_token = session.access_token;
               refresh_token = session.refresh_token;
@@ -1552,30 +1568,30 @@ create policy "auth write service_catalog" on service_catalog for all using (aut
           } catch (e) {}
           if (!access_token) {
             try {
-              const raw = localStorage.getItem("sb-vsednhqbszdiwpazcoii-auth-token");
+              var raw = localStorage.getItem("sb-vsednhqbszdiwpazcoii-auth-token");
               if (raw) {
-                const p = JSON.parse(raw);
-                access_token = p.access_token;
-                refresh_token = p.refresh_token;
+                var parsed = JSON.parse(raw);
+                access_token = parsed.access_token;
+                refresh_token = parsed.refresh_token;
               }
             } catch (e) {}
           }
           if (access_token) {
-            const params = new URLSearchParams();
+            var params = new URLSearchParams();
             params.set("access_token", access_token);
             if (refresh_token) params.set("refresh_token", refresh_token);
-            window.location.href = url + "#" + params.toString();
+            window.location.href = dest + "#" + params.toString();
             return;
           }
         }
       } catch (e) {}
-      window.location.href = url;
+      window.location.href = dest;
     }
     (function () {
       const sm = document.getElementById("linkServiceManager");
       const vm = document.getElementById("linkVaultManager");
-      if (sm) sm.addEventListener("click", function (e) { e.preventDefault(); goWithSession("/manage/"); });
-      if (vm) vm.addEventListener("click", function (e) { e.preventDefault(); goWithSession("/vault/admin/"); });
+      if (sm) sm.addEventListener("click", function (e) { e.preventDefault(); goWithSession("manage"); });
+      if (vm) vm.addEventListener("click", function (e) { e.preventDefault(); goWithSession("vault"); });
     })();
 
     checkSession();

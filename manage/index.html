@@ -1135,7 +1135,7 @@
             if (m1) access_token = decodeURIComponent(m1[1]);
             if (m2) refresh_token = decodeURIComponent(m2[1]);
           } catch (e) {}
-          try { history.replaceState(null, "", window.location.pathname + window.location.search); } catch (e) {}
+          try { history.replaceState(null, "", window.location.href.split("#")[0]); } catch (e) {}
         }
 
         if (access_token) {
@@ -1912,7 +1912,13 @@
           .order('id', { ascending: false })
           .range(from, to);
 
-        if (error) throw error;
+        if (error) {
+          console.error("loadData supabase error:", error);
+          throw error;
+        }
+        if (location.protocol === "file:" && (!data || data.length === 0) && reset && from === 0) {
+          console.warn("file:// origin: browser may block Supabase API (CORS). Use https://neoshy.vercel.app/manage/");
+        }
 
         if (data.length < PAGE_SIZE) {
           hasMoreData = false;
