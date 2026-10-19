@@ -458,24 +458,25 @@
       transform: translateY(-2px);
     }
     .shot-card .img-wrap {
+      overflow: hidden;
+      border-radius: 10px 10px 0 0;
+      background: #070b14;
+      min-height: 120px;
+      max-height: 200px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #060a10;
-      min-height: 140px;
-      max-height: 200px;
-      padding: 10px;
-      border-bottom: 1px solid var(--border);
+      padding: 8px 8px 0;
     }
     .shot-card img {
-      max-width: 100%;
-      max-height: 180px;
-      width: auto;
+      width: 100%;
       height: auto;
+      max-height: 184px;
       object-fit: contain;
+      object-position: top center;
       display: block;
+      background: #070b14;
       border-radius: 6px;
-      cursor: zoom-in;
     }
     .shot-card .caption {
       padding: 12px 14px;
@@ -498,31 +499,34 @@
       background: #060a10;
       display: flex;
       justify-content: center;
-      padding: 14px;
+      padding: 12px;
       backdrop-filter: blur(8px);
     }
     .full-shot img {
-      max-width: min(520px, 100%);
-      max-height: 340px;
-      width: auto;
+      width: min(100%, 720px);
       height: auto;
+      max-height: 400px;
       object-fit: contain;
+      object-position: top center;
       display: block;
-      border-radius: 6px;
+      margin: 0 auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #070b14;
       cursor: zoom-in;
     }
     .hero-shot {
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow), 0 0 50px rgba(59, 158, 255, 0.08);
-      max-width: min(780px, 100%);
-      max-height: 380px;
-      width: auto;
+      width: min(100%, 720px);
       height: auto;
+      max-height: 380px;
       object-fit: contain;
+      object-position: top center;
       display: block;
-      margin: 0 auto;
-      background: #060a10;
+      margin: 24px auto 0;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      background: #070b14;
       cursor: zoom-in;
     }
 
@@ -806,8 +810,8 @@
       .features { grid-template-columns: 1fr; }
       .stats { grid-template-columns: 1fr 1fr; gap: 10px; }
       .showcase-grid { grid-template-columns: 1fr; }
-      .shot-card .img-wrap { max-height: 220px; min-height: 160px; }
-      .shot-card img { max-height: 200px; }
+      .shot-card .img-wrap { max-height: 180px; min-height: 100px; }
+      .shot-card img { max-height: 168px; }
 
       .social-grid {
         grid-template-columns: 1fr;
@@ -898,7 +902,7 @@
 
       <div class="badge">
         <span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;"></span>
-        Windows · v1.0.2 · ADB · Fastboot · Scrcpy
+        Windows · v1.0.3 · ADB · Fastboot · Scrcpy · Mi Unlock
       </div>
       <h1>All-in-one Android<br><span class="highlight">Remote & Flash Toolkit</span></h1>
       <p>
@@ -906,17 +910,17 @@
         Xiaomi flash, Samsung Heimdall, and payload.bin dump.
       </p>
       <div class="hero-cta">
-        <a href="https://github.com/nowpayel/tool/releases/download/v1.0.2/NeoShy_Remote_Tool_Setup_v1.0.2.exe" class="btn btn-primary" download>
+        <a href="https://github.com/nowpayel/tool/releases/download/v1.0.3/NeoShy_Remote_Tool_Setup_v1.0.3.exe" class="btn btn-primary" download>
           <i class="fa-solid fa-download"></i>
-          Download v1.0.2
+          Download v1.0.3
         </a>
         <button type="button" class="btn btn-ghost" onclick="openChangelog()">
           <i class="fa-solid fa-list"></i>
           Changelog
         </button>
-        <a href="https://github.com/nowpayel/tool/releases/download/neoshytool/NeoShy_Remote_Tool_Setup_v1.0.1.exe" class="btn btn-ghost" download>
+        <a href="https://github.com/nowpayel/tool/releases/download/v1.0.2/NeoShy_Remote_Tool_Setup_v1.0.2.exe" class="btn btn-ghost" download>
           <i class="fa-solid fa-clock-rotate-left"></i>
-          v1.0.1
+          v1.0.2
         </a>
       </div>
       <img src="assets/main-ui.png" alt="NeoShy Remote Tool main interface" class="hero-shot" onclick="openLightbox(this.src)" />
@@ -927,24 +931,24 @@
   <section id="whats-new" style="padding-top: 20px; padding-bottom: 40px;">
     <div class="container">
       <div class="section-title">
-        <h2>What’s New</h2>
-        <p>Major interface update for faster workflow and clearer feedback.</p>
+        <h2>What’s New in v1.0.3</h2>
+        <p>Mi Unlock on Xiaomi tab, plus a solid adaptive UI from 720p to 1080p.</p>
       </div>
       <div class="features" style="max-width: 900px; margin: 0 auto;">
         <div class="feature-card">
-          <div class="feature-icon" style="background: rgba(59, 158, 255, 0.15); color: var(--accent);"><i class="fa-solid fa-table-columns"></i></div>
-          <h3>New Sidebar Layout</h3>
-          <p>Device Status, Command Tools tabs (ADB / Fastboot / Xiaomi / Samsung), and quick actions are now organized in a clean left sidebar.</p>
+          <div class="feature-icon" style="background: rgba(249, 115, 22, 0.18); color: var(--orange);"><i class="fa-solid fa-unlock-keyhole"></i></div>
+          <h3>Xiaomi Mi Unlock</h3>
+          <p>Install and open <code>miunlock</code> directly from the Xiaomi tab. Status shows when the package is ready — unlock bootloader without leaving the tool.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--green);"><i class="fa-solid fa-terminal"></i></div>
-          <h3>Live Command Log</h3>
-          <p>Real-time output on the right panel. See every command result instantly, with Cancel & Clear Log controls always visible.</p>
+          <div class="feature-icon" style="background: rgba(59, 158, 255, 0.15); color: var(--accent);"><i class="fa-solid fa-display"></i></div>
+          <h3>Adaptive UI (720p → 1080p)</h3>
+          <p>Layout scales by screen size: compact under 900p, medium around 1600×900, full on 1080p+. No clipped buttons or cut-off Fastboot sections.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon" style="background: rgba(168, 85, 247, 0.15); color: var(--purple);"><i class="fa-solid fa-mobile-screen-button"></i></div>
-          <h3>Improved Mirroring Controls</h3>
-          <p>Floating control panel while screen mirroring — Power, Restart, Notifications, Clipboard, Screenshot, Push File, and more.</p>
+          <div class="feature-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--green);"><i class="fa-solid fa-mobile-screen"></i></div>
+          <h3>Xiaomi Flash Polish</h3>
+          <p>Shorter labels on small screens, full-size controls on larger ones. Firmware folder, script list, options, Mi Unlock, and Execute Flash stay fully visible.</p>
         </div>
       </div>
     </div>
@@ -970,8 +974,8 @@
         </div>
         <div class="feature-card">
           <div class="feature-icon icon-mi"><i class="fa-solid fa-mobile-screen"></i></div>
-          <h3>Xiaomi Flash</h3>
-          <p>Select extracted firmware folder, list flash_all*.bat scripts, execute with progress & safety confirmations. Supports lock / except_storage variants.</p>
+          <h3>Xiaomi Flash + Mi Unlock</h3>
+          <p>Select extracted firmware folder, list flash_all*.bat scripts, skip product / anti-rollback options, Execute Flash with confirmations. Built-in Mi Unlock (install & open miunlock).</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon icon-sam"><i class="fa-solid fa-gem"></i></div>
@@ -1039,8 +1043,8 @@
             <img src="assets/xiaomi-flash.png" alt="Xiaomi firmware flash" onclick="openLightbox(this.src)" />
           </div>
           <div class="caption">
-            <h3>Xiaomi Flash Mode</h3>
-            <p>Pick firmware folder → choose flash_all script → execute safely.</p>
+            <h3>Xiaomi Flash + Mi Unlock</h3>
+            <p>Firmware folder, flash scripts, options, Execute Flash, plus install & open Mi Unlock.</p>
           </div>
         </div>
         <div class="shot-card">
@@ -1124,21 +1128,21 @@
           Free for personal use. Windows 10/11. Requires a USB cable and ADB/USB debugging enabled on the device.
         </p>
         <div class="cta-btns" style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
-          <a href="https://github.com/nowpayel/tool/releases/download/v1.0.2/NeoShy_Remote_Tool_Setup_v1.0.2.exe" class="btn btn-primary" download>
+          <a href="https://github.com/nowpayel/tool/releases/download/v1.0.3/NeoShy_Remote_Tool_Setup_v1.0.3.exe" class="btn btn-primary" download>
             <i class="fa-solid fa-download"></i>
-            Download v1.0.2
+            Download v1.0.3
           </a>
           <button type="button" class="btn btn-ghost" onclick="openChangelog()">
             <i class="fa-solid fa-list"></i>
             Changelog
           </button>
-          <a href="https://github.com/nowpayel/tool/releases/download/neoshytool/NeoShy_Remote_Tool_Setup_v1.0.1.exe" class="btn btn-ghost" download>
+          <a href="https://github.com/nowpayel/tool/releases/download/v1.0.2/NeoShy_Remote_Tool_Setup_v1.0.2.exe" class="btn btn-ghost" download>
             <i class="fa-solid fa-clock-rotate-left"></i>
-            v1.0.1
+            v1.0.2
           </a>
         </div>
         <p style="margin-top:18px;font-size:0.82rem;color:var(--text-muted);">
-          v1.0.2 — more stable mirroring, cleaner 720p UI, tidier Xiaomi flash tab.
+          v1.0.3 — Xiaomi Mi Unlock, adaptive UI for 720p / 900p / 1080p.
         </p>
         <p style="margin-top:12px;font-size:0.78rem;color:var(--text-muted);">
           ⚠️ Flashing firmware or partitions can brick devices. Always double-check model, slot, and image files. Use at your own risk.
@@ -1160,7 +1164,26 @@
         <button type="button" class="modal-close" onclick="closeChangelog()" aria-label="Close">&times;</button>
       </div>
       <div class="modal-body">
-        <span class="ver">v1.0.2</span>
+        <span class="ver">v1.0.3</span>
+        <h4>Xiaomi · Mi Unlock</h4>
+        <ul>
+          <li>Install / open <code>miunlock</code> from the Xiaomi tab</li>
+          <li>Live status when the package is installed</li>
+          <li>Firmware flash flow unchanged (folder → script → Execute Flash)</li>
+        </ul>
+        <h4>Adaptive UI</h4>
+        <ul>
+          <li><strong>&lt; 900p</strong> (e.g. 1366×768): compact layout, short labels, dense Fastboot so all sections fit</li>
+          <li><strong>~900p</strong> (e.g. 1600×900): full-size buttons, labels adjusted so nothing clips</li>
+          <li><strong>1080p+</strong>: original full layout preserved</li>
+          <li>No extra scrollbars on the command panel — clean UI</li>
+        </ul>
+        <h4>Other</h4>
+        <ul>
+          <li>App / installer version bumped to 1.0.3</li>
+        </ul>
+
+        <span class="ver" style="margin-top:16px;">v1.0.2</span>
         <h4>More stable mirroring</h4>
         <ul>
           <li>Fixed black / detached scrcpy (overlay + glue instead of child embed)</li>
